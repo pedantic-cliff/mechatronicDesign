@@ -12,65 +12,75 @@ static float  Kp = 0.f,
               Kd = 0.f;
 
 
-void initPins(void); 
-void initTimer(void); 
-void initPWM(void); 
+void PWM_Config(int period); 
+void TIM_Config(void); 
+void setSpeeds(long left, long right); 
 
 void initPID(float p, float i, float d){
   Kp = p, Ki = i, Kd = d;
-  initPins(); 
-  initTimer(); 
-  initPWM();
+  TIM_Config(); 
+  PWM_Config(1000); 
 }
 
 void pid_pos(long pos){
-  TIM_SetCompare1(TIM1, 300); // set brightness
+  setSpeeds(50,100); 
 }
 
-void initPins(void) {
+void setSpeeds(long left, long right){
+  TIM3->CCR1 = left;
+  TIM3->CCR2 = right; 
+}
+
+void TIM_Config(void)
+{
   GPIO_InitTypeDef GPIO_InitStructure;
 
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+  /* TIM3 clock enable */
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+  /* GPIOC and GPIOB clock enable */
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+  /* GPIOC Configuration: TIM3 CH1 (PC6) and TIM3 CH2 (PC7) */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 ;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-  GPIO_Init(GPIOE, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+  GPIO_Init(GPIOC, &GPIO_InitStructure); 
 
-  GPIO_PinAFConfig(GPIOE, GPIO_PinSource9, GPIO_AF_TIM1);
+  /* Connect TIM3 pins to AF2 */ 
+  GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_TIM3);
+  GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_TIM3); 
 }
-
-void initTimer(void) {
-  /* TIM4 clock enable */
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM1, ENABLE);
-
-  /* Compute the prescaler value */
-  u32 PrescalerValue = (uint16_t) ((SystemCoreClock / 2) / 21000000) - 1;
-
+void PWM_Config(period)
+{
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+  TIM_OCInitTypeDef TIM_OCInitStructure;
+  uint16_t PrescalerValue = 0;
+  /* Compute the prescaler value */
+  PrescalerValue = (uint16_t) ((SystemCoreClock /2) / 28000000) - 1;
   /* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = 1000;
+  TIM_TimeBaseStructure.TIM_Period = period;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-
-  TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
-}
-
-void initPWM(void) {
-  TIM_OCInitTypeDef TIM_OCInitStructure;
-
+  TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
+  
+  /* PWM1 Mode configuration: Channel1 */
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
   TIM_OCInitStructure.TIM_Pulse = 0;
   TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+  TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+  TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
+  /* PWM1 Mode configuration: Channel2 */
+  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+  TIM_OCInitStructure.TIM_Pulse = 0;
+  TIM_OC2Init(TIM3, &TIM_OCInitStructure);
+  TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
 
-  /* PWM1 Mode configuration: Channel2 (GPIOD Pin 13)*/
-  TIM_OC1Init(TIM1, &TIM_OCInitStructure);
-  TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
-
-  TIM_Cmd(TIM1, ENABLE);
+  /* TIM3 enable counter */
+  TIM_Cmd(TIM3, ENABLE);
 }
 
