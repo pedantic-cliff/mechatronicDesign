@@ -26,11 +26,23 @@ void init() {
 
 
 void loop() {
-  uint8_t x, y, z; 
-  x = accel_getX(); 
-  y = accel_getY(); 
-  z = accel_getZ(); 
-  delay(500);
+  int8_t x, y, z; 
+  switch(state){
+    case ACCEL: 
+      GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
+      x = (int8_t)accel_getX(); 
+      y = (int8_t)accel_getY(); 
+      z = (int8_t)accel_getZ(); 
+      if (x > 30) 
+        GPIO_SetBits(GPIOD, GPIO_Pin_14); 
+      if (y > 30) 
+        GPIO_SetBits(GPIOD, GPIO_Pin_13); 
+      if (y < -30) 
+        GPIO_SetBits(GPIOD, GPIO_Pin_15); 
+      if (x < -30) 
+        GPIO_SetBits(GPIOD, GPIO_Pin_12); 
+      break;
+  }
 }
 
 void delay(uint32_t ms) {
@@ -83,12 +95,10 @@ void EXTI0_IRQHandler(void){
       case PID: 
         state = ACCEL;
         GPIO_SetBits(GPIOD,GPIO_Pin_12); 
-        GPIO_ResetBits(GPIOD,GPIO_Pin_14); 
+        GPIO_ResetBits(GPIOD, GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_15); 
         break;
       case ACCEL: 
         state = PID; 
-        GPIO_SetBits(GPIOD,GPIO_Pin_14); 
-        GPIO_ResetBits(GPIOD,GPIO_Pin_12); 
         break;
     }
   }
