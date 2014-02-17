@@ -2,10 +2,13 @@
 #include "pid.h"
 #include "usart.h"
 #include "accel.h"
+#include "stm32f4xx_tim.h"
+#include "misc.h"
 #include <stdio.h>
 /* leds in the board will fade */
-typedef enum { PID, ACCEL } STATE; 
+typedef enum { CYCLE, ACCEL, PID } STATE; 
 volatile STATE state; 
+
 
 int main(void) {
   init();
@@ -16,33 +19,39 @@ int main(void) {
 }
 
 void init() {
-  state = PID; 
+  state = CYCLE; 
   initButton();
   initLEDs();
   initPID(1.f, 0.f, 0.f);
   init_USART(); 
   initAccel();
+  initSysTick(); 
 }
 
 
 void loop() {
-  int8_t x, y, z; 
   switch(state){
     case ACCEL: 
-      GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
-      x = (int8_t)accel_getX(); 
-      y = (int8_t)accel_getY(); 
-      z = (int8_t)accel_getZ(); 
-      if (x > 30) 
-        GPIO_SetBits(GPIOD, GPIO_Pin_14); 
-      if (y > 30) 
-        GPIO_SetBits(GPIOD, GPIO_Pin_13); 
-      if (y < -30) 
-        GPIO_SetBits(GPIOD, GPIO_Pin_15); 
-      if (x < -30) 
-        GPIO_SetBits(GPIOD, GPIO_Pin_12); 
+      doAccel();
       break;
   }
+  delay(500);
+}
+
+void doAccel(void){
+  int8_t x, y, z; 
+  GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
+  x = (int8_t)accel_getX(); 
+  y = (int8_t)accel_getY(); 
+  z = (int8_t)accel_getZ(); 
+  if (x > 30)
+    GPIO_SetBits(GPIOD, GPIO_Pin_14); 
+  if (y > 30) 
+    GPIO_SetBits(GPIOD, GPIO_Pin_13); 
+  if (y < -30) 
+    GPIO_SetBits(GPIOD, GPIO_Pin_15); 
+  if (x < -30) 
+    GPIO_SetBits(GPIOD, GPIO_Pin_12); 
 }
 
 void delay(uint32_t ms) {
@@ -98,14 +107,53 @@ void EXTI0_IRQHandler(void){
         GPIO_ResetBits(GPIOD, GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_15); 
         break;
       case ACCEL: 
-        state = PID; 
+        state = CYCLE; 
         break;
+      case CYCLE:
+        state = ACCEL; 
+        break; 
     }
   }
   EXTI_ClearITPendingBit(EXTI_Line0); 
 }
 
 
+typedef enum { ORANGE, GREEN, BLUE, RED } LED_STATE;
+LED_STATE activeLED; 
+long currentTime; 
+void initSysTick(void){
+  activeLED = ORANGE; 
+  currentTime = 0; 
+  SysTick_Config(SystemCoreClock / 1000);
+  NVIC_SetPriority(SysTick_IRQn, 1); 
+}
+
+void SysTick_Handler(void){
+  if(state != CYCLE) return; 
+
+  currentTime++;
+  if(currentTime % 200 != 0) return;
+  
+  GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15); 
+  switch(activeLED){
+    case ORANGE: 
+      activeLED = GREEN; 
+      GPIO_SetBits(GPIOD, GPIO_Pin_12);
+      break;
+    case GREEN: 
+      activeLED = BLUE; 
+      GPIO_SetBits(GPIOD, GPIO_Pin_15);
+      break; 
+    case BLUE: 
+      activeLED = RED; 
+      GPIO_SetBits(GPIOD, GPIO_Pin_14);
+      break;
+    case RED: 
+      activeLED = ORANGE; 
+      GPIO_SetBits(GPIOD, GPIO_Pin_13);
+      break;
+  }
+}
 
 void initLEDs() {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);

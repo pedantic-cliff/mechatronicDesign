@@ -14,6 +14,8 @@ void loop();
 
 void delay();
 
-void initButton();
-void initLEDs();
+void initButton(void);
+void initLEDs(void);
+void initSysTick(void); 
+void doAccel(void);
 #endif //_MAIN_H_
