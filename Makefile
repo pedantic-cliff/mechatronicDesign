@@ -18,6 +18,7 @@ SOURCES += \
 			$(PERIPH)/src/stm32f4xx_exti.c \
 			$(PERIPH)/src/stm32f4xx_syscfg.c \
 			$(PERIPH)/src/stm32f4xx_tim.c \
+			$(PERIPH)/src/stm32f4xx_usart.c \
 			$(PERIPH)/src/misc.c
 
 SOURCES += startup_stm32f4xx.S
@@ -27,6 +28,7 @@ SOURCES += system_stm32f4xx.c
 SOURCES += \
 		src/main.c \
 		src/pid.c \
+		src/usart.c \
 
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 

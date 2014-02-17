@@ -1,5 +1,6 @@
 #include "main.h"
 #include "pid.h"
+#include "usart.h"
 
 /* leds in the board will fade */
 typedef enum { PID, ACCEL } STATE; 
@@ -9,7 +10,7 @@ int main(void) {
   init();
   pid_pos(500); 
   do {
-    //    loop();
+    loop();
   } while (1);
 }
 
@@ -18,12 +19,12 @@ void init() {
   initButton();
   initLEDs();
   initPID(1.f, 0.f, 0.f);
+  init_USART(); 
 }
 
 int lastButtonStatus = RESET;
 void loop() {
-
-  delay(4);
+//  delay(4);
 }
 
 void delay(uint32_t ms) {
