@@ -1,7 +1,8 @@
 #include "main.h"
 #include "pid.h"
 #include "usart.h"
-
+#include "accel.h"
+#include <stdio.h>
 /* leds in the board will fade */
 typedef enum { PID, ACCEL } STATE; 
 volatile STATE state; 
@@ -20,11 +21,16 @@ void init() {
   initLEDs();
   initPID(1.f, 0.f, 0.f);
   init_USART(); 
+  initAccel();
 }
 
-int lastButtonStatus = RESET;
+
 void loop() {
-//  delay(4);
+  uint8_t x, y, z; 
+  x = accel_getX(); 
+  y = accel_getY(); 
+  z = accel_getZ(); 
+  delay(500);
 }
 
 void delay(uint32_t ms) {
@@ -88,6 +94,8 @@ void EXTI0_IRQHandler(void){
   }
   EXTI_ClearITPendingBit(EXTI_Line0); 
 }
+
+
 
 void initLEDs() {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);

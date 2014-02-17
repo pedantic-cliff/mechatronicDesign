@@ -29,6 +29,7 @@ SOURCES += \
 		src/main.c \
 		src/pid.c \
 		src/usart.c \
+		src/accel.c \
 
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 
