@@ -4,6 +4,7 @@
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_tim.h"
+#include "misc.h"
 
 /* leds in the board will fade */
 const uint16_t LEDS = GPIO_Pin_13 | GPIO_Pin_15;
@@ -14,12 +15,14 @@ static float  Kp = 0.f,
 
 void PWM_Config(int period); 
 void TIM_Config(void); 
+void ENC_Config(void); 
 void setSpeeds(long left, long right); 
 
 void initPID(float p, float i, float d){
   Kp = p, Ki = i, Kd = d;
   TIM_Config(); 
   PWM_Config(1000); 
+  ENC_Config();
 }
 
 void pid_pos(long pos){
@@ -66,7 +69,7 @@ void PWM_Config(period)
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
-  
+
   /* PWM1 Mode configuration: Channel1 */
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
@@ -82,5 +85,52 @@ void PWM_Config(period)
 
   /* TIM3 enable counter */
   TIM_Cmd(TIM3, ENABLE);
+}
+void ENC_Config(void){
+  //******* Currently only does one port **********//
+  NVIC_InitTypeDef NVIC_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStructure;
+  TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+  TIM_ICInitTypeDef TIM_ICInitStructure;
+
+  /*TIM2 clock source enable */
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+  /* Enable GPIOA, clock */
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);   
+
+  /* Encoder unit connected to TIM2, quadrature mode */   
+  //GPIOA Config  
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Enable the TIM2 Update Interrupt for left encoder*/                                                                           
+  NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;            
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  /* Timer configuration in Encoder mode for left encoder*/
+  TIM_TimeBaseStructure.TIM_Prescaler = 0x00;  // No prescaling
+  TIM_TimeBaseStructure.TIM_Period = 65535; //max resolution
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;//devide by clock by one
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;// count up  
+  TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+
+  TIM_EncoderInterfaceConfig(TIM2, TIM_EncoderMode_TI12,  TIM_ICPolarity_Falling, TIM_ICPolarity_Falling);
+  TIM_ICStructInit(&TIM_ICInitStructure);
+  TIM_ICInitStructure.TIM_ICFilter = 6;//ICx_FILTER;
+  TIM_ICInit(TIM2, &TIM_ICInitStructure);
+
+  // Clear all pending interrupts
+  TIM_ClearFlag(TIM2, TIM_FLAG_Update);
+  TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+
+  //Reset counter
+  TIM2->CNT = 10000;//prevent exceeding 0 when turning wheel backwards
+  TIM_Cmd(TIM2, ENABLE);//enable left encoder
 }
 
