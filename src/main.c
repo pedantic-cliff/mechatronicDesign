@@ -2,11 +2,12 @@
 #include "pid.h"
 #include "usart.h"
 #include "accel.h"
+#include "servo.h"
 #include "stm32f4xx_tim.h"
 #include "misc.h"
 #include <stdio.h>
 /* leds in the board will fade */
-typedef enum { CYCLE, ACCEL, PID } STATE; 
+typedef enum { CYCLE, ACCEL, PID, SERVO } STATE; 
 volatile STATE state; 
 
 
@@ -14,6 +15,7 @@ int main(void) {
   init();
   pid_pos(500); 
   do {
+//    pingServo(0x01);
     loop();
   } while (1);
 }
@@ -26,6 +28,9 @@ void init() {
   init_USART(); 
   initAccel();
   initSysTick(); 
+  initServos(); 
+  //setID();
+
 }
 
 
@@ -34,7 +39,11 @@ void loop() {
     case ACCEL: 
       doAccel();
       break;
+    case SERVO: 
+      break;
   }
+  enableTorque();
+  setSpeed();
   delay(500);
 }
 
@@ -110,6 +119,9 @@ void EXTI0_IRQHandler(void){
         state = CYCLE; 
         break;
       case CYCLE:
+        state = SERVO; 
+        break; 
+      case SERVO:
         state = ACCEL; 
         break; 
     }
