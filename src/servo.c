@@ -3,8 +3,7 @@
 #include <stm32f4xx_gpio.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 #include <stm32f4xx_rcc.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 
-#define BAUD_RATE 15000
-
+#define BAUD_RATE 3124950   // Somehow this is 1Mbps
 #define PING        0x01
 #define READ_DATA   0x02
 #define WRITE_DATA  0x03
@@ -13,56 +12,36 @@
 #define TORQUE_ADDR            0x18
 #define MOVING_SPEED_LOW_ADDR  0x21
 
-void writeInsruction(Servo s, char *params, int len); 
-// Define instruction container
-// Internal struct
-typedef struct __attribute__((__packed__)){
-  char      StartBytes[2];
-  char      Id;
-  char      Length; 
-  char      Instruction;
-} inner_Instruction_t;
-
-typedef struct {
-  inner_Instruction_t  Header;
-  char                *Parameters;
-  char                 Checksum;
-} Instruction_t;
-
-
-// Internal memory for servos 
-servo_t _Servos[2]; 
-int _numServos = 0;
+void writeInstruction(Servo s, char *params, int len); 
 
 int setTorque(Servo s, char en){
   char params[2] = { 
     TORQUE_ADDR,
-    ENABLE 
+    STATE_ENABLE 
   }; 
-  writeInsruction(s, params, 2); 
+  writeInstruction(s, params, 2); 
   return 0;
 }
 
-void createServo(Servo s, char ID, char direction){
+Servo createServo(Servo s, char ID, char direction){
   s->id = ID; 
   s->direction = direction; 
 
   s->setTorque = setTorque; 
+  return s;
 }
 
 
 void initServos(void){
-  //_buff_ptr = &_buffer[0];
-  /* --------------------------- System Clocks Configuration -----------------*/
   /* USART3 clock enable */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
   
   /* GPIOD clock enable */
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
+  // Set up GPIO B10 //
   GPIO_InitTypeDef GPIO_InitStructure;
  
-  /*-------------------------- GPIO Configuration ----------------------------*/
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -70,21 +49,12 @@ void initServos(void){
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
  
-  /* Connect USART pins to AF */
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
 
+  // Set up USART3 //
   USART_InitTypeDef USART_InitStructure;
- 
-  /* USARTx configuration ------------------------------------------------------*/
-  /* USARTx configured as follow:
-        - BaudRate = 9600 baud
-        - Word Length = 8 Bits
-        - Two Stop Bit
-        - Odd parity
-        - Hardware flow control disabled (RTS and CTS signals)
-        - Receive and transmit enabled
-  */
-  USART_InitStructure.USART_BaudRate = 3124950;
+
+  USART_InitStructure.USART_BaudRate = BAUD_RATE;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -96,49 +66,29 @@ void initServos(void){
   //USART3->CR3 |= USART_CR3_HDSEL;
   USART_Cmd(USART3, ENABLE);
 }
-/*
-void _fillChecksum(void){
-  int i; 
-  unsigned char checksum =  instruction.Header.Id 
-                            + instruction.Header.Length 
-                            + instruction.Header.Instruction; 
-  for (i = 0; i < instruction.Header.Length; i++){
-    checksum += instruction.Parameters[i]; 
-  }
-  checksum = ~checksum;
-  instruction.Checksum = checksum; 
-}
 
-int _write(char * buffer, int length){
-  int ii;
-  for(ii = length; ii; buffer++, ii--){
+void _write(char * buffer, int length){
+  for(; length; buffer++, length--){
     while( !(USART3->SR & 0x00000040) );
     USART_SendData(USART3, *buffer);
   }
-  return length - ii; 
 }
-*/
-/*
-volatile char _buffer[256];
-volatile _buff_index = 0;
-void USART3_IRQHandler(void){
-  if (USART_GetITStatus(USART1, USART_IT_RXNE) ){
-    _buffer[_buff_index] = USART3->DR; 
-    _buff_index = (_buff_index + 1) & 0xFF;
+
+void writeInstruction(Servo s, char *params, int length){ 
+  int i = 0; 
+  char checksum = 0; 
+  char buffer[5 + length]; 
+  buffer[0] = buffer[1] = 0xFF;
+  buffer[2] = s->id; 
+  buffer[3] = length; 
+  buffer[4] = WRITE_DATA; 
+  for(i = 0; i < length; i++){
+    buffer[4 + i] = params[i]; 
   }
-}
-
-int _read(char * buffer, int length){
-  int ii; 
-  for (ii = length; ii; buffer++, ii--){
+  for(i = 2; i < 4 + length; i++){
+    checksum += buffer[i]; 
   }
+  buffer[4+length] = ~checksum; 
 
-  return 0;
+  _write(buffer, sizeof(buffer)); 
 }
-void _writeInstruction(){
-  _write((char*)&instruction.Header, sizeof(instruction.Header)); 
-  _write((char*)&instruction.Parameters, instruction.Header.Length - 2); 
-  _write(&instruction.Checksum, 1); 
-}
-
-*/

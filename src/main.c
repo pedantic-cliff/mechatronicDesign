@@ -7,9 +7,13 @@
 #include "misc.h"
 #include <stdio.h>
 /* leds in the board will fade */
-typedef enum { CYCLE, ACCEL, PID, SERVO } STATE; 
+typedef enum { CYCLE, ACCEL, SERVO } STATE; 
 volatile STATE state; 
 
+Servo_t servos[0]; 
+
+Servo leftServo; 
+Servo rightServo; 
 
 int main(void) {
   init();
@@ -29,8 +33,8 @@ void init() {
   initAccel();
   initSysTick(); 
   initServos(); 
-  //setID();
-
+  leftServo  = createServo(&servos[0], SERVO_ID_LEFT,  DIRECTION_FORWARD); 
+  rightServo = createServo(&servos[1], SERVO_ID_RIGHT, DIRECTION_REVERSE);
 }
 
 
@@ -41,16 +45,17 @@ void loop() {
       break;
     case SERVO: 
       break;
+    case CYCLE:
+      break;
   }
   delay(500);
 }
 
 void doAccel(void){
-  int8_t x, y, z; 
+  int8_t x, y; 
   GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
   x = (int8_t)accel_getX(); 
   y = (int8_t)accel_getY(); 
-  z = (int8_t)accel_getZ(); 
   if (x > 30)
     GPIO_SetBits(GPIOD, GPIO_Pin_14); 
   if (y > 30) 
@@ -108,11 +113,6 @@ void initButton(void) {
 void EXTI0_IRQHandler(void){
   if(EXTI_GetITStatus(EXTI_Line0) != RESET){
     switch(state){
-      case PID: 
-        state = ACCEL;
-        GPIO_SetBits(GPIOD,GPIO_Pin_12); 
-        GPIO_ResetBits(GPIOD, GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_15); 
-        break;
       case ACCEL: 
         state = CYCLE; 
         break;

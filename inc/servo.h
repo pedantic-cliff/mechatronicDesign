@@ -1,11 +1,16 @@
 #ifndef _SERVO_H_
 #define _SERVO_H_
 
-#define BROADCAST_ID 0xFE
+#define BROADCAST_ID  0xFE
 
-#define STATE_ENABLE 0x01
+#define STATE_ENABLE  0x01
 #define STATE_DISABLE 0x00
 
+#define SERVO_ID_LEFT   0x01
+#define SERVO_ID_RIGHT  0x02
+
+#define DIRECTION_FORWARD ( 1)
+#define DIRECTION_REVERSE (-1)
 
 // Define the external Servo Type
 typedef struct servo *Servo; 
@@ -18,9 +23,9 @@ typedef struct servo {
 
   // Methods
   int (*setTorque)(Servo, char en);
-} servo_t;
+} Servo_t;
 
 void initServos(void);
-void createServo(Servo s, char ID, char direction); 
+Servo createServo(Servo s, char ID, char direction); 
 
 #endif
