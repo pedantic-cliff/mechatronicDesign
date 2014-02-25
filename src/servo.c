@@ -1,21 +1,21 @@
-
+#include <servo.h>
 #include <stm32f4xx_usart.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 #include <stm32f4xx_gpio.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 #include <stm32f4xx_rcc.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 
 #define BAUD_RATE 15000
 
-#define BROADCAST_ID 0xFE
-
-#define MAX_PARAMS 16
-
 #define PING        0x01
 #define READ_DATA   0x02
 #define WRITE_DATA  0x03
 
 #define ID_ADDR                0x03
+#define TORQUE_ADDR            0x18
 #define MOVING_SPEED_LOW_ADDR  0x21
 
+void writeInsruction(Servo s, char *params, int len); 
+// Define instruction container
+// Internal struct
 typedef struct __attribute__((__packed__)){
   char      StartBytes[2];
   char      Id;
@@ -25,25 +25,31 @@ typedef struct __attribute__((__packed__)){
 
 typedef struct {
   inner_Instruction_t  Header;
-  char                Parameters[MAX_PARAMS];
-  char                Checksum;
+  char                *Parameters;
+  char                 Checksum;
 } Instruction_t;
 
-typedef struct __attribute__((__packed__)){
-  char      StartBytes[2]; 
-  char      Id; 
-  char      Length; 
-  char      Error; 
-} inner_Response_t;
 
-typedef struct {
-  inner_Response_t  Header; 
-  char              Parameters[MAX_PARAMS];
-  char              Checksum;
-} Response_t;
+// Internal memory for servos 
+servo_t _Servos[2]; 
+int _numServos = 0;
 
-Instruction_t instruction;
-Response_t    response; 
+int setTorque(Servo s, char en){
+  char params[2] = { 
+    TORQUE_ADDR,
+    ENABLE 
+  }; 
+  writeInsruction(s, params, 2); 
+  return 0;
+}
+
+void createServo(Servo s, char ID, char direction){
+  s->id = ID; 
+  s->direction = direction; 
+
+  s->setTorque = setTorque; 
+}
+
 
 void initServos(void){
   //_buff_ptr = &_buffer[0];
@@ -90,7 +96,7 @@ void initServos(void){
   //USART3->CR3 |= USART_CR3_HDSEL;
   USART_Cmd(USART3, ENABLE);
 }
-
+/*
 void _fillChecksum(void){
   int i; 
   unsigned char checksum =  instruction.Header.Id 
@@ -111,10 +117,10 @@ int _write(char * buffer, int length){
   }
   return length - ii; 
 }
-
+*/
+/*
 volatile char _buffer[256];
 volatile _buff_index = 0;
-/*
 void USART3_IRQHandler(void){
   if (USART_GetITStatus(USART1, USART_IT_RXNE) ){
     _buffer[_buff_index] = USART3->DR; 
@@ -129,67 +135,10 @@ int _read(char * buffer, int length){
 
   return 0;
 }
-*/
 void _writeInstruction(){
   _write((char*)&instruction.Header, sizeof(instruction.Header)); 
   _write((char*)&instruction.Parameters, instruction.Header.Length - 2); 
   _write(&instruction.Checksum, 1); 
 }
 
-void _readResponse(){
-}
-
-int setID(void){
-  instruction.Header.StartBytes[0]  = 0xFF; 
-  instruction.Header.StartBytes[1]  = 0xFF; 
-  instruction.Header.Id             = BROADCAST_ID; 
-  instruction.Header.Length         = 4;
-  instruction.Header.Instruction    = WRITE_DATA;
-  instruction.Parameters[0]         = 0x03;
-  instruction.Parameters[1]         = 0x01;
-  _fillChecksum(); 
-
-  _writeInstruction(); 
-  return 0; 
-}
-
-int enableTorque(void){
-  instruction.Header.StartBytes[0]  = 0xFF; 
-  instruction.Header.StartBytes[1]  = 0xFF; 
-  instruction.Header.Id             = 0x01; 
-  instruction.Header.Length         = 4;
-  instruction.Header.Instruction    = WRITE_DATA;
-  instruction.Parameters[0]         = 0x18;
-  instruction.Parameters[1]         = 0x01;
-  _fillChecksum(); 
-
-  _writeInstruction(); 
-  return 0; 
-}
-int setSpeed(void){
-  instruction.Header.StartBytes[0]  = 0xFF; 
-  instruction.Header.StartBytes[1]  = 0xFF; 
-  instruction.Header.Id             = 0x01; 
-  instruction.Header.Length         = 4;
-  instruction.Header.Instruction    = WRITE_DATA;
-  instruction.Parameters[0]         = MOVING_SPEED_LOW_ADDR;
-  instruction.Parameters[1]         = 0x10;
-  _fillChecksum(); 
-
-  _writeInstruction(); 
-  _readResponse(); 
-  return 0; 
-
-}
-
-int pingServo(int ID){
-  instruction.Header.StartBytes[0] = 0xFF; 
-  instruction.Header.StartBytes[1] = 0xFF; 
-  instruction.Header.Id = ID; 
-  instruction.Header.Length = 2; 
-  instruction.Header.Instruction = PING; 
-  _fillChecksum();
-
-  _writeInstruction();
-  return 0; 
-}
+*/

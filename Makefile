@@ -1,4 +1,4 @@
-PROJECT_NAME=pwm
+PROJECT_NAME=mechatronics
 
 BUILDDIR = build
 

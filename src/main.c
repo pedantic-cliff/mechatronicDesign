@@ -42,8 +42,6 @@ void loop() {
     case SERVO: 
       break;
   }
-  enableTorque();
-  setSpeed();
   delay(500);
 }
 
