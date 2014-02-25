@@ -105,7 +105,7 @@ void writeInstruction(Servo s, char *params, int length){
   char buffer[5 + length]; 
   buffer[0] = buffer[1] = 0xFF;
   buffer[2] = s->id; 
-  buffer[3] = length; 
+  buffer[3] = length + 2; 
   buffer[4] = WRITE_DATA; 
   for(i = 0; i < length; i++){
     buffer[4 + i] = params[i]; 
