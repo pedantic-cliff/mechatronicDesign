@@ -10,7 +10,7 @@
 typedef enum { CYCLE, ACCEL, SERVO } STATE; 
 volatile STATE state; 
 
-Servo_t servos[0]; 
+Servo_t servos[2]; 
 
 Servo leftServo; 
 Servo rightServo; 
