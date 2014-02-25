@@ -10,7 +10,14 @@
 
 #define ID_ADDR                0x03
 #define TORQUE_ADDR            0x18
-#define MOVING_SPEED_LOW_ADDR  0x21
+//#define MOVING_SPEED_LOW_ADDR  0x21 //commented by Anurag
+
+
+//Added by Anurag,
+
+// Addresses for setting servo speeds
+#define SPEED_LOW_ADDR 0x20
+#define SPEED_HIGH_ADDR 0x21
 
 void writeInstruction(Servo s, char *params, int len); 
 
@@ -21,6 +28,24 @@ int setTorque(Servo s, char en){
   }; 
   writeInstruction(s, params, 2); 
   return 0;
+}
+
+//Set speed on a given servo motor
+
+int setSpeed(Servo s,int speed){
+//Speed ranges from -1024 to +1023
+	if(speed<0){
+		speed = speed*(-1)+1024;
+	}
+	char params[3];
+	unsigned lowerByte =0;
+	unsigned upperByte =0;
+	lowerByte = speed & 0xff;
+	upperByte = (speed>>8) & 0xff;
+	params[0] = SPEED_LOW_ADDR;
+	params[1] = lowerByte;
+	params[2] = upperByte;
+	writeInstruction(s,params,3);
 }
 
 Servo createServo(Servo s, char ID, char direction){
