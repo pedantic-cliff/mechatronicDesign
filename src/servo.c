@@ -46,6 +46,8 @@ int setSpeed(Servo s,int speed){
 	params[1] = lowerByte;
 	params[2] = upperByte;
 	writeInstruction(s,params,3);
+
+  return 0; 
 }
 
 Servo createServo(Servo s, char ID, char direction){
@@ -53,6 +55,7 @@ Servo createServo(Servo s, char ID, char direction){
   s->direction = direction; 
 
   s->setTorque = setTorque; 
+  s->setSpeed  = setSpeed;
   return s;
 }
 

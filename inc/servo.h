@@ -23,6 +23,7 @@ typedef struct servo {
 
   // Methods
   int (*setTorque)(Servo, char en);
+  int (*setSpeed)(Servo, int speed);
 } Servo_t;
 
 void initServos(void);

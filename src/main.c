@@ -35,6 +35,7 @@ void init() {
   initServos(); 
   leftServo  = createServo(&servos[0], SERVO_ID_LEFT,  DIRECTION_FORWARD); 
   rightServo = createServo(&servos[1], SERVO_ID_RIGHT, DIRECTION_REVERSE);
+  leftServo->setTorque(leftServo,STATE_ENABLE);
 }
 
 
