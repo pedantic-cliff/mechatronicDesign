@@ -6,6 +6,7 @@
 #include "stm32f4xx_tim.h"
 #include "misc.h"
 #include <stdio.h>
+
 /* leds in the board will fade */
 typedef enum { CYCLE, ACCEL, SERVO } STATE; 
 volatile STATE state; 
@@ -14,6 +15,8 @@ Servo_t servos[2];
 
 Servo leftServo; 
 Servo rightServo; 
+
+Accel accel; 
 
 int main(void) {
   init();
@@ -30,7 +33,7 @@ void init() {
   initLEDs();
   initPID(1.f, 0.f, 0.f);
   init_USART(); 
-  initAccel();
+  accel = initAccel();
   initSysTick(); 
   initServos(); 
   leftServo  = createServo(&servos[0], SERVO_ID_LEFT,  DIRECTION_FORWARD); 
@@ -63,8 +66,8 @@ void loop() {
 void doAccel(void){
   int8_t x, y; 
   GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
-  x = (int8_t)accel_getX(); 
-  y = (int8_t)accel_getY(); 
+  x = (int8_t)accel->getX(); 
+  y = (int8_t)accel->getY(); 
   if (x > 30)
     GPIO_SetBits(GPIOD, GPIO_Pin_14); 
   if (y > 30) 

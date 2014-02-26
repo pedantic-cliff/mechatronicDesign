@@ -1,3 +1,4 @@
+#include <accel.h>
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_rcc.h>
@@ -11,10 +12,8 @@ void initSPI(void);
 void sendData(uint8_t addr, uint8_t data);
 uint8_t getData (uint8_t addr); 
 
-void initAccel(void){
-  initSPI();
-  sendData(CTRL_REG1, 0x67); // POWER_ON | Zen | Yen | Xen 
-}
+// Internal Storage for the one Accel object
+struct accel _storage; 
 
 uint8_t accel_getX(void){
   return getData(OUT_X);
@@ -105,3 +104,15 @@ uint8_t getData(uint8_t address){
 
   return  SPI_I2S_ReceiveData(SPI1);
 }
+
+Accel initAccel(void){
+  Accel a = (Accel)&_storage;
+  initSPI();
+  sendData(CTRL_REG1, 0x67); // POWER_ON | Zen | Yen | Xen 
+
+  a->getX = accel_getX;
+  a->getY = accel_getY;
+  a->getZ = accel_getZ; 
+  return a;
+}
+
