@@ -134,18 +134,18 @@ void _write(char * buffer, int length){
 void writeInstruction(Servo s, char *params, int length){ 
   int i = 0; 
   char checksum = 0; 
-  char buffer[5 + length]; 
+  char buffer[6 + length]; 
   buffer[0] = buffer[1] = 0xFF;
   buffer[2] = s->id; 
   buffer[3] = length + 2; 
   buffer[4] = WRITE_DATA; 
   for(i = 0; i < length; i++){
-    buffer[4 + i] = params[i]; 
+    buffer[5 + i] = params[i]; 
   }
-  for(i = 2; i < 4 + length; i++){
+  for(i = 2; i < 5 + length; i++){
     checksum += buffer[i]; 
   }
-  buffer[4+length] = ~checksum; 
+  buffer[5+length] = ~checksum; 
 
-  _write(buffer, sizeof(buffer)); 
+  _write(buffer, 6 + length); 
 }

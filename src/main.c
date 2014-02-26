@@ -42,6 +42,7 @@ void init() {
 
 
 void loop() {
+  leftServo->setTorque(leftServo,STATE_ENABLE);
   switch(state){
     case ACCEL: 
       doAccel();
@@ -51,19 +52,7 @@ void loop() {
     case CYCLE:
       break;
   }
-  delay(5000);
-  leftServo->toggleServoLed(leftServo,1,1);
-  delay(5000);
-  leftServo->toggleServoLed(leftServo,1,0);
-  delay(5000);
-  leftServo->toggleServoLed(leftServo,2,1);
-  delay(5000);
-  leftServo->toggleServoLed(leftServo,2,0);
-  delay(5000);
-  leftServo->toggleServoLed(leftServo,3,1);
-  delay(5000);
-  leftServo->toggleServoLed(leftServo,3,0);
-  delay(5000);
+  //delay(5000);
 }
 
 void doAccel(void){
