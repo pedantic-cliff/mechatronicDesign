@@ -12,12 +12,19 @@
 #define TORQUE_ADDR            0x18
 //#define MOVING_SPEED_LOW_ADDR  0x21 //commented by Anurag
 
-
-//Added by Anurag,
-
 // Addresses for setting servo speeds
 #define SPEED_LOW_ADDR 0x20
 #define SPEED_HIGH_ADDR 0x21
+
+// Addresses for angle limits on servo
+#define CW_ANGLE_LIMIT_LOW 0x06
+#define CW_ANGLE_LIMIT_HIGH 0x07
+#define CCW_ANGLE_LIMIT_LOW 0x08
+#define CCW_ANGLE_LIMIT_HIGH 0x09
+
+// Address for LED
+#define SERVO_LED 0x19
+
 
 void writeInstruction(Servo s, char *params, int len); 
 
@@ -30,8 +37,28 @@ int setTorque(Servo s, char en){
   return 0;
 }
 
-//Set speed on a given servo motor
+//Set servos to wheel mode
+int setServo2WheelMode(Servo s){
+	char params[5];
+	params[0] = CW_ANGLE_LIMIT_LOW;
+	params[1] = 0x00;
+	params[2] = 0x00;
+	params[3] = 0x00;
+	params[4] = 0x00;
+	writeInstruction(s,params,5);
+	return 0;
+	}
 
+// Toggle LED
+int toggleServoLed(Servo s,int LEDID,int en){
+	char params[2];
+	params[0] = SERVO_LED;
+	params[1] = en<<(LEDID-1);
+	writeInstruction(s,params,2);
+	return 0;
+	}
+
+//Set speed on a given servo motor
 int setSpeed(Servo s,int speed){
 //Speed ranges from -1024 to +1023
 	if(speed<0){
@@ -56,6 +83,8 @@ Servo createServo(Servo s, char ID, char direction){
 
   s->setTorque = setTorque; 
   s->setSpeed  = setSpeed;
+  s->setServo2WheelMode = setServo2WheelMode;
+  s->toggleServoLed = toggleServoLed;
   return s;
 }
 
@@ -91,7 +120,7 @@ void initServos(void){
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
  
   USART_Init(USART3, &USART_InitStructure);
-  //USART3->CR3 |= USART_CR3_HDSEL;
+  USART3->CR3 |= USART_CR3_HDSEL;
   USART_Cmd(USART3, ENABLE);
 }
 

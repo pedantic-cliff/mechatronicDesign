@@ -36,6 +36,8 @@ void init() {
   leftServo  = createServo(&servos[0], SERVO_ID_LEFT,  DIRECTION_FORWARD); 
   rightServo = createServo(&servos[1], SERVO_ID_RIGHT, DIRECTION_REVERSE);
   leftServo->setTorque(leftServo,STATE_ENABLE);
+  leftServo->setServo2WheelMode(leftServo);
+  leftServo->setSpeed(leftServo,512);
 }
 
 
@@ -49,7 +51,19 @@ void loop() {
     case CYCLE:
       break;
   }
-  delay(500);
+  delay(5000);
+  leftServo->toggleServoLed(leftServo,1,1);
+  delay(5000);
+  leftServo->toggleServoLed(leftServo,1,0);
+  delay(5000);
+  leftServo->toggleServoLed(leftServo,2,1);
+  delay(5000);
+  leftServo->toggleServoLed(leftServo,2,0);
+  delay(5000);
+  leftServo->toggleServoLed(leftServo,3,1);
+  delay(5000);
+  leftServo->toggleServoLed(leftServo,3,0);
+  delay(5000);
 }
 
 void doAccel(void){
