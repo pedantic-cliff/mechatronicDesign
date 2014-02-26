@@ -47,7 +47,6 @@ void init() {
 
 
 void loop() {
-  leftServo->setTorque(leftServo,STATE_DISABLE);
   delay(500);
   switch(state){
     case ACCEL: 
