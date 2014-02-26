@@ -35,14 +35,20 @@ void init() {
   initServos(); 
   leftServo  = createServo(&servos[0], SERVO_ID_LEFT,  DIRECTION_FORWARD); 
   rightServo = createServo(&servos[1], SERVO_ID_RIGHT, DIRECTION_REVERSE);
+  leftServo->toggleServoLed(leftServo,1,1);
+  delay(500); 
   leftServo->setTorque(leftServo,STATE_ENABLE);
+  delay(500);
   leftServo->setServo2WheelMode(leftServo);
+  delay(500);
   leftServo->setSpeed(leftServo,512);
+  delay(500);
 }
 
 
 void loop() {
-  leftServo->setTorque(leftServo,STATE_ENABLE);
+  leftServo->setTorque(leftServo,STATE_DISABLE);
+  delay(500);
   switch(state){
     case ACCEL: 
       doAccel();
