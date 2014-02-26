@@ -7,6 +7,7 @@ typedef struct accel {
   uint8_t (*getX)(void); 
   uint8_t (*getY)(void); 
   uint8_t (*getZ)(void); 
+  float   (*getAngle)(void);
 } accel_t; 
 
 Accel initAccel(void); 

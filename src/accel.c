@@ -2,6 +2,7 @@
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_rcc.h>
+#include <math.h>
 
 #define CTRL_REG1 0x20
 #define OUT_X     0x29
@@ -23,6 +24,13 @@ uint8_t accel_getY(void){
 }
 uint8_t accel_getZ(void){
   return getData(OUT_Z);
+}
+
+float accel_getAngle(){ 
+  uint8_t x, y; 
+  x = accel_getX(); 
+  y = accel_getY();
+  return atan2f(y,x); 
 }
 
 void initSPI(void){
@@ -113,6 +121,7 @@ Accel initAccel(void){
   a->getX = accel_getX;
   a->getY = accel_getY;
   a->getZ = accel_getZ; 
+  a->getAngle = accel_getAngle; 
   return a;
 }
 

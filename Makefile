@@ -53,11 +53,11 @@ GDB = arm-none-eabi-gdb
 
 CFLAGS  = -O0 -g -Wall -I.\
    -mcpu=cortex-m4 -mthumb \
-   -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
+   -mfpu=fpv4-sp-d16 -mfloat-abi=soft \
    $(INCLUDES) -DUSE_STDPERIPH_DRIVER
 
 LDSCRIPT = stm32_flash.ld
-LDFLAGS += -T$(LDSCRIPT) -mthumb -mcpu=cortex-m4 -nostdlib
+LDFLAGS += -T$(LDSCRIPT) -mthumb -mcpu=cortex-m4 -nostdlib -lm
 
 $(BIN): $(ELF)
 	$(OBJCOPY) -O binary $< $@

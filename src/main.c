@@ -19,33 +19,32 @@ Servo rightServo;
 Accel accel; 
 
 int main(void) {
+  int i = -1000; 
   init();
   pid_pos(500); 
   do {
-//    pingServo(0x01);
     loop();
   } while (1);
 }
 
+void doServo(){
+  leftServo->setServo2WheelMode(leftServo);
+  delay(100);
+  leftServo->setSpeed(leftServo, 100); 
+  delay(100);
+}
+
 void init() {
-  state = CYCLE; 
+  state = ACCEL; 
   initButton();
   initLEDs();
-  initPID(1.f, 0.f, 0.f);
+  //initPID(1.f, 0.f, 0.f);
   init_USART(); 
   accel = initAccel();
   initSysTick(); 
   initServos(); 
   leftServo  = createServo(&servos[0], SERVO_ID_LEFT,  DIRECTION_FORWARD); 
-  rightServo = createServo(&servos[1], SERVO_ID_RIGHT, DIRECTION_REVERSE);
-  leftServo->toggleServoLed(leftServo,1,1);
-  delay(500); 
-  leftServo->setTorque(leftServo,STATE_ENABLE);
-  delay(500);
-  leftServo->setServo2WheelMode(leftServo);
-  delay(500);
-  leftServo->setSpeed(leftServo,512);
-  delay(500);
+  //rightServo = createServo(&servos[1], SERVO_ID_RIGHT, DIRECTION_REVERSE);
 }
 
 
@@ -56,18 +55,19 @@ void loop() {
       doAccel();
       break;
     case SERVO: 
+      doServo(); 
       break;
     case CYCLE:
       break;
   }
-  //delay(5000);
 }
 
 void doAccel(void){
-  int8_t x, y; 
+  int8_t x, y, a; 
   GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
   x = (int8_t)accel->getX(); 
   y = (int8_t)accel->getY(); 
+  a = (int8_t)(1000*accel->getAngle());
   if (x > 30)
     GPIO_SetBits(GPIOD, GPIO_Pin_14); 
   if (y > 30) 
@@ -76,6 +76,11 @@ void doAccel(void){
     GPIO_SetBits(GPIOD, GPIO_Pin_15); 
   if (x < -30) 
     GPIO_SetBits(GPIOD, GPIO_Pin_12); 
+  USART_putInt(x); 
+  USART_puts("\t"); 
+  USART_putInt(y); 
+  USART_puts("\n\r"); 
+  
 }
 
 void delay(uint32_t ms) {
@@ -134,6 +139,8 @@ void EXTI0_IRQHandler(void){
       case SERVO:
         state = ACCEL; 
         break; 
+      default: 
+        state = ACCEL;
     }
   }
   EXTI_ClearITPendingBit(EXTI_Line0); 
