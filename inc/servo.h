@@ -6,8 +6,8 @@
 #define STATE_ENABLE  0x01
 #define STATE_DISABLE 0x00
 
-#define SERVO_ID_LEFT   0x01
-#define SERVO_ID_RIGHT  0x02
+#define SERVO_ID_LEFT   0xFE
+#define SERVO_ID_RIGHT  0xFE
 
 #define DIRECTION_FORWARD ( 1)
 #define DIRECTION_REVERSE (-1)
