@@ -5,6 +5,7 @@
 #include "servo.h"
 #include "stm32f4xx_tim.h"
 #include "misc.h"
+#include "math.h"
 #include <stdio.h>
 
 /* leds in the board will fade */
@@ -79,8 +80,9 @@ void doAccel(void){
   USART_putInt(x); 
   USART_puts("\t"); 
   USART_putInt(y); 
+  USART_puts("\t"); 
+  USART_putInt(100*atan2f(y,x));   
   USART_puts("\n\r"); 
-  
 }
 
 void delay(uint32_t ms) {
