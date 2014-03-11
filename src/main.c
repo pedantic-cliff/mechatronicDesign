@@ -5,6 +5,7 @@
 #include "stm32f4xx_tim.h"
 #include "misc.h"
 #include <stdio.h>
+#include "math.h"
 /* leds in the board will fade */
 typedef enum { CYCLE, ACCEL, PID } STATE; 
 volatile STATE state; 
@@ -52,6 +53,7 @@ void doAccel(void){
     GPIO_SetBits(GPIOD, GPIO_Pin_15); 
   if (x < -30) 
     GPIO_SetBits(GPIOD, GPIO_Pin_12); 
+  float angle = atan2f(y,x); 
 }
 
 void delay(uint32_t ms) {
