@@ -18,22 +18,18 @@ void init() {
   colorSensors->init(colorSensors); 
 }
 
-u16 readADC1(u8 channel) { 
-  ADC_RegularChannelConfig(ADC1, channel, 1, ADC_SampleTime_15Cycles); 
-  // Start the conversion 
-  ADC_SoftwareStartConv(ADC1); 
-  // Wait until conversion completion
-  while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET); 
-  // Get the conversion value 
-  return ADC_GetConversionValue(ADC1); 
-}
-
-
 void loop() {
+  int i = 0; 
   delay(2000);
-  colorSensors->measureColor(colorSensors,RED); 
   enableLEDs(RED);
-  delay(2000); 
+  colorSensors->measureColor(colorSensors,RED); 
+//  while(!(colorSensors->done)); 
+  volatile int *results = colorSensors->getResult();
+  for(i = 0; i < NUM_SENSORS; i++){
+    USART_putInt(results[i]); 
+    USART_puts("\t");
+  }
+  USART_puts("\n\r");
   disableLEDs(RED|BLUE);
 }
 
