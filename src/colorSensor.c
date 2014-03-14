@@ -106,7 +106,7 @@ void initialize(ColorSensors this){
 
 void startADC(void){
   delay(100); 
-  NVIC_EnableIRQ(ADC_IRQn);
+  //NVIC_EnableIRQ(ADC_IRQn);
   ADC_SoftwareStartConv(ADC3);
 } 
 

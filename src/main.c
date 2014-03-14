@@ -23,7 +23,6 @@ void init() {
 void loop() {
   delay(2000);
   colorSensors->measureColor(colorSensors,RED); 
-  while(!RED_VALID(colorSensors->sensors[0])); 
   USART_putInt(colorSensors->sensors[0]->measurements[RED_IDX]); 
   USART_puts("\n\r"); 
 }
