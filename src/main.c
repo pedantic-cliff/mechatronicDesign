@@ -2,14 +2,13 @@
 #include "pid.h"
 #include "usart.h"
 #include "accel.h"
+#include "colorSensor.h"
 #include "stm32f4xx_tim.h"
 #include "misc.h"
 #include <stdio.h>
 /* leds in the board will fade */
-typedef enum { CYCLE, ACCEL, PID } STATE; 
-volatile STATE state; 
 
-
+ColorSensors colorSensors; 
 int main(void) {
   init();
   pid_pos(500); 
@@ -22,37 +21,20 @@ void init() {
   state = CYCLE; 
   initButton();
   initLEDs();
-  initPID(1.f, 0.f, 0.f);
   init_USART(); 
-  initAccel();
   initSysTick(); 
+  colorSensors = creatColorSensors(); 
+  colorSensors->initialize(); 
 }
 
 
 void loop() {
-  switch(state){
-    case ACCEL: 
-      doAccel();
-      break;
-  }
-  delay(500);
+  delay(2000);
+  colorSensors->measureRed(); 
+  while(!RED_VALID(colorSensors->sensors[0]->validColors)); 
+  
 }
 
-void doAccel(void){
-  int8_t x, y, z; 
-  GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
-  x = (int8_t)accel_getX(); 
-  y = (int8_t)accel_getY(); 
-  z = (int8_t)accel_getZ(); 
-  if (x > 30)
-    GPIO_SetBits(GPIOD, GPIO_Pin_14); 
-  if (y > 30) 
-    GPIO_SetBits(GPIOD, GPIO_Pin_13); 
-  if (y < -30) 
-    GPIO_SetBits(GPIOD, GPIO_Pin_15); 
-  if (x < -30) 
-    GPIO_SetBits(GPIOD, GPIO_Pin_12); 
-}
 
 void delay(uint32_t ms) {
   ms *= 3360;
@@ -94,7 +76,6 @@ void initButton(void) {
   gpio.GPIO_PuPd = GPIO_PuPd_NOPULL;
   gpio.GPIO_Pin = GPIO_Pin_0;
   GPIO_Init(GPIOD, &gpio);
-
 }
 
 // Interrupt Channel 0 handler
@@ -129,31 +110,7 @@ void initSysTick(void){
 }
 
 void SysTick_Handler(void){
-  if(state != CYCLE) return; 
-
-  currentTime++;
-  if(currentTime % 200 != 0) return;
-  
-  GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15); 
-  switch(activeLED){
-    case ORANGE: 
-      activeLED = GREEN; 
-      GPIO_SetBits(GPIOD, GPIO_Pin_12);
-      break;
-    case GREEN: 
-      activeLED = BLUE; 
-      GPIO_SetBits(GPIOD, GPIO_Pin_15);
-      break; 
-    case BLUE: 
-      activeLED = RED; 
-      GPIO_SetBits(GPIOD, GPIO_Pin_14);
-      break;
-    case RED: 
-      activeLED = ORANGE; 
-      GPIO_SetBits(GPIOD, GPIO_Pin_13);
-      break;
-  }
-}
+ }
 
 void initLEDs() {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
