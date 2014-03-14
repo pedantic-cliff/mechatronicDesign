@@ -25,7 +25,7 @@
 #define NUM_SENSORS 1
 #define SENSOR_PORT GPIOD
 
-#define ADC3_DR_ADDRESS ((uint32_t)0x4001224C)
+#define ADC1_DR_ADDRESS ((uint32_t)0x4001224C)
 
 typedef struct lightSensor_t *LightSensor;
 typedef struct lightSensor_t{
@@ -43,6 +43,7 @@ typedef struct colorSensors_t {
   void (*init)  (ColorSensors sensors);
 
   void (*measureColor) (ColorSensors sensors, Color color); 
+  uint16_t (*getResult) (void); 
 } colorSensor;
 
 ColorSensors createColorSensors(void); 

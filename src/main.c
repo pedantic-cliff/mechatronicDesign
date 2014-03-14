@@ -5,9 +5,7 @@
 
 ColorSensors colorSensors; 
 int main(void) {
-  int i = -1000; 
   init();
-  pid_pos(500); 
   do {
     loop();
   } while (1);
@@ -15,6 +13,7 @@ int main(void) {
 
 void init() {
   init_USART(); 
+  initLEDs();
   colorSensors = createColorSensors(); 
   colorSensors->init(colorSensors); 
 }
@@ -33,7 +32,8 @@ u16 readADC1(u8 channel) {
 void loop() {
   delay(2000);
   colorSensors->measureColor(colorSensors,RED); 
-  USART_putInt(readADC1(ADC_Channel_14)); 
-  USART_puts("\n\r"); 
+  enableLEDs(RED);
+  delay(2000); 
+  disableLEDs(RED|BLUE);
 }
 

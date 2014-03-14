@@ -48,6 +48,12 @@ void EXTI0_IRQHandler(void){
 }
 
 /************ Surface LEDs *****************/
+#define GREEN_PIN   GPIO_Pin_12
+#define RED_PIN     GPIO_Pin_14
+#define BLUE_PIN    GPIO_Pin_15
+#define ORANGE_PIN  GPIO_Pin_13
+#define LED_PORT    GPIOD
+
 void initLEDs() {
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
@@ -59,10 +65,28 @@ void initLEDs() {
 }
 
 void enableLEDs(Color c){ 
-
+  int mask = 0; 
+  if(c & RED)
+    mask |= RED_PIN;
+  if(c & GREEN)
+    mask |= GREEN_PIN;
+  if(c & ORANGE)
+    mask |= ORANGE_PIN;
+  if(c & BLUE)
+    mask |= BLUE_PIN;
+  GPIO_SetBits(LED_PORT, mask); 
 }
 void disableLEDs(Color c){ 
-
+  int mask = 0; 
+  if(c & RED)
+    mask |= RED_PIN;
+  if(c & GREEN)
+    mask |= GREEN_PIN;
+  if(c & ORANGE)
+    mask |= ORANGE_PIN;
+  if(c & BLUE)
+    mask |= BLUE_PIN;
+  GPIO_ResetBits(LED_PORT, mask); 
 }
 
 /************ Timing ********************/
