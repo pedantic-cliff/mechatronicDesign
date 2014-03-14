@@ -110,6 +110,63 @@ void USART_puts(volatile char *s){
   }
 }
 
+void USART_putInt(int16_t input){
+  int len = 0; 
+  int c = 0; 
+  int flag = 0;
+  char buffer[8]; 
+  if (input < 0){
+    buffer[len++] = '-'; 
+    input = -input; 
+  }
+/*  if (( c = input / 10000) ){
+    input -= c * 10000; 
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+  if (flag || (c = (input / 1000))){
+    input -= c * 1000; 
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+*/
+  if (flag || input > 9999){
+    c = 0; 
+    while(input > 9999){
+      c++, input -= 10000; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+
+  if (flag || input >= 999){
+    c = 0; 
+    while(input > 999){
+      c++, input -= 1000; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+  if (flag || input >= 99){
+    c = 0; 
+    while(input > 99){
+      c++, input -= 100; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+  if (flag || input > 9){
+    c = 0;
+    while(input > 9){
+      c++, input -= 10; 
+    }
+    buffer[len++] = '0' + c; 
+  }
+  buffer[len++] = '0' + input; 
+  buffer[len++] = '\0';
+  USART_puts(buffer); 
+}
+
 void USART_sendByte(uint8_t byte){
   USART_SendData(USART1, byte);
 }

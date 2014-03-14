@@ -1,4 +1,4 @@
-PROJECT_NAME=pwm
+PROJECT_NAME=mechatronics
 
 BUILDDIR = build
 
@@ -28,11 +28,13 @@ SOURCES += startup_stm32f4xx.S
 SOURCES += system_stm32f4xx.c
 
 SOURCES += \
+		src/utils.c \
 		src/main.c \
 		src/pid.c \
 		src/usart.c \
 		src/accel.c \
 		src/colorSensor.c \
+		src/servo.c \
 
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 
@@ -53,13 +55,13 @@ AR = arm-none-eabi-ar
 OBJCOPY = arm-none-eabi-objcopy
 GDB = arm-none-eabi-gdb
 
-CFLAGS  = -O0 -g -Wall -I.\
+CFLAGS  = -O0 -g -Wall -I. -std=c99\
    -mcpu=cortex-m4 -mthumb \
    -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
    $(INCLUDES) -DUSE_STDPERIPH_DRIVER
 
 LDSCRIPT = stm32_flash.ld
-LDFLAGS += -T$(LDSCRIPT) -mthumb -mcpu=cortex-m4 -nostdlib
+LDFLAGS += -T$(LDSCRIPT) -nostdlib -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -lm
 
 $(BIN): $(ELF)
 	$(OBJCOPY) -O binary $< $@

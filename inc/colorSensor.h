@@ -3,6 +3,7 @@
 
 #include "stm32f4xx_dma.h"
 #include "stm32f4xx_adc.h"
+#include "utils.h"
 
 #define LIGHT_PORT  GPIOE
 #define RED_PIN     GPIO_Pin_10
@@ -16,16 +17,10 @@
 #define GREEN_IDX   2
 #define BLUE_IDX    3
 
-#define RED_MASK (0x01)
-#define BLUE_MASK (0x02)
-#define GREEN_MASK (0x04)
-#define NONE_MASK (0x08)
-#define RED_VALID(sensor) (!!(sensor->validColors & RED_MASK))
-#define GREEN_VALID(sensor) (!!(sensor->validColors & BLUE_MASK))
-#define BLUE_VALID(sensor) (!!(sensor->validColors & GREEN_MASK))
-#define NONE_VALID(sensor) (!!(sensor->validColors & NONE_MASK))
-
-typedef enum { NONE, RED, GREEN, BLUE } COLORS; 
+#define RED_VALID(sensor) (!!(sensor->validColors & RED))
+#define GREEN_VALID(sensor) (!!(sensor->validColors & BLUE))
+#define BLUE_VALID(sensor) (!!(sensor->validColors & GREEN))
+#define NONE_VALID(sensor) (!!(sensor->validColors & NONE))
 
 #define NUM_SENSORS 1
 #define SENSOR_PORT GPIOD
@@ -43,14 +38,11 @@ typedef struct lightSensor_t{
 
 typedef struct colorSensors_t *ColorSensors; 
 typedef struct colorSensors_t {
-  LightSensor sensors; 
+  LightSensor sensors[NUM_SENSORS]; 
 
   void (*init)  (ColorSensors sensors);
 
-  void (*measureRed)  (ColorSensors sensors); 
-  void (*measureGreen)(ColorSensors sensors); 
-  void (*measureBlue) (ColorSensors sensors); 
-  void (*measureNone) (ColorSensors sensors); 
+  void (*measureColor) (ColorSensors sensors, Color color); 
 } colorSensor;
 
 ColorSensors createColorSensors(void); 

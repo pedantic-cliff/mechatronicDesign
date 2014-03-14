@@ -2,12 +2,11 @@
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
 #include "colorSensor.h"
-#include "main.h"
 
 __IO uint16_t ADC3ConvertedValue[4];
 __IO uint32_t ADC3ConvertedVoltage[4];
 
-volatile COLORS currColor; 
+volatile Color currColor; 
 
 struct lightSensor_t sensors[NUM_SENSORS]; 
 struct colorSensors_t colorSensors;
@@ -84,7 +83,7 @@ void initADC(void){
   /* Enable ADC3 */
   ADC_Cmd(ADC3, ENABLE);
 }
-void initLEDs(void){
+void initLights(void){
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 
@@ -101,58 +100,42 @@ void initSensors(void){
 }
 
 void initialize(ColorSensors this){
-  initLEDs(); 
+  initLights(); 
   initSensors(); 
 }
 
-void startADC(int colorIdx){
+void startADC(void){
   delay(100); 
   NVIC_EnableIRQ(ADC_IRQn);
   ADC_SoftwareStartConv(ADC3);
 } 
 
 void ADC_IRQHandler(void){
-  colorSensors.sensors[0].measurements[0] = ADC_GetConversionValue(ADC3);
-  colorSensors.sensors[0]->validColors |= RED_MASK;
+  colorSensors.sensors[0]->measurements[0] = ADC_GetConversionValue(ADC3);
+  colorSensors.sensors[0]->validColors |= RED;
 }
 
-void measureRed(ColorSensors cs){
-  GPIO_ResetBits(LIGHT_PORT, ALL_LIGHTS);
-  GPIO_SetBits(LIGHT_PORT, RED_PIN); 
-  currColor = RED;
-  for(int i = 0; i < NUM_SENSORS; i++){
-    cs->sensors[i]->validColors &= ~RED_MASK; 
+void measureColor(ColorSensors cs, Color c){
+  int i;
+  for(i = 0; i < NUM_SENSORS; i++){
+   cs->sensors[i]->validColors &= ~c; 
   }
-  startADC(RED_IDX); 
-}
-
-void measureGreen(ColorSensors cs){
   GPIO_ResetBits(LIGHT_PORT, ALL_LIGHTS);
-  GPIO_SetBits(LIGHT_PORT, GREEN_PIN); 
-  currColor = GREEN;
-  for(int i = 0; i < NUM_SENSORS; i++){
-    cs->sensors[i]->validColors &= ~GREEN_MASK; 
+  switch(c){
+    case RED:
+      GPIO_SetBits(LIGHT_PORT, RED_PIN); 
+      break;
+    case GREEN:
+      GPIO_SetBits(LIGHT_PORT, GREEN_PIN); 
+      break;
+    case BLUE: 
+      GPIO_SetBits(LIGHT_PORT, BLUE_PIN); 
+      break;
+    case NONE: 
+      break;
   }
-  startADC(GREEN_IDX); 
-}
-
-void measureBlue(ColorSensors cs){
-  GPIO_ResetBits(LIGHT_PORT, ALL_LIGHTS);
-  GPIO_SetBits(LIGHT_PORT, BLUE_PIN); 
-  currColor = BLUE;
-  for(int i = 0; i < NUM_SENSORS; i++){
-    cs->sensors[i]->validColors &= ~BLUE_MASK; 
-  }
-  startADC(BLUE_IDX); 
-}
-
-void measureNone(ColorSensors cs){
-  GPIO_ResetBits(LIGHT_PORT, ALL_LIGHTS);
-  currColor = NONE;
-  for(int i = 0; i < NUM_SENSORS; i++){
-    cs->sensors[i]->validColors &= ~NONE_MASK; 
-  }
-  startADC(NONE_IDX); 
+  currColor = c;
+  startADC(); 
 }
 
 ColorSensors createColorSensors(void){
@@ -160,10 +143,7 @@ ColorSensors createColorSensors(void){
 
   cs->init          = initialize; 
 
-  cs->measureRed    = measureRed; 
-  cs->measureGreen  = measureGreen;
-  cs->measureBlue   = measureBlue;
-  cs->measureNone   = measureNone;
+  cs->measureColor  = measureColor;
 
   return &colorSensors;
 }
