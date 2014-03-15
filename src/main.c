@@ -18,10 +18,10 @@ int main(void) {
 
 void init() {
   init_USART(); 
-  //initLEDs();
+  initLEDs();
   initEncoders();
-  colorSensors = createColorSensors(); 
-  colorSensors->init(colorSensors); 
+  //colorSensors = createColorSensors(); 
+  //colorSensors->init(colorSensors); 
 }
 
 void loop() {

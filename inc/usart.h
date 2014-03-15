@@ -4,5 +4,5 @@
 
 void init_USART(void); 
 void USART_puts(volatile char * str); 
-void USART_putInt(int16_t value); 
+void USART_putInt(int value); 
 void USART_sendByte(uint8_t byte); 

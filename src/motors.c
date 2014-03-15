@@ -6,20 +6,20 @@
 #include "motors.h"
 
 // Left Motor Channels 
-#define ENCLA_PIN GPIO_Pin_6
-#define ENCLA_GPIO_PORT GPIOC
-#define ENCLA_GPIO_CLK RCC_AHB1Periph_GPIOC
-#define ENCLA_SOURCE GPIO_PinSource6
-#define ENCLA_AF GPIO_AF_TIM3 
+#define ENCLA_PIN GPIO_Pin_0
+#define ENCLA_GPIO_PORT GPIOA
+#define ENCLA_GPIO_CLK RCC_AHB1Periph_GPIOA
+#define ENCLA_SOURCE GPIO_PinSource0
+#define ENCLA_AF GPIO_AF_TIM5 
 
-#define ENCLB_PIN GPIO_Pin_7
-#define ENCLB_GPIO_PORT GPIOC
-#define ENCLB_GPIO_CLK RCC_AHB1Periph_GPIOC
-#define ENCLB_SOURCE GPIO_PinSource7
-#define ENCLB_AF GPIO_AF_TIM3
+#define ENCLB_PIN GPIO_Pin_1
+#define ENCLB_GPIO_PORT GPIOA
+#define ENCLB_GPIO_CLK RCC_AHB1Periph_GPIOA
+#define ENCLB_SOURCE GPIO_PinSource1
+#define ENCLB_AF GPIO_AF_TIM5
 
-#define ENCL_TIMER TIM3 
-#define ENCL_TIMER_CLK RCC_APB1Periph_TIM3
+#define ENCL_TIMER TIM5 
+#define ENCL_TIMER_CLK RCC_APB1Periph_TIM5
 
 // Right Motor Channels 
 #define ENCRA_PIN GPIO_Pin_15
@@ -77,9 +77,9 @@ void initEncoders (void) { GPIO_InitTypeDef GPIO_InitStructure;
   // set them up as encoder inputs 
   // set both inputs to rising polarity to let it use both edges 
   TIM_EncoderInterfaceConfig (ENCL_TIMER, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
-  TIM_SetAutoreload (ENCL_TIMER, 0xffff);
+  TIM_SetAutoreload (ENCL_TIMER, 0xffffffff);
   TIM_EncoderInterfaceConfig (ENCR_TIMER, TIM_EncoderMode_TI12, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
-  TIM_SetAutoreload (ENCR_TIMER, 0xffff);
+  TIM_SetAutoreload (ENCR_TIMER, 0xffffffff);
 
   // turn on the timer/counters 
   TIM_Cmd (ENCL_TIMER, ENABLE);
@@ -102,9 +102,9 @@ void encodersReset(void){
 }
 
 int getLeftCount(void){
-  return LEFT_COUNT();
+  return (LEFT_COUNT());
 }
 int getRightCount(void){
-  return RIGHT_COUNT();
+  return (RIGHT_COUNT());
 }
 

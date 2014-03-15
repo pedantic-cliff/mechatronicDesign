@@ -110,11 +110,11 @@ void USART_puts(volatile char *s){
   }
 }
 
-void USART_putInt(int16_t input){
+void USART_putInt(int input){
   int len = 0; 
   int c = 0; 
   int flag = 0;
-  char buffer[8]; 
+  char buffer[12]; 
   if (input < 0){
     buffer[len++] = '-'; 
     input = -input; 
@@ -130,6 +130,48 @@ void USART_putInt(int16_t input){
     flag = 1; 
   }
 */
+  if (flag || input > 999999999){
+    c = 0; 
+    while(input > 999999999){
+      c++, input -= 1000000000; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+  if (flag || input > 99999999){
+    c = 0; 
+    while(input > 99999999){
+      c++, input -= 100000000; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+  if (flag || input > 9999999){
+    c = 0; 
+    while(input > 9999999){
+      c++, input -= 10000000; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+  if (flag || input > 999999){
+    c = 0; 
+    while(input > 999999){
+      c++, input -= 1000000; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+
+  if (flag || input > 99999){
+    c = 0; 
+    while(input > 99999){
+      c++, input -= 100000; 
+    }
+    buffer[len++] = '0' + c; 
+    flag = 1; 
+  }
+
   if (flag || input > 9999){
     c = 0; 
     while(input > 9999){
