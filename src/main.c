@@ -60,11 +60,8 @@ void doAccel(void){
 void loop() {
   static int i = 0; 
   delay(500);
-  doAccel();
-  /*
-     if(i++ & 0x1)
-     enableLEDs(RED);
-     else 
-     disableLEDs(RED);
-     */
+  if(i++ & 0x1)
+    enableLEDs(RED);
+  else 
+    disableLEDs(RED);
 }
