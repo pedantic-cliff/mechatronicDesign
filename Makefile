@@ -35,6 +35,7 @@ SOURCES += \
 		src/accel.c \
 		src/colorSensor.c \
 		src/servo.c \
+		src/motors.c
 
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 

@@ -39,7 +39,7 @@ void initButton(void) {
   gpio.GPIO_Mode = GPIO_Mode_IN;
   gpio.GPIO_PuPd = GPIO_PuPd_NOPULL;
   gpio.GPIO_Pin = GPIO_Pin_0;
-  GPIO_Init(GPIOD, &gpio);
+  GPIO_Init(GPIOA, &gpio);
 }
 
 // Interrupt for USER_BUTTON
