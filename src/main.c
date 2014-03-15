@@ -10,6 +10,8 @@
 
 ColorSensors colorSensors; 
 Accel accel; 
+Motors motors; 
+
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
@@ -24,7 +26,9 @@ void init() {
   //initEncoders();
   //colorSensors = createColorSensors(); 
   //colorSensors->init(colorSensors); 
-  accel = initAccel(); 
+  accel   = initAccel(); 
+  motors  = createMotors(); 
+  motors->setSpeeds(0x8000, 0x4000);
 }
 
 void doColors(void){

@@ -30,7 +30,6 @@ SOURCES += system_stm32f4xx.c
 SOURCES += \
 		src/utils.c \
 		src/main.c \
-		src/pid.c \
 		src/usart.c \
 		src/accel.c \
 		src/colorSensor.c \

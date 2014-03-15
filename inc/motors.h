@@ -1,10 +1,17 @@
 #ifndef _MOTORS_H_
 #define _MOTORS_H_
 
-void initEncoders(void);
-void encodersReset(void);
+typedef struct motors *Motors; 
 
-int getLeftCount(void);
-int getRightCount(void);
+typedef struct motors{
+  
+  int (*getLeftCount)(void); 
+  int (*getRightCount)(void); 
+  void (*resetCounts)(void); 
+
+  void (*setSpeeds)(int left, int right); 
+} motors_t; 
+
+Motors createMotors(void); 
 
 #endif //_MOTORS_H_
