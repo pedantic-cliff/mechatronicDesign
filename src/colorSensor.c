@@ -91,8 +91,8 @@ void ADC_Configuration(void)
   ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 5, ADC_SampleTime_480Cycles); // this is max
   ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 6, ADC_SampleTime_480Cycles); // this is max
 
-  //ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
-  //NVIC_EnableIRQ(ADC_IRQn);
+  ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
+  NVIC_EnableIRQ(ADC_IRQn);
 
   ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
   
@@ -128,7 +128,11 @@ void initialize(ColorSensors this){
 }
 
 void startADC(void){
+  int i = 0;
   colorSensors.done = 0;
+  for(; i < NUM_SENSORS; i++){
+    ADC1ConvertedValue[i] = 0;
+  }
   delay(100); 
   ADC_SoftwareStartConv(ADC1);
 } 
