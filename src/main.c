@@ -11,6 +11,7 @@
 ColorSensors colorSensors; 
 Accel accel; 
 int main(void) {
+  delay(500); // Give the hardware time to warm up on cold start
   init();
   do {
     loop();
@@ -23,7 +24,7 @@ void init() {
   //initEncoders();
   //colorSensors = createColorSensors(); 
   //colorSensors->init(colorSensors); 
-  accel = initAccel();
+  accel = initAccel(); 
 }
 
 void doColors(void){
@@ -60,6 +61,7 @@ void doAccel(void){
 void loop() {
   static int i = 0; 
   delay(500);
+  
   if(i++ & 0x1)
     enableLEDs(RED);
   else 
