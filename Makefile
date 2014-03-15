@@ -1,4 +1,4 @@
-PROJECT_NAME=pwm
+PROJECT_NAME=mechatronics
 
 BUILDDIR = build
 
@@ -19,6 +19,8 @@ SOURCES += \
 			$(PERIPH)/src/stm32f4xx_syscfg.c \
 			$(PERIPH)/src/stm32f4xx_tim.c \
 			$(PERIPH)/src/stm32f4xx_usart.c \
+			$(PERIPH)/src/stm32f4xx_dma.c \
+			$(PERIPH)/src/stm32f4xx_adc.c \
 			$(PERIPH)/src/misc.c
 
 SOURCES += startup_stm32f4xx.S
@@ -26,10 +28,13 @@ SOURCES += startup_stm32f4xx.S
 SOURCES += system_stm32f4xx.c
 
 SOURCES += \
+		src/utils.c \
 		src/main.c \
 		src/pid.c \
 		src/usart.c \
 		src/accel.c \
+		src/colorSensor.c \
+		src/servo.c \
 
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 
@@ -50,13 +55,13 @@ AR = arm-none-eabi-ar
 OBJCOPY = arm-none-eabi-objcopy
 GDB = arm-none-eabi-gdb
 
-CFLAGS  = -O0 -g -Wall -I.\
+CFLAGS  = -O0 -g -Wall -I. -std=c99\
    -mcpu=cortex-m4 -mthumb \
    -mfpu=fpv4-sp-d16 -mfloat-abi=hard \
    $(INCLUDES) -DUSE_STDPERIPH_DRIVER
 
 LDSCRIPT = stm32_flash.ld
-LDFLAGS += -T$(LDSCRIPT) -mthumb -mcpu=cortex-m4 -nostdlib -mfpu=fpv4-sp-d16 -mfloat-abi=hard 
+LDFLAGS += -T$(LDSCRIPT) -nostdlib -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -lm
 
 $(BIN): $(ELF)
 	$(OBJCOPY) -O binary $< $@
