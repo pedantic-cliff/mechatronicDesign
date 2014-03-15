@@ -9,6 +9,7 @@
 #include "math.h"
 
 ColorSensors colorSensors; 
+Accel accel; 
 int main(void) {
   init();
   do {
@@ -20,14 +21,13 @@ void init() {
   init_USART(); 
   initLEDs();
   //initEncoders();
-  colorSensors = createColorSensors(); 
-  colorSensors->init(colorSensors); 
+  //colorSensors = createColorSensors(); 
+  //colorSensors->init(colorSensors); 
+  accel = initAccel();
 }
 
-void loop() {
-  static int i = 0; 
+void doColors(void){
   int ii;
-  delay(500);
   colorSensors->measureColor(colorSensors,RED); 
   while(!colorSensors->done); 
   volatile uint16_t* res = colorSensors->getResult(); 
@@ -37,9 +37,34 @@ void loop() {
     USART_puts("\t"); 
   }
   USART_puts("\n\r");
-  if(i++ & 0x1)
-    enableLEDs(RED);
-  else 
-    disableLEDs(RED);
 }
 
+void doAccel(void){
+  int8_t x = accel->getX(),
+         y = accel->getY();
+  int theta = accel->getAngle();
+  USART_puts("Angle: ");
+  USART_putInt(theta);
+  USART_puts("\n\r");  
+  disableLEDs(RED|BLUE|GREEN|ORANGE);
+  if (x > 30)
+    enableLEDs(RED);
+  if (y > 30) 
+    enableLEDs(ORANGE);
+  if (y < -30) 
+    enableLEDs(BLUE);
+  if (x < -30) 
+    enableLEDs(GREEN);
+}
+
+void loop() {
+  static int i = 0; 
+  delay(500);
+  doAccel();
+  /*
+     if(i++ & 0x1)
+     enableLEDs(RED);
+     else 
+     disableLEDs(RED);
+     */
+}

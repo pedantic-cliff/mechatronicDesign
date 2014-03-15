@@ -27,10 +27,10 @@ uint8_t accel_getZ(void){
 }
 
 float accel_getAngle(){ 
-  uint8_t x, y; 
+  int8_t x, y; 
   x = accel_getX(); 
   y = accel_getY();
-  return atan2f(y,x); 
+  return 180.*atan2f(y,x)/3.14159; 
 }
 
 void initSPI(void){
@@ -55,7 +55,7 @@ void initSPI(void){
 
   GPIO_InitTypeDef GPIO_InitTypeDefStruct;
 
-  GPIO_InitTypeDefStruct.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_6;
+  GPIO_InitTypeDefStruct.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
   GPIO_InitTypeDefStruct.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitTypeDefStruct.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitTypeDefStruct.GPIO_OType = GPIO_OType_PP;
