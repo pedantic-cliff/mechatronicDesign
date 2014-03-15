@@ -24,7 +24,7 @@ void loop() {
   enableLEDs(RED);
   colorSensors->measureColor(colorSensors,RED); 
 //  while(!(colorSensors->done)); 
-  volatile int *results = colorSensors->getResult();
+  volatile uint16_t *results = colorSensors->getResult();
   for(i = 0; i < NUM_SENSORS; i++){
     USART_putInt(results[i]); 
     USART_puts("\t");

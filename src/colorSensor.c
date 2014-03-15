@@ -39,7 +39,7 @@ void initDMA(void){
 }
 
 void RCC_Configuration(void){
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 }
@@ -51,10 +51,12 @@ void GPIO_Configuration(void)
   /* ADC Channel 14 -> PC4
   */
   
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | 
-                                GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5; 
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 
+                                | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
   
@@ -67,9 +69,9 @@ void ADC_Configuration(void)
   
   /* ADC Common Init */
   ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
-  ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div2;
+  ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div4; // 2 4 6 or 8
   ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
-  ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
+  ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_10Cycles; //min is 10
   ADC_CommonInit(&ADC_CommonInitStructure);  
   
   ADC_InitStructure.ADC_Resolution            = ADC_Resolution_12b;
@@ -82,14 +84,14 @@ void ADC_Configuration(void)
   ADC_Init(ADC1, &ADC_InitStructure);
   
   /* ADC1 regular channel 11 configuration */
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_10, 1, ADC_SampleTime_15Cycles); // PC0
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_15Cycles); // PC1
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_15Cycles); // PC2
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 4, ADC_SampleTime_15Cycles); // PC3
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 5, ADC_SampleTime_15Cycles); // PC4
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_15, 6, ADC_SampleTime_15Cycles); // PC5
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 2, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 3, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 4, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 5, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 6, ADC_SampleTime_480Cycles); // this is max
 
-  ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
+  //ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
   //NVIC_EnableIRQ(ADC_IRQn);
 
   ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);

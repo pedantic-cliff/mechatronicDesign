@@ -22,7 +22,7 @@
 #define BLUE_VALID(sensor) (!!(sensor->validColors & GREEN))
 #define NONE_VALID(sensor) (!!(sensor->validColors & NONE))
 
-#define NUM_SENSORS 1
+#define NUM_SENSORS 6
 #define SENSOR_PORT GPIOD
 
 #define ADC1_DR_ADDRESS ((uint32_t)0x40012000 + 0x000 + 0x4C)
