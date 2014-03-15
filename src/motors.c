@@ -6,20 +6,20 @@
 #include "motors.h"
 
 // Left Motor Channels 
-#define ENCLA_PIN GPIO_Pin_12
-#define ENCLA_GPIO_PORT GPIOD 
-#define ENCLA_GPIO_CLK RCC_AHB1Periph_GPIOD
-#define ENCLA_SOURCE GPIO_PinSource12
-#define ENCLA_AF GPIO_AF_TIM4 
+#define ENCLA_PIN GPIO_Pin_6
+#define ENCLA_GPIO_PORT GPIOC
+#define ENCLA_GPIO_CLK RCC_AHB1Periph_GPIOC
+#define ENCLA_SOURCE GPIO_PinSource6
+#define ENCLA_AF GPIO_AF_TIM3 
 
-#define ENCLB_PIN GPIO_Pin_13
-#define ENCLB_GPIO_PORT GPIOD
-#define ENCLB_GPIO_CLK RCC_AHB1Periph_GPIOD
-#define ENCLB_SOURCE GPIO_PinSource13
-#define ENCLB_AF GPIO_AF_TIM4
+#define ENCLB_PIN GPIO_Pin_7
+#define ENCLB_GPIO_PORT GPIOC
+#define ENCLB_GPIO_CLK RCC_AHB1Periph_GPIOC
+#define ENCLB_SOURCE GPIO_PinSource7
+#define ENCLB_AF GPIO_AF_TIM3
 
-#define ENCL_TIMER TIM4 
-#define ENCL_TIMER_CLK RCC_APB1Periph_TIM4
+#define ENCL_TIMER TIM3 
+#define ENCL_TIMER_CLK RCC_APB1Periph_TIM3
 
 // Right Motor Channels 
 #define ENCRA_PIN GPIO_Pin_15
