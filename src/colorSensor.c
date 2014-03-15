@@ -52,13 +52,11 @@ void GPIO_Configuration(void)
   /* ADC Channel 14 -> PC4
   */
   
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 
-                                | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 
+                                | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
   
 /**************************************************************************************/
@@ -85,12 +83,12 @@ void ADC_Configuration(void)
   ADC_Init(ADC1, &ADC_InitStructure);
   
   /* ADC1 regular channel 11 configuration */
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 2, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 3, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 4, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 5, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 6, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 1, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 2, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 3, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 4, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 5, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 6, ADC_SampleTime_480Cycles); // this is max
 
   ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
   NVIC_EnableIRQ(ADC_IRQn);
