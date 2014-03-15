@@ -7,6 +7,7 @@
 __IO uint16_t ADC1ConvertedValue[NUM_SENSORS];
 
 volatile Color currColor; 
+volatile int currIdx;
 volatile int done;
 
 struct lightSensor_t sensors[NUM_SENSORS]; 
@@ -129,17 +130,21 @@ void initialize(ColorSensors this){
 
 void startADC(void){
   int i = 0;
+  enableLEDs(BLUE);
   colorSensors.done = 0;
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
   }
-  delay(100); 
   ADC_SoftwareStartConv(ADC1);
 } 
 
 void ADC_IRQHandler(void){
+  int i ;
+  for(i = 0; i < NUM_SENSORS; i++){
+    sensors[i].measurements[currIdx] = ADC1ConvertedValue[i]; 
+  }
   colorSensors.done = 1;
-  enableLEDs(BLUE);
+  disableLEDs(BLUE);
 }
 
 void measureColor(ColorSensors cs, Color c){
@@ -148,14 +153,18 @@ void measureColor(ColorSensors cs, Color c){
   switch(c){
     case RED:
       GPIO_SetBits(LIGHT_PORT, RED_PIN); 
+      currIdx = RED_IDX;
       break;
     case GREEN:
       GPIO_SetBits(LIGHT_PORT, GREEN_PIN); 
+      currIdx = GREEN_IDX;
       break;
     case BLUE: 
       GPIO_SetBits(LIGHT_PORT, BLUE_PIN); 
+      currIdx = BLUE_IDX;
       break;
     case NONE: 
+      currIdx = NONE_IDX;
       break;
   }
   currColor = c;
