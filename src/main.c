@@ -23,24 +23,34 @@ int main(void) {
 void init() {
   init_USART(); 
   initLEDs();
-  //initEncoders();
-  //colorSensors = createColorSensors(); 
-  //colorSensors->init(colorSensors); 
+  colorSensors = createColorSensors(); 
+  colorSensors->init(colorSensors); 
   accel   = initAccel(); 
   motors  = createMotors(); 
   motors->setSpeeds(0x8000, 0x4000);
 }
 
-void doColors(void){
+void doColor(Color c){
   int ii;
-  colorSensors->measureColor(colorSensors,RED); 
+  colorSensors->measureColor(colorSensors,c); 
   while(!colorSensors->done); 
   volatile uint16_t* res = colorSensors->getResult(); 
-  USART_puts("Light Sensors: "); 
+  USART_puts("Color["); 
+  USART_putInt(c); 
+  USART_puts("]:\t"); 
   for(ii = 0; ii < NUM_SENSORS; ii++){
     USART_putInt(res[ii]); 
     USART_puts("\t"); 
   }
+  USART_puts("\n\r");
+}
+
+void doColors(void){
+  colorSensors->measureColor(colorSensors,RED); 
+  doColor(NONE);
+  doColor(RED);
+  doColor(GREEN);
+  doColor(BLUE);
   USART_puts("\n\r");
 }
 
@@ -65,7 +75,7 @@ void doAccel(void){
 void loop() {
   static int i = 0; 
   delay(500);
-  
+  doColors(); 
   if(i++ & 0x1)
     enableLEDs(RED);
   else 
