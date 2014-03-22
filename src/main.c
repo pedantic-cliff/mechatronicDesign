@@ -26,7 +26,7 @@ void init() {
   //initEncoders();
   //colorSensors = createColorSensors(); 
   //colorSensors->init(colorSensors); 
-  accel   = initAccel(); 
+  //accel   = initAccel(); 
   motors  = createMotors(); 
   motors->setSpeeds(0x8000, 0x4000);
 }
@@ -62,10 +62,21 @@ void doAccel(void){
     enableLEDs(GREEN);
 }
 
+void doMotors(void){
+  int i = 0; 
+  motors->setSpeeds(-0x3000,-0x3000); 
+  for (i = 0; i < 10; i++){
+    USART_putInt(motors->getLeftCount());
+    USART_puts("\t"); 
+    USART_putInt(motors->getRightCount());
+    USART_puts("\n\r"); 
+    delay(1000);
+  }
+}
 void loop() {
   static int i = 0; 
-  delay(500);
-  
+  doMotors();
+
   if(i++ & 0x1)
     enableLEDs(RED);
   else 

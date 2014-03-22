@@ -9,7 +9,7 @@ typedef struct motors{
   int (*getRightCount)(void); 
   void (*resetCounts)(void); 
 
-  void (*setSpeeds)(int left, int right); 
+  void (*setSpeeds)(float left, float right); 
 } motors_t; 
 
 Motors createMotors(void); 

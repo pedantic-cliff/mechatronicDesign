@@ -41,6 +41,14 @@
 #define LEFT_COUNT() ENCL_TIMER->CNT 
 #define RIGHT_COUNT() ENCR_TIMER->CNT
 
+// MOTOR CONTROL 
+#define PWM_TIMER TIM3
+#define DIR_PORT GPIOE
+#define DIR_PIN_RL GPIO_Pin_10
+#define DIR_PIN_FL GPIO_Pin_11
+#define DIR_PIN_FR GPIO_Pin_12
+#define DIR_PIN_RR GPIO_Pin_13
+
 // Private storage
 static motors_t _storage;
 
@@ -121,7 +129,7 @@ void initPWM(void){
   TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Down;
   TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
 
   /* PWM1 Mode configuration: Channel3 */
@@ -142,6 +150,16 @@ void initPWM(void){
   TIM_Cmd(TIM3, ENABLE);
 }
 
+void initMotorDir(void){
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+  
+  GPIO_InitTypeDef gpio;
+  GPIO_StructInit(&gpio);
+  gpio.GPIO_Mode = GPIO_Mode_OUT;
+  gpio.GPIO_Pin  = DIR_PIN_FL | DIR_PIN_FR | DIR_PIN_RL | DIR_PIN_RR; 
+  GPIO_Init(DIR_PORT, &gpio);
+}
+
 void encodersReset(void){
   __disable_irq();
   TIM_SetCounter (ENCL_TIMER, 0);
@@ -156,9 +174,27 @@ int getRightCount(void){
   return (RIGHT_COUNT());
 }
 
-void setSpeeds(int l, int r){
-  TIM3->CCR3 = l; 
-  TIM3->CCR4 = r;
+void setSpeeds(float l, float r){
+  TIM3->CCR3 = 0; 
+  TIM3->CCR4 = 0; 
+  if ( l < 0 ){
+    l = -l;
+    GPIO_SetBits(DIR_PORT, DIR_PIN_RL);
+    GPIO_ResetBits(DIR_PORT, DIR_PIN_FL);
+  } else {
+    GPIO_SetBits(DIR_PORT, DIR_PIN_FL);
+    GPIO_ResetBits(DIR_PORT, DIR_PIN_RL);
+  }
+  if (r < 0 ){
+    r = -r;
+    GPIO_SetBits(DIR_PORT, DIR_PIN_RR);
+    GPIO_ResetBits(DIR_PORT, DIR_PIN_FR);
+  } else {
+    GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
+    GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
+  }
+  TIM3->CCR3 = (int) l; 
+  TIM3->CCR4 = (int) r;
 }; 
 
 Motors createMotors(void){
@@ -172,6 +208,8 @@ Motors createMotors(void){
 
   initEncoders();
   initPWM(); 
-  
+
+
+  initMotorDir(); 
   return m; 
 }
