@@ -32,6 +32,7 @@ void holdPos(Pid self, Point targ, State curr){
 
   errA = calcErrA(targ->a, curr->a);
 
+  // If angle is off correct that rather than make position more off. 
   if(fabsf(errA) > 0.01f){
     m->setSpeeds( -self->angleGains.Kp * errA, 
                    self->angleGains.Kp * errA ); 
