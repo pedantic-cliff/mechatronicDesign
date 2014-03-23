@@ -30,7 +30,7 @@ float accel_getAngle(){
   int8_t x, y; 
   x = accel_getX(); 
   y = accel_getY();
-  return 180.*atan2f(y,x)/3.14159; 
+  return atan2f(y,x); 
 }
 
 void initSPI(void){
