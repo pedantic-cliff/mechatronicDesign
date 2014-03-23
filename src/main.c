@@ -3,6 +3,7 @@
 #include "usart.h"
 #include "accel.h"
 #include "colorSensor.h"
+#include "localize.h"
 #include "motors.h"
 #include "misc.h"
 #include <stdio.h>
@@ -11,6 +12,7 @@
 ColorSensors colorSensors; 
 Accel accel; 
 Motors motors; 
+Localizer localizer;
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
@@ -26,9 +28,10 @@ void init() {
   //initEncoders();
   //colorSensors = createColorSensors(); 
   //colorSensors->init(colorSensors); 
-  //accel   = initAccel(); 
+  accel   = initAccel(); 
   motors  = createMotors(); 
-  motors->setSpeeds(0x8000, 0x4000);
+
+  localizer = createLocalizer(motors, accel);
 }
 
 void doColors(void){
@@ -44,41 +47,28 @@ void doColors(void){
   USART_puts("\n\r");
 }
 
-void doAccel(void){
-  int8_t x = accel->getX(),
-         y = accel->getY();
-  int theta = accel->getAngle();
-  USART_puts("Angle: ");
-  USART_putInt(theta);
-  USART_puts("\n\r");  
-  disableLEDs(RED|BLUE|GREEN|ORANGE);
-  if (x > 30)
-    enableLEDs(RED);
-  if (y > 30) 
-    enableLEDs(ORANGE);
-  if (y < -30) 
-    enableLEDs(BLUE);
-  if (x < -30) 
-    enableLEDs(GREEN);
+void doLocalize(void){
+  localizer->update(localizer);
 }
 
-void doMotors(void){
-  int i = 0; 
-  motors->setSpeeds(-0x3000,-0x3000); 
-  for (i = 0; i < 10; i++){
-    USART_putInt(motors->getLeftCount());
-    USART_puts("\t"); 
-    USART_putInt(motors->getRightCount());
-    USART_puts("\n\r"); 
-    delay(1000);
-  }
+void doLog(void){
+  USART_puts("State Vector: [");
+  USART_putFloat(localizer->Rw.x);
+  USART_puts(",\t");
+  USART_putFloat(localizer->Rw.y);
+  USART_puts(",\t");
+  USART_putFloat(localizer->Rw.theta);
+  USART_puts("\n\r");
+
 }
+
 void loop() {
   static int i = 0; 
-  doMotors();
+  doLocalize();
 
   if(i++ & 0x1)
     enableLEDs(RED);
   else 
     disableLEDs(RED);
+  doLog();
 }
