@@ -11,6 +11,7 @@ void update(Localizer self){
 
   int newL = self->m->getLeftCount(),
       newR = self->m->getRightCount();
+  self->Rw.theta = self->acc->getAngle(); 
 
   // Encoder differences
   dSL = newL - self->encoders.L; 
@@ -23,7 +24,6 @@ void update(Localizer self){
   self->Rw.x += dS * cosf(self->Rw.theta + dTheta); 
   self->Rw.y += dS * sinf(self->Rw.theta + dTheta); 
 
-  self->Rw.theta = self->acc->getAngle(); 
 
   // TODO Update the Transforms here??
 }
