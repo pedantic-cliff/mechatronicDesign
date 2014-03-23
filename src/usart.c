@@ -209,6 +209,12 @@ void USART_putInt(int input){
   USART_puts(buffer); 
 }
 
+void USART_putFloat(float num){
+  USART_putInt(num); 
+  USART_sendByte('.'); 
+  USART_putInt((num * 10000) % 10000);
+}
+
 void USART_sendByte(uint8_t byte){
   USART_SendData(USART1, byte);
 }
