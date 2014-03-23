@@ -4,6 +4,14 @@
 #include "colorSensor.h"
 #include "usart.h"
 
+#define LIGHT_PORT  GPIOE
+#define RED_PIN     GPIO_Pin_9
+#define GREEN_PIN   GPIO_Pin_10
+#define BLUE_PIN    GPIO_Pin_11
+#define ALL_LIGHTS ( RED_PIN | GREEN_PIN | BLUE_PIN )
+
+#define SENSOR_PORT GPIOD
+
 __IO uint16_t ADC1ConvertedValue[NUM_SENSORS];
 
 volatile Color currColor; 
