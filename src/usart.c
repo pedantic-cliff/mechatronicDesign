@@ -213,8 +213,11 @@ void USART_sendByte(uint8_t byte){
   USART_SendData(USART1, byte);
 }
 void USART_putFloat(float num){
-  USART_putInt(num); 
-  USART_sendByte('.'); 
+  int numI = num;; 
+  USART_putInt(numI); 
+  numI = ((int)(1000 * num)) % 1000;
+  USART_puts("."); 
+  USART_putInt(numI);
 }
 
 

@@ -26,8 +26,8 @@ void update(Localizer self){
   dS      = ENC_TO_D((dSL + dSR) / 2.f);        // Stable as long as dSL,dSR are not too large
   dTheta  = (dSR - dSL) / WHEEL_BASE_WIDTH;
   // Apply Rw = Rw + dRw
-  self->Rw.x += dS;// * cosf(self->Rw.theta + dTheta); 
-  self->Rw.y += dS;// * sinf(self->Rw.theta + dTheta); 
+  self->Rw.x += dS * cosf(self->Rw.theta + dTheta); 
+  self->Rw.y += dS * sinf(self->Rw.theta + dTheta); 
 
   self->enc->L = newL;
   self->enc->R = newR;

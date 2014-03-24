@@ -62,13 +62,13 @@ void doLog(void){
   USART_puts("\n\r");
 
   USART_puts("x, y: ");
-  USART_putInt(localizer->Rw.x);
+  USART_putFloat(localizer->Rw.x);
   USART_puts("\t");
-  USART_putInt(localizer->Rw.y);
+  USART_putFloat(localizer->Rw.y);
   USART_puts("\n\r");
 
   USART_puts("Angle: ");
-  USART_putInt(accel->getAngle());
+  USART_putFloat(accel->getAngle());
   USART_puts("\n\r");
 
 }
