@@ -30,6 +30,7 @@ void init() {
   //colorSensors->init(colorSensors); 
   accel   = initAccel(); 
   motors  = createMotors(); 
+  motors->setSpeeds(0x8000,0x8000);
 
   localizer = createLocalizer(motors, accel);
 }
@@ -53,22 +54,29 @@ void doLocalize(void){
 
 void doLog(void){
   USART_puts("State Vector: [");
-  USART_putFloat(localizer->Rw.x);
-  USART_puts(",\t");
-  USART_putFloat(localizer->Rw.y);
-  USART_puts(",\t");
-  USART_putFloat(localizer->Rw.theta);
+  USART_puts("\n\r");
+  
+  USART_puts("Encoders: ");
+  USART_putInt(motors->getLeftCount());
+  USART_puts("\t");
+  USART_putInt(motors->getRightCount());
+  USART_puts("\n\r");
+
+  USART_puts("Angle: ");
+  accel->getAngle();
   USART_puts("\n\r");
 
 }
 
 void loop() {
   static int i = 0; 
-  doLocalize();
+  USART_puts("Loop\n\r");
+  //doLocalize();
+  doLog();
 
+  delay(500);
   if(i++ & 0x1)
     enableLEDs(RED);
   else 
     disableLEDs(RED);
-  doLog();
 }

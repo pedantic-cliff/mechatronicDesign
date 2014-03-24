@@ -1,7 +1,7 @@
 #include "localize.h"
 #include "constants.h"
 #include "math.h"
-
+#include "usart.h"
 
 localizer_t _storage; 
 
@@ -12,14 +12,15 @@ void update(Localizer self){
   int newL = self->m->getLeftCount(),
       newR = self->m->getRightCount();
   self->Rw.theta = self->acc->getAngle(); 
-
+  
+  
   // Encoder differences
   dSL = newL - self->encoders.L; 
   dSR = newR - self->encoders.R; 
 
   // Translate to position updates
   dS      = ENC_TO_D((dSL + dSR) / 2.f);        // Stable as long as dSL,dSR are not too large
-
+  dTheta  = (dSR - dSL) / WHEEL_BASE_WIDTH;
   // Apply Rw = Rw + dRw
   self->Rw.x += dS * cosf(self->Rw.theta + dTheta); 
   self->Rw.y += dS * sinf(self->Rw.theta + dTheta); 
@@ -32,7 +33,7 @@ Localizer createLocalizer(Motors m, Accel acc){
   Localizer l = &_storage;
   
   l->m = m;
-  l->acc = acc
+  l->acc = acc;
   l->Rw.x = 0.f;
   l->Rw.y = 0.f;
   l->Rw.theta = acc->getAngle();
