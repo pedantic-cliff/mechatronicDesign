@@ -4,20 +4,19 @@
 #include "motors.h"
 #include "accel.h"
 
+typedef struct enc *Enc;
+
 typedef struct localizer *Localizer;
 typedef struct localizer{
   // Coordinates of robot in world frame
-  struct{
+  struct {
     float x; 
     float y; 
     float theta; 
-  } Rw; 
+  } Rw;
 
   // Current counts of L and R encoders
-  struct{ 
-    int L;
-    int R; 
-  } encoders;
+  Enc enc; 
 
   // References localizing sensors
   Motors m; 
