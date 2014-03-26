@@ -104,12 +104,12 @@ void ADC_Configuration(void)
   
   /* ADC Common Init */
   ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
-  ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div4; // 2 4 6 or 8
+  ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div8; // 2 4 6 or 8
   ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
   ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_10Cycles; //min is 10
   ADC_CommonInit(&ADC_CommonInitStructure);  
   
-  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_12b;
+  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_10b; //12b 10b 8b 6b
   ADC_InitStructure.ADC_ScanConvMode          = ENABLE; 
   ADC_InitStructure.ADC_ContinuousConvMode    = DISABLE; // Conversions Triggered
   ADC_InitStructure.ADC_ExternalTrigConvEdge  = ADC_ExternalTrigConvEdge_Rising;
@@ -119,12 +119,12 @@ void ADC_Configuration(void)
   ADC_Init(ADC1, &ADC_InitStructure);
   
   /* ADC1 regular channel 11 configuration */
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_3,  1, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 4, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 5, ADC_SampleTime_480Cycles); // this is max
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_15, 6, ADC_SampleTime_480Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_3,  1, ADC_SampleTime_144Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_144Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_12, 3, ADC_SampleTime_144Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_13, 4, ADC_SampleTime_144Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 5, ADC_SampleTime_144Cycles); // this is max
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_15, 6, ADC_SampleTime_144Cycles); // this is max
 
   ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
   NVIC_EnableIRQ(ADC_IRQn);
@@ -155,11 +155,6 @@ void initSensors(void){
   ADC_Configuration();
 }
 
-void initialize(ColorSensors this){
-  initLights(); 
-  initSensors(); 
-}
-
 void startADC(void){
   int i = 0;
   enableLEDs(BLUE);
@@ -167,6 +162,7 @@ void startADC(void){
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
   }
+  delay(150);
 //  TIM_SetCounter(TIM8, 0xFFF);
 //  TIM_Cmd(TIM8, ENABLE);
   ADC_SoftwareStartConv(ADC1);
@@ -212,7 +208,8 @@ volatile uint16_t* getResult(void){
 ColorSensors createColorSensors(void){
   ColorSensors cs = &colorSensors; 
 
-  cs->init          = initialize; 
+  initLights(); 
+  initSensors(); 
 
   cs->measureColor  = measureColor;
   cs->getResult     = getResult; 

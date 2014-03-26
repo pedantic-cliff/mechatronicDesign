@@ -26,7 +26,6 @@ void init() {
   init_USART(); 
   initLEDs();
   colorSensors = createColorSensors(); 
-  colorSensors->init(colorSensors); 
   accel   = initAccel(); 
   motors  = createMotors(); 
   delay(500);
@@ -34,19 +33,12 @@ void init() {
   localizer = createLocalizer(motors, accel);
 }
 
-void doColor(Color c){
+int doColor(Color c){
   int ii;
   colorSensors->measureColor(colorSensors,c); 
   while(!colorSensors->done); 
   volatile uint16_t* res = colorSensors->getResult(); 
-  USART_puts("Color["); 
-  USART_putInt(c); 
-  USART_puts("]:\t"); 
-  for(ii = 0; ii < NUM_SENSORS; ii++){
-    USART_putInt(res[ii]); 
-    USART_puts("\t"); 
-  }
-  USART_puts("\n\r");
+  return res[0];
 }
 
 void doLocalize(void){
@@ -74,14 +66,35 @@ void doLog(void){
   USART_puts("\n\r");
 
 }
+void doColors(void){
+  int n,r,g,b,min;
+  n = doColor(NONE);
+  r = doColor(RED);
+  g = doColor(GREEN);
+  b = doColor(BLUE);
+
+  min = n;
+  min = min < r ? min: r;
+  min = min < b ? min: b;
+  min = min < g ? min: g;
+
+  USART_puts("NRGB: ");
+  USART_putInt(n - min);
+  USART_puts("\t");
+  USART_putInt(r - min);
+  USART_puts("\t");
+  USART_putInt(g - min);
+  USART_puts("\t");
+  USART_putInt(b - min);
+  USART_puts("\n\r");
+}
 
 void loop() {
   static int i = 0; 
-  USART_puts("Loop\n\r");
-  doLocalize();
-  doLog();
+  doColors();
+  //doLocalize();
+  //doLog();
 
-  delay(500);
   if(i++ & 0x1)
     enableLEDs(RED);
   else 

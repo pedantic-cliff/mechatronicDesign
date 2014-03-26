@@ -31,7 +31,6 @@ typedef struct lightSensor_t{
 typedef struct colorSensors_t *ColorSensors; 
 typedef struct colorSensors_t {
   LightSensor sensors[NUM_SENSORS]; 
-  void (*init)  (ColorSensors sensors);
 
   void (*measureColor) (ColorSensors sensors, Color color); 
   volatile uint16_t* (*getResult) (void); 
