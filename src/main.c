@@ -25,8 +25,8 @@ int main(void) {
 void init() {
   init_USART(); 
   initLEDs();
-  //colorSensors = createColorSensors(); 
-  //colorSensors->init(colorSensors); 
+  colorSensors = createColorSensors(); 
+  colorSensors->init(colorSensors); 
   accel   = initAccel(); 
   motors  = createMotors(); 
   delay(500);
@@ -34,12 +34,14 @@ void init() {
   localizer = createLocalizer(motors, accel);
 }
 
-void doColors(void){
+void doColor(Color c){
   int ii;
-  colorSensors->measureColor(colorSensors,RED); 
+  colorSensors->measureColor(colorSensors,c); 
   while(!colorSensors->done); 
   volatile uint16_t* res = colorSensors->getResult(); 
-  USART_puts("Light Sensors: "); 
+  USART_puts("Color["); 
+  USART_putInt(c); 
+  USART_puts("]:\t"); 
   for(ii = 0; ii < NUM_SENSORS; ii++){
     USART_putInt(res[ii]); 
     USART_puts("\t"); 
