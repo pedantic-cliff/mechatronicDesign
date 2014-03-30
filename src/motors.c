@@ -126,7 +126,7 @@ void initPWM(void){
   /* Compute the prescaler value */
   PrescalerValue = (uint16_t) ((SystemCoreClock /2) / 28000000) - 1;
   /* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+  TIM_TimeBaseStructure.TIM_Period = 0x8000;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Down;
@@ -193,8 +193,8 @@ void setSpeeds(float l, float r){
     GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
-  TIM3->CCR3 = (int) r; 
-  TIM3->CCR4 = (int) l;
+  TIM3->CCR3 = (int) 0x500*r; 
+  TIM3->CCR4 = (int) 0x500*l;
 }; 
 
 Motors createMotors(void){
