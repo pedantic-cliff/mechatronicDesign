@@ -24,8 +24,7 @@ typedef struct pid {
   
   Motors m; 
 
-  void (*holdPos)(Pid self, Point target);
-  void (*holdVel)(Pid self, Point target); 
+  void (*loop)(Pid self, State target, State current);
 } pid_t;
 
 Pid createPID(Motors m);

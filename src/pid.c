@@ -2,8 +2,6 @@
 #include "utils.h"
 
 
-static float Kp = 0.1f;
-
 static long posL, 
             posR; 
 
@@ -25,23 +23,22 @@ float calcErrA(float targ, float curr){
   return errA; 
 }
 
-void holdPos(Pid self, Point targ, State curr){
+//
+// Loop expects two fully updated State vectors to calculate error. 
+// 
+void loop(Pid self, State targ, State curr){
   float errL = 0.f,
         errR = 0.f,
         errA = 0.f;
 
   errA = calcErrA(targ->a, curr->a);
 
-  // If angle is off correct that rather than make position more off. 
+  // If angle is off: correct that rather than make position more off. 
   if(fabsf(errA) > 0.01f){
     m->setSpeeds( -self->angleGains.Kp * errA, 
                    self->angleGains.Kp * errA ); 
     return; 
   }
-}
-
-void holdVel(Pid self, State curr, Point target){
-
 }
 
 Pid createPID(PID_Gains aGains, PID_Gains pGains, PID_Gains vGains, Motors m){
@@ -59,7 +56,6 @@ Pid createPID(PID_Gains aGains, PID_Gains pGains, PID_Gains vGains, Motors m){
 
   pid->m = m;
 
-  pid->holdPos  = holdPos;
-  pid->holdVel  = holdVel;
+  pid->loop = loop;
 }
 
