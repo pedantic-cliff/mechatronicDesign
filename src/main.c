@@ -29,7 +29,7 @@ void init() {
   accel   = initAccel(); 
   motors  = createMotors(); 
   delay(500);
-  motors->setSpeeds(0x8000,0x8000);
+  motors->setSpeeds(0xe800,0x9000);
   localizer = createLocalizer(motors, accel);
 }
 

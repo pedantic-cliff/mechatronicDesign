@@ -44,10 +44,10 @@
 // MOTOR CONTROL 
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
-#define DIR_PIN_RL GPIO_Pin_12
-#define DIR_PIN_FL GPIO_Pin_14
-#define DIR_PIN_FR GPIO_Pin_13
-#define DIR_PIN_RR GPIO_Pin_15
+#define DIR_PIN_FR GPIO_Pin_12
+#define DIR_PIN_RR GPIO_Pin_14
+#define DIR_PIN_RL GPIO_Pin_13
+#define DIR_PIN_FL GPIO_Pin_15
 
 // Private storage
 static motors_t _storage;
@@ -193,8 +193,8 @@ void setSpeeds(float l, float r){
     GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
-  TIM3->CCR3 = (int) l; 
-  TIM3->CCR4 = (int) r;
+  TIM3->CCR3 = (int) r; 
+  TIM3->CCR4 = (int) l;
 }; 
 
 Motors createMotors(void){
