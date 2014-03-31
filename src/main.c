@@ -93,9 +93,8 @@ void loop() {
   doColors();
   //doLocalize();
   //doLog();
-
   if(i++ & 0x1)
-    enableLEDs(RED);
+    enableLEDs(BLUE);
   else 
-    disableLEDs(RED);
+    disableLEDs(BLUE);
 }
