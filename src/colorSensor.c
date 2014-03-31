@@ -109,7 +109,7 @@ void ADC_Configuration(void)
   ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_10Cycles; //min is 10
   ADC_CommonInit(&ADC_CommonInitStructure);  
   
-  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_10b; //12b 10b 8b 6b
+  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_12b; //12b 10b 8b 6b
   ADC_InitStructure.ADC_ScanConvMode          = ENABLE; 
   ADC_InitStructure.ADC_ContinuousConvMode    = DISABLE; // Conversions Triggered
   ADC_InitStructure.ADC_ExternalTrigConvEdge  = ADC_ExternalTrigConvEdge_Rising;
@@ -157,12 +157,12 @@ void initSensors(void){
 
 void startADC(void){
   int i = 0;
-  enableLEDs(BLUE);
   colorSensors.done = 0;
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
   }
   delay(150);
+  enableLEDs(GREEN);
 //  TIM_SetCounter(TIM8, 0xFFF);
 //  TIM_Cmd(TIM8, ENABLE);
   ADC_SoftwareStartConv(ADC1);
@@ -171,10 +171,13 @@ void startADC(void){
 void ADC_IRQHandler(void){
   int i ;
   for(i = 0; i < NUM_SENSORS; i++){
-    sensors[i].measurements[currIdx] = ADC1ConvertedValue[i]; 
+    sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
-  colorSensors.done = 1;
-  disableLEDs(BLUE);
+  colorSensors.done += 1;
+  if(colorSensors.done < COLOR_SENSOR_ITERS)
+    ADC_SoftwareStartConv(ADC1);
+  else
+    disableLEDs(GREEN);
 }
 
 void measureColor(ColorSensors cs, Color c){

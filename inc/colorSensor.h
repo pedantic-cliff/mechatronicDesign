@@ -6,6 +6,7 @@
 #include "utils.h"
 
 #define NUM_COLORS  4
+#define COLOR_SENSOR_ITERS 8
 
 #define NONE_IDX    0
 #define RED_IDX     1
