@@ -20,13 +20,21 @@ static state_t _targState;
 static State targState;
 
 static Pid pid; 
-static PID_Gains angleGains = { 1.f, 0.5f, 0.0f },
-                 posGains   = { 0.0f, 0.0f, 0.0f },
-                 velGains   = { 1.0f, 0.0f, 0.0f };
+
+void startMoveUp(void){
+  static PID_Gains angleGains = { 30.f, 15.0f, 10.0f },
+                   posGains   = { 0.0f, 0.0f, 0.0f },
+                   velGains   = { 5.0f, 1.0f, 0.0f };
+  pid->setGains(pid, angleGains, posGains, velGains);
+  motors->setOffset(motors,0x5400);
+  targState->theta = PI/2.0f;
+  targState->vel = 5.f;
+}
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
+  startMoveUp();
   do {
     loop();
     delay(300);
@@ -34,9 +42,10 @@ int main(void) {
 }
 
 void init() {
+  static PID_Gains angleGains = { 0.0f, 0.0f, 0.0f },
+                   posGains   = { 0.0f, 0.0f, 0.0f },
+                   velGains   = { 0.0f, 0.0f, 0.0f };
   targState = &_targState;
-  targState->theta = PI/2.0f;
-  targState->vel = 5.f;
   init_USART(); 
   initLEDs();
   colorSensors = createColorSensors(); 
@@ -49,7 +58,6 @@ void init() {
 }
 
 int doColor(Color c){
-  int ii;
   colorSensors->measureColor(colorSensors,c); 
   while(!colorSensors->done); 
   volatile uint16_t* res = colorSensors->getResult(); 
@@ -112,13 +120,16 @@ void doPID(void){
   pid->loop(pid, targState, localizer->state);
 }
 
+void doMoveUp(void){
+  pid->loop(pid, targState, localizer->state);
+}
+
 void loop() {
   static int i = 0; 
   //doColors();
   doLocalize();
-  doPID();
+  doMoveUp();
   //doLog();
-  //motors->setSpeeds(0,0);
   if(i++ & 0x1)
     enableLEDs(RED);
   else 

@@ -4,12 +4,14 @@
 typedef struct motors *Motors; 
 
 typedef struct motors{
+  int PWM_Min;
   
   int (*getLeftCount)(void); 
   int (*getRightCount)(void); 
   void (*resetCounts)(void); 
 
-  void (*setSpeeds)(float left, float right); 
+  void (*setSpeeds)(Motors self, float left, float right); 
+  void (*setOffset)(Motors self, int offset); 
 } motors_t; 
 
 Motors createMotors(void); 

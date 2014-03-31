@@ -27,6 +27,7 @@ typedef struct pid {
   
   Motors m; 
 
+  void (*setGains)(Pid self, PID_Gains a, PID_Gains p, PID_Gains v);
   void (*loop)(Pid self, State target, State current);
 } Pid_t;
 
