@@ -171,10 +171,13 @@ void startADC(void){
 void ADC_IRQHandler(void){
   int i ;
   for(i = 0; i < NUM_SENSORS; i++){
-    sensors[i].measurements[currIdx] = ADC1ConvertedValue[i]; 
+    sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
-  colorSensors.done = 1;
-  disableLEDs(BLUE);
+  colorSensors.done += 1;
+  if(colorSensors.done < COLOR_SENSOR_ITERS)
+    ADC_SoftwareStartConv(ADC1);
+  else
+    disableLEDs(BLUE);
 }
 
 void measureColor(ColorSensors cs, Color c){

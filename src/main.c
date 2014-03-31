@@ -29,14 +29,14 @@ void init() {
   accel   = initAccel(); 
   motors  = createMotors(); 
   delay(500);
-  motors->setSpeeds(0x8000,0x8000);
+//  motors->setSpeeds(0x8000,0x8000);
   localizer = createLocalizer(motors, accel);
 }
 
 int doColor(Color c){
   int ii;
   colorSensors->measureColor(colorSensors,c); 
-  while(!colorSensors->done); 
+  while(colorSensors->done < COLOR_SENSOR_ITERS); 
   volatile uint16_t* res = colorSensors->getResult(); 
   return res[0];
 }
@@ -78,7 +78,6 @@ void doColors(void){
   min = min < b ? min: b;
   min = min < g ? min: g;
 
-  USART_puts("NRGB: ");
   USART_putInt(n - min);
   USART_puts("\t");
   USART_putInt(r - min);
