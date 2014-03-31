@@ -14,8 +14,8 @@ typedef struct {
   float d; 
 } error_t, *Error; 
 
+static error_t eT = { 0.f, 0.f, 0.f };
 Error calcErrTheta(const float targ, const float curr){
-  static error_t e;
   float err; 
   if(targ < -PI && curr > PI){
     err = (targ + 2*PI) - curr; 
@@ -24,29 +24,32 @@ Error calcErrTheta(const float targ, const float curr){
   }else{
     err = (targ) - (curr);
   }
-  e.d = err - e.p;  // e.p still the old error 
-  e.p = err;
-  if(fabsf(e.p) < PI/3)
-    e.s = e.s + e.p;
-  else 
-    e.s = 0;
+  eT.d = err - eT.p;  // e.p still the old error 
+  eT.p = err;
+  if(fabsf(err) < PI/3)
+    eT.s = eT.s + err;
 
-  return &e; 
+  return &eT; 
 
 }
 
 // Due to the nature of the motor being an integrator everything is 
 // written as one derivative higher!
+static error_t eV = { 0.f, 0.f, 0.f };
 Error calcErrVel(const float targ, const float curr){ 
-  static error_t e;
   float err = targ - curr; 
-  e.d = err - e.p;  // e.p still the old error
-  e.p = err; 
-  if(fabsf(e.p) < 5.0f)
-    e.s = e.s + err; 
-  else 
-    e.s = 0;
-  return &e; 
+  eV.d = err - eV.p;  // e.p still the old error
+  USART_puts("D:");
+  USART_putFloat(err);
+  USART_puts(" - ");
+  USART_putFloat(eV.p);
+  USART_puts(" = ");
+  USART_putFloat(err - eV.p);
+  USART_puts("\r\n");
+  eV.p = err; 
+  if(fabsf(err) < 10.0f)
+    eV.s = eV.s + err; 
+  return &eV; 
 }
 
 //

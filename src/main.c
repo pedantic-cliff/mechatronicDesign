@@ -22,12 +22,21 @@ static State targState;
 static Pid pid; 
 
 void startMoveUp(void){
-  static PID_Gains angleGains = { 30.f, 15.0f, 10.0f },
+  static PID_Gains angleGains = { 30.f, 10.0f, 10.0f },
                    posGains   = { 0.0f, 0.0f, 0.0f },
-                   velGains   = { 5.0f, 1.0f, 0.0f };
+                   velGains   = { 10.0f, 10.0f, 0.0f };
   pid->setGains(pid, angleGains, posGains, velGains);
   motors->setOffset(motors,0x5400);
   targState->theta = PI/2.0f;
+  targState->vel = 5.f;
+}
+void startMoveRight(void){
+  static PID_Gains angleGains = { 50.f, 10.0f, 10.0f },
+                   posGains   = { 0.0f, 0.0f, 0.0f },
+                   velGains   = { 5.0f, 1.0f, 0.0f };
+  pid->setGains(pid, angleGains, posGains, velGains);
+  motors->setOffset(motors,0x2000);
+  targState->theta = 0.0f;
   targState->vel = 5.f;
 }
 
@@ -37,7 +46,7 @@ int main(void) {
   startMoveUp();
   do {
     loop();
-    delay(300);
+    delay(1000);
   } while (1);
 }
 
@@ -120,15 +129,11 @@ void doPID(void){
   pid->loop(pid, targState, localizer->state);
 }
 
-void doMoveUp(void){
-  pid->loop(pid, targState, localizer->state);
-}
-
 void loop() {
   static int i = 0; 
   //doColors();
   doLocalize();
-  doMoveUp();
+  doPID();
   //doLog();
   if(i++ & 0x1)
     enableLEDs(RED);

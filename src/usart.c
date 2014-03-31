@@ -212,10 +212,14 @@ void USART_putInt(int input){
 void USART_sendByte(uint8_t byte){
   USART_SendData(USART1, byte);
 }
+
 void USART_putFloat(float num){
+  if(num < 0.f){
+    USART_sendByte('-');
+    num = -num;
+  }
   int numI = num;
   USART_putInt(numI); 
-  if(num < 0.f) num = -num;
   numI = ((int)(1000 * num)) % 1000;
   USART_puts("."); 
   USART_putInt(numI);
