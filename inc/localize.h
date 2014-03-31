@@ -1,19 +1,17 @@
 #ifndef _LOCALIZE_H_
 #define _LOCALIZE_H_
 
+#include "common.h"
 #include "motors.h"
 #include "accel.h"
 
 typedef struct enc *Enc;
 
+
 typedef struct localizer *Localizer;
 typedef struct localizer{
   // Coordinates of robot in world frame
-  struct {
-    float x; 
-    float y; 
-    float theta; 
-  } Rw;
+  State state;
 
   // Current counts of L and R encoders
   Enc enc; 

@@ -14,7 +14,7 @@ void sendData(uint8_t addr, uint8_t data);
 uint8_t getData (uint8_t addr); 
 
 // Internal Storage for the one Accel object
-struct accel _storage; 
+static struct accel _storage; 
 
 uint8_t accel_getX(void){
   return getData(OUT_X);

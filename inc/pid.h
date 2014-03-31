@@ -2,7 +2,7 @@
 #define _PID_H_
 
 #include "motors.h"
-#include "eom.h"
+#include "common.h"
 
 typedef struct { 
   float x; 
@@ -12,10 +12,13 @@ typedef struct {
 
 typedef struct {
   float Kp; 
-  float Ki; 
+  float Ks; 
   float Kd;
 } PID_Gains;
 
+#ifdef pid_t
+#undef pid_t
+#endif 
 typedef struct pid *Pid;
 typedef struct pid {
   PID_Gains angleGains; 
@@ -24,10 +27,9 @@ typedef struct pid {
   
   Motors m; 
 
-  void (*holdPos)(Pid self, Point target);
-  void (*holdVel)(Pid self, Point target); 
-} pid_t;
+  void (*loop)(Pid self, State target, State current);
+} Pid_t;
 
-Pid createPID(Motors m);
+Pid createPID(PID_Gains a, PID_Gains p, PID_Gains v, Motors m);
 
 #endif // _PID_H_
