@@ -12,7 +12,7 @@ typedef struct {
 
 typedef struct {
   float Kp; 
-  float Ki; 
+  float Ks; 
   float Kd;
 } PID_Gains;
 

@@ -42,6 +42,9 @@
 #define RIGHT_COUNT() ENCR_TIMER->CNT
 
 // MOTOR CONTROL 
+#define PWM_MAX 0x8000
+#define PWM_MIN 0x2000
+#define PWM_SCALER 0.05f
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
 #define DIR_PIN_FR GPIO_Pin_12
@@ -126,7 +129,7 @@ void initPWM(void){
   /* Compute the prescaler value */
   PrescalerValue = (uint16_t) ((SystemCoreClock /2) / 28000000) - 1;
   /* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = 0x8000;
+  TIM_TimeBaseStructure.TIM_Period = PWM_MAX;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Down;
@@ -175,8 +178,12 @@ int getRightCount(void){
 }
 
 void setSpeeds(float l, float r){
-  TIM3->CCR3 = 0; 
-  TIM3->CCR4 = 0; 
+  long L_PWM = 0;
+  long R_PWM = 0;
+  
+//  TIM3->CCR3 = 0; 
+//  TIM3->CCR4 = 0; 
+  
   if ( l < 0 ){
     l = -l;
     GPIO_SetBits(DIR_PORT, DIR_PIN_RL);
@@ -193,8 +200,11 @@ void setSpeeds(float l, float r){
     GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
-  TIM3->CCR3 = (int) 0x500*r; 
-  TIM3->CCR4 = (int) 0x500*l;
+
+  L_PWM = PWM_MIN + l * PWM_SCALER; 
+  R_PWM = PWM_MIN + r * PWM_SCALER; 
+  TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
+  TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
 }; 
 
 Motors createMotors(void){

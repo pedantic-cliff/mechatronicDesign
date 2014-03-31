@@ -28,11 +28,10 @@ void update(Localizer self){
   dS      = ENC_TO_D((dSL + dSR) / 2.f);  
   dTheta  = (dSR - dSL) / WHEEL_BASE_WIDTH;
   // Apply Rw = Rw + dRw
-  self->state->vx = dS * cosf(self->state->theta + dTheta); 
-  self->state->x += self->state->vx;
+  self->state->vel = dS;
 
-  self->state->vy = dS * sinf(self->state->theta + dTheta); 
-  self->state->y += self->state->vy; 
+  self->state->x += self->state->vel * cosf(self->state->theta + dTheta);  
+  self->state->y += self->state->vel * sinf(self->state->theta + dTheta);  
 
   self->enc->L = newL;
   self->enc->R = newR;
@@ -46,8 +45,7 @@ Localizer createLocalizer(Motors m, Accel acc){
   l->state->x = 0.f;
   l->state->y = 0.f;
   l->state->theta = acc->getAngle();
-  l->state->vx = 0.f;
-  l->state->vy = 0.f;
+  l->state->vel = 0.f;
 
   l->enc = &_enc;
   l->enc->L = m->getLeftCount(); 

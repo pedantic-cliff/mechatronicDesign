@@ -11,8 +11,7 @@ typedef struct state{
     float x; 
     float y; 
     float theta; 
-    float vx;
-    float vy;
+    float vel;
 } state_t;
 
 #endif //_COMMON_H_

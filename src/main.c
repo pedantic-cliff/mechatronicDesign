@@ -20,31 +20,29 @@ static state_t _targState;
 static State targState;
 
 static Pid pid; 
-static PID_Gains angleGains = { 30.0f, 0.0f, 0.0f },
+static PID_Gains angleGains = { 1.f, 0.5f, 0.0f },
                  posGains   = { 0.0f, 0.0f, 0.0f },
-                 velGains   = { 0.0f, 0.0f, 0.0f };
+                 velGains   = { 1.0f, 0.0f, 0.0f };
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
   do {
     loop();
-    delay(1000);
+    delay(300);
   } while (1);
 }
 
 void init() {
   targState = &_targState;
-  targState->theta = 0.f;
-  targState->vx = 0.f;
-  targState->vy = 0.f; 
+  targState->theta = PI/2.0f;
+  targState->vel = 5.f;
   init_USART(); 
   initLEDs();
   colorSensors = createColorSensors(); 
   accel   = initAccel(); 
   motors  = createMotors(); 
   delay(500);
-
   localizer = createLocalizer(motors, accel);
   pid = createPID(angleGains, posGains, velGains, motors); 
   USART_puts("Init finished \r\n");
@@ -82,6 +80,9 @@ void doLog(void){
   USART_puts("Angle: ");
   USART_putFloat(localizer->state->theta);
   USART_puts("\n\r");
+  USART_puts("Vel: ");
+  USART_putFloat(localizer->state->vel);
+  USART_puts("\n\r");
 }
 
 void doColors(void){
@@ -116,8 +117,8 @@ void loop() {
   //doColors();
   doLocalize();
   doPID();
-  doLog();
-
+  //doLog();
+  //motors->setSpeeds(0,0);
   if(i++ & 0x1)
     enableLEDs(RED);
   else 
