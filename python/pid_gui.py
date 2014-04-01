@@ -37,7 +37,7 @@ class Port:
     return str(self.serial.read(size),'ascii')
 
 global p
-p = Port("/dev/ttyUSB1"); 
+p = Port("/dev/ttyUSB0")
 
 def updateSerialLog():
   i = 0
@@ -61,7 +61,7 @@ class Application(Frame):
     "Creating the widgets"
     self.label_left_P=Label(self,text="Left Position").grid(row=1, column=1, sticky=W)
     self.label_left_S=Label(self,text="Left Sum").grid(row=1, column=2, sticky=W)
-    self.label_left_D=Label(self,text="Left Difference").grid(row=1, column=3, sticky=W)
+    self.label_left_D=Label(self,text="Left Difference").grid(row=1, column=2, sticky=W)
 
     self.label_right_P=Label(self,text="Right Position").grid(row=3, column=1, sticky=W)
     self.label_right_S=Label(self,text="Right Sum").grid(row=3, column=2, sticky=W)
@@ -89,16 +89,17 @@ class Application(Frame):
     self.data_R_D.insert(0,"0")
 
     self.button=Button(self,text="Send Values",command=self.send).grid(row=8, column=3,sticky=W)
-    self.start=Button(self,text="START!",command=self.begin).grid(row=9, column=3,sticky=W)
-    self.halt=Button(self,text="STOP!",command=self.stop).grid(row=10, column=3,sticky=W)                                                                   
-
+    self.start=Button(self,text="START!",command=self.begin).grid(row=8, column=4,sticky=W)
+    self.halt=Button(self,text="STOP!",command=self.stop).grid(row=9, column=3,sticky=W)                                                                   
+    self.reset=Button(self,text="Reset",command=self.reset).grid(row=9, column=4,sticky=W)
+    
     self.scroller=Scrollbar(self)
-    self.scroller.grid(row=11,column=1,sticky='nsew')
+    self.scroller.grid(row=15,column=1,sticky='nsew')
     self.scroller.config(width='1')
 
 
     self.output=Text(self, width=30, height=25, wrap=WORD)
-    self.output.grid(row=11, column=2,sticky='nsew')
+    self.output.grid(row=15, column=2,sticky='nsew')
     global output
     output = self.output
 
@@ -115,10 +116,11 @@ class Application(Frame):
         self.data_R_D.get()]
     values = list(map(lambda x: float(x), values))
     p.write('g', values); 
-    print(values)
+    
     
   def stop(self):
     """Stops the process""" 
+    
     global running
     global p 
     p.write('h')
@@ -134,10 +136,12 @@ class Application(Frame):
 
     p.write('s')
     running = 1
+  def reset(self):
+    self.output.delete(0.0, END)
 
 root=Tk()
 root.title("PID Control")
-root.geometry("500x600")
+root.geometry("600x600")
 
 app=Application(root)
 

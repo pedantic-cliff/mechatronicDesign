@@ -58,11 +58,12 @@ static void loop(Pid self, State targ, State curr){
   pidV = self->velGains.Kp * errV->p;
 
   
-  USART_puts("Angle Control: e = ");
+ /* USART_puts("Angle Control: e = ");
   USART_putFloat(errA->p);
   USART_puts("\tu = ");
   USART_putFloat(pidA);
   USART_puts("\n\r");
+  */
   /*
   errV = calcErrVel(targ->vel, curr->vel);
   USART_puts("Velocity Control: err = ");

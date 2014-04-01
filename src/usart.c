@@ -4,12 +4,15 @@
 #include <stm32f4xx_gpio.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 #include <stm32f4xx_rcc.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 #include <stm32f4xx_conf.h> 
+#include "utils.h"
 
 #define MAX_STRLEN 64 // this is the maximum string length of our string in characters
 #define BAUD_RATE 15000     // Somehow this corresponds to 4800!!
 
 volatile char received_string[MAX_STRLEN+1]; // this will hold the recieved string
-
+volatile int  received_index = 0; 
+volatile char command = 'n';
+volatile int  commandLen = 0;
 /* This funcion initializes the USART1 peripheral
  *
  * Arguments: baudrate --> the baudrate at which the USART is
@@ -220,7 +223,39 @@ void USART_putFloat(float num){
   USART_puts("."); 
   USART_putInt(numI);
 }
+extern volatile int running; 
 
+float extractFloat(volatile char *buf){
+  int i = 0; 
+  union { 
+    char cs[4]; 
+    float f;
+  } conv; 
+  for(; i < 4; i++){
+    conv.cs[i] = buf[i];
+  }
+  return conv.f;
+}
+
+void parseParams(void){
+  switch(command){
+    case 's': 
+      running = 1;
+      break; 
+    case 'h':
+      running = 0; 
+      break; 
+    case 'g': 
+      USART_puts("Got: ");
+      USART_putFloat(extractFloat(&received_string[2])); 
+      USART_puts("\r\n");
+      break;
+  }
+  command = 'n'; 
+  commandLen = 0; 
+  received_index = 0; 
+  disableLEDs(ORANGE);
+}
 
 // this is the interrupt request handler (IRQ) for ALL USART1 interrupts
 void USART1_IRQHandler(void){
@@ -230,7 +265,23 @@ void USART1_IRQHandler(void){
 
     //static uint8_t cnt = 0; // this counter is used to determine the string length
     char t = USART1->DR; // the character from the USART1 data register is saved in t
-    USART_SendData(USART1,t);
+    received_string[received_index++] = t;
+    
+    // First byte is the command
+    if(received_index == 1){
+      command = t; 
+      enableLEDs(ORANGE);
+    }
+    // Second byte is the length of remainder
+    else if(received_index == 2){
+      commandLen = t; 
+    }
+    
+    if(received_index - 2 == commandLen){
+      parseParams(); 
+    }
+
+    //USART_SendData(USART1,t);
     /* check if the received character is not the LF character (used to determine end of string)
      * or the if the maximum string length has been been reached
      */
