@@ -12,7 +12,7 @@ Motors motors;
 
 Localizer localizer;
 
-state_t _targState; 
+state_t _targState {0.f,0.f,PI/2,0.f}; 
 State targState;
 
 Pid pid; 
