@@ -12,19 +12,19 @@
 
 volatile int running = 0;
 
-static ColorSensors colorSensors; 
-static Accel accel; 
-static Motors motors; 
+ColorSensors colorSensors; 
+Accel accel; 
+Motors motors; 
 
-static Localizer localizer;
+Localizer localizer;
 
-static state_t _targState; 
-static State targState;
+state_t _targState; 
+State targState;
 
-static Pid pid; 
-static PID_Gains angleGains = { 1.f, 0.5f, 0.0f },
-                 posGains   = { 0.0f, 0.0f, 0.0f },
-                 velGains   = { 1.0f, 0.0f, 0.0f };
+Pid pid; 
+PID_Gains angleGains = { 0.0f,  0.0f, 0.0f },
+          posGains   = { 0.0f, 0.0f, 0.0f },
+          velGains   = { 0.0f, 0.0f, 0.0f };
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start

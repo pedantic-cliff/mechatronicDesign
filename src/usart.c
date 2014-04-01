@@ -246,9 +246,7 @@ void parseParams(void){
       running = 0; 
       break; 
     case 'g': 
-      USART_puts("Got: ");
-      USART_putFloat(extractFloat(&received_string[2])); 
-      USART_puts("\r\n");
+      extractFloat(&received_string[2]); 
       break;
   }
   command = 'n'; 
