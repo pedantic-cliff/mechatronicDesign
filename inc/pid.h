@@ -7,7 +7,7 @@
 typedef struct { 
   float x; 
   float y; 
-  float a; 
+  float theta; 
 } *Point; 
 
 typedef struct {
@@ -21,9 +21,9 @@ typedef struct {
 #endif 
 typedef struct pid *Pid;
 typedef struct pid {
-  PID_Gains angleGains; 
-  PID_Gains posGains;
-  PID_Gains velGains;
+  PID_Gains xyDistGains; 
+  PID_Gains bearGains;
+  PID_Gains angGains;
   
   Motors m; 
 
