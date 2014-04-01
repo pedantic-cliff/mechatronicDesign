@@ -1,9 +1,15 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
+#include "utils.h"
+#include "usart.h"
+#include "accel.h"
+#include "colorSensor.h"
+#include "localize.h"
+#include "motors.h"
+#include "pid.h"
 
-void init();
-void loop();
-
+void halt(void);
+void start(void);
 
 extern ColorSensors colorSensors; 
 extern Accel accel; 
@@ -14,9 +20,9 @@ extern Localizer localizer;
 extern State targState;
 
 extern Pid pid; 
-extern PID_Gains angleGains = { 1.f, 0.5f, 0.0f },
-                 posGains   = { 0.0f, 0.0f, 0.0f },
-                 velGains   = { 1.0f, 0.0f, 0.0f };
+extern PID_Gains angleGains,
+                 distGains ,
+                 bearGains ;
 
 
 #endif //_MAIN_H_

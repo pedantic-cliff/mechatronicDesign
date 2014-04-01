@@ -5,6 +5,7 @@
 #include <stm32f4xx_rcc.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
 #include <stm32f4xx_conf.h> 
 #include "utils.h"
+#include "main.h"
 
 #define MAX_STRLEN 64 // this is the maximum string length of our string in characters
 #define BAUD_RATE 15000     // Somehow this corresponds to 4800!!
@@ -215,10 +216,14 @@ void USART_putInt(int input){
 void USART_sendByte(uint8_t byte){
   USART_SendData(USART1, byte);
 }
+
 void USART_putFloat(float num){
+  if(num < 0.f){
+    USART_sendByte('-');
+    num = -num;
+  }
   int numI = num;
   USART_putInt(numI); 
-  if(num < 0.f) num = -num;
   numI = ((int)(1000 * num)) % 1000;
   USART_puts("."); 
   USART_putInt(numI);
@@ -238,15 +243,25 @@ float extractFloat(volatile char *buf){
 }
 
 void parseParams(void){
+  int i = 0; 
   switch(command){
     case 's': 
-      running = 1;
+      start();
       break; 
     case 'h':
-      running = 0; 
+      halt();
       break; 
     case 'g': 
-      extractFloat(&received_string[2]); 
+      angleGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      distGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
+      distGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      distGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      bearGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
+      bearGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      bearGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      pid->setGains(pid, distGains, bearGains, angleGains);
       break;
   }
   command = 'n'; 

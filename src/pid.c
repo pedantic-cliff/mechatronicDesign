@@ -4,92 +4,103 @@
 #include "common.h"
 #include "localize.h"
 #include "math.h"
-
-static long posL, 
-            posR; 
-
-static long posL_targ,
-            posR_targ;
+//#include "errno.h"
 
 static Pid_t _storage; 
 
 typedef struct { 
-  float p;
-  float s; 
-  float d; 
-} error_t, *Error; 
+	float p;
+	float s; 
+	float d;
+	char first;
+} pidError_t, *Error; 
 
-Error calcErrTheta(const float targ, const float curr){
-  static error_t e; 
-  if(targ < -PI && curr > PI){
-    e.p = (targ + 2*PI) - curr; 
-  }else if(targ > PI && curr < -PI){
-    e.p = (targ) - (curr + 2*PI);
-  }else{
-    e.p = (targ) - (curr);
-  }
-  if(fabsf(e.p) < PI/3)
-    e.s = e.s + e.p;
+int __errno;
 
-  return &e; 
+static pidError_t eT = {0.f, 0.f, 0.f, 1};
+static pidError_t eB = {0.f, 0.f, 0.f, 1};
+static pidError_t eDist = {0.f, 0.f, 0.f, 1};
+static pidError_t eLm = {0.f, 0.f, 0.f, 1};
+static pidError_t eRm = {0.f, 0.f, 0.f, 1};
+
+float fixAngles(float inAngle){
+	float outAngle;								//Calc and convert angular error to (-pi,pi]
+	outAngle = atan2f(sin(inAngle),cos(inAngle));
+	return outAngle;
 }
 
-// Due to the nature of the motor being an integrator everything is 
-// written as one derivative higher!
-Error calcErrVel(const float targ, const float curr){ 
-  static error_t ePrev,
-                 err; 
-  err.p = targ - curr + 0.8* ePrev.p; 
-  ePrev.p = err.p; 
-  return &err; 
+
+void calcErr(const float err, Error E){
+	if(E->first==1){								//Check if the error struct is virgin yet
+		E->p = err;
+		E->first = 0;
+	}
+	E->d = err - E->p;							// e.p still the old error. Set diff error 
+	E->p = err;										// Set proprtional error
+	if(fabsf(err) < PI/6)						// Check for size of error
+		E->s = E->s + err;						// Set intergral error
 }
 
-//
-// Loop expects two fully updated State vectors to calculate error. 
-// 
-static void loop(Pid self, State targ, State curr){
-  Error errV, errA;
-  float pidA = 0.f,
-        pidV = 0.f;
 
-  errA = calcErrTheta(targ->theta, curr->theta);
-  errV = calcErrVel(targ->vel, curr->vel);
-  pidA = self->angleGains.Kp * errA->p + self->angleGains.Ks * errA->s;
-  pidV = self->velGains.Kp * errV->p;
-
-  
- /* USART_puts("Angle Control: e = ");
-  USART_putFloat(errA->p);
-  USART_puts("\tu = ");
-  USART_putFloat(pidA);
-  USART_puts("\n\r");
-  */
-  /*
-  errV = calcErrVel(targ->vel, curr->vel);
-  USART_puts("Velocity Control: err = ");
-  USART_putFloat(pidV);
-  USART_puts("\n\r");
-  */
-  self->m->setSpeeds( pidA + pidV , -pidA + pidV );
+void calcAllErrs(State targ,State curr){
+	float xyDistErr,bearErr,angErr;
+	xyDistErr = sqrt(	(targ->x - curr->x)*(targ->x - curr->x) + 
+								(targ->y - curr->y)*(targ->y - curr->y));
+	bearErr = atan2f(targ->y - curr->y,targ->x - curr->x);
+	angErr = targ->theta - curr->theta;
+	angErr = fixAngles(angErr);
+	
+	calcErr(xyDistErr,&eDist);
+	calcErr(bearErr,&eB);
+	calcErr(angErr,&eT);
 }
 
-Pid createPID(PID_Gains aGains, PID_Gains pGains, PID_Gains vGains, Motors m){
-  Pid pid = & _storage;
-  
-  pid->angleGains.Kp = aGains.Kp;
-  pid->angleGains.Ks = aGains.Ks;
-  pid->angleGains.Kd = aGains.Kd;
-  pid->posGains.Kp = pGains.Kp;
-  pid->posGains.Ks = pGains.Ks;
-  pid->posGains.Kd = pGains.Kd;
-  pid->velGains.Kp = vGains.Kp;
-  pid->velGains.Ks = vGains.Ks;
-  pid->velGains.Kd = vGains.Kd;
 
-  pid->m = m;
+static void loop (Pid self, State target, State current){
+	float velocityFbk,omegaFbk,vleft,vright;
+	calcAllErrs(target,current);
+	
+	velocityFbk =	eDist.p*self->xyDistGains.Kp 
+              + eDist.s*self->xyDistGains.Ks
+						  + eDist.d*self->xyDistGains.Kd;
+	
+	omegaFbk =  eB.p*self->bearGains.Kp 
+						+ eB.s*self->bearGains.Ks 
+						+ eB.d*self->bearGains.Kd 
+						  
+						+ eT.p*self->angGains.Kp 
+						+ eT.s*self->angGains.Ks 
+						+ eT.d*self->angGains.Kd;
+	
+	vleft = velocityFbk - omegaFbk*WHEEL_BASE_WIDTH/2;
+	vright = velocityFbk + omegaFbk*WHEEL_BASE_WIDTH/2;
+	
+	//Feed forward part yet to be done
+	
+	self->m->setSpeeds(self->m,vleft,vright);
+}
 
-  pid->loop = loop;
+void setGains(Pid pid, PID_Gains distG, PID_Gains bearG, PID_Gains angG){
+	pid->xyDistGains.Kp = distG.Kp;
+	pid->xyDistGains.Ks = distG.Ks;
+	pid->xyDistGains.Kd = distG.Kd;
+	pid->bearGains.Kp = bearG.Kp;
+	pid->bearGains.Ks = bearG.Ks;
+	pid->bearGains.Kd = bearG.Kd;
+	pid->angGains.Kp = angG.Kp;
+	pid->angGains.Ks = angG.Ks;
+	pid->angGains.Kd = angG.Kd;
+}
 
-  return pid;
+Pid createPID(PID_Gains distG, PID_Gains bearG, PID_Gains angG, Motors m){
+	Pid pid = & _storage;
+
+	setGains(pid,distG,bearG,angG);
+	pid->m = m;
+
+	pid->loop = loop;
+	pid->setGains = setGains;
+
+	return pid;
 }
 

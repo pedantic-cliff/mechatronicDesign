@@ -1,16 +1,16 @@
 #include "main.h"
-#include "utils.h"
-#include "usart.h"
-#include "accel.h"
-#include "colorSensor.h"
-#include "localize.h"
-#include "motors.h"
-#include "pid.h"
 #include "misc.h"
 #include <stdio.h>
 #include "math.h"
 
-volatile int running = 0;
+static volatile int running = 0;
+
+void start(void){
+  running = 1;
+}
+void halt(void){
+  running = 0;
+}
 
 ColorSensors colorSensors; 
 Accel accel; 
@@ -22,13 +22,16 @@ state_t _targState;
 State targState;
 
 Pid pid; 
-PID_Gains angleGains = { 0.0f,  0.0f, 0.0f },
-          posGains   = { 0.0f, 0.0f, 0.0f },
-          velGains   = { 0.0f, 0.0f, 0.0f };
+PID_Gains angleGains  = { 0.0f, 0.0f, 0.0f },
+          distGains   = { 0.0f, 0.0f, 0.0f },
+          bearGains   = { 0.0f, 0.0f, 0.0f };
+static void init(void);
+static void loop(void);
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
+  start();
   do {
     if(running)
       loop();
@@ -36,10 +39,11 @@ int main(void) {
   } while (1);
 }
 
-void init() {
+static void init() {
+  static PID_Gains angleGains = { 0.0f, 0.0f, 0.0f },
+                   posGains   = { 0.0f, 0.0f, 0.0f },
+                   velGains   = { 0.0f, 0.0f, 0.0f };
   targState = &_targState;
-  targState->theta = PI/2.0f;
-  targState->vel = 5.f;
   init_USART(); 
   initLEDs();
   colorSensors = createColorSensors(); 
@@ -52,7 +56,6 @@ void init() {
 }
 
 int doColor(Color c){
-  int ii;
   colorSensors->measureColor(colorSensors,c); 
   while(colorSensors->done < COLOR_SENSOR_ITERS); 
   volatile uint16_t* res = colorSensors->getResult(); 
@@ -114,7 +117,7 @@ void doPID(void){
   pid->loop(pid, targState, localizer->state);
 }
 
-void loop() {
+static void loop() {
   static int i = 0; 
   USART_puts("Loop\n");
   delay(3000);
@@ -127,3 +130,5 @@ void loop() {
   else 
     disableLEDs(BLUE);
 }
+
+

@@ -4,6 +4,7 @@
 #include "stm32f4xx_gpio.h"
 #include "misc.h"
 #include "motors.h"
+#include "usart.h"
 
 // Left Motor Channels 
 #define ENCLA_PIN GPIO_Pin_0
@@ -43,8 +44,7 @@
 
 // MOTOR CONTROL 
 #define PWM_MAX 0x8000
-#define PWM_MIN 0x2000
-#define PWM_SCALER 0.05f
+#define PWM_SCALER 1
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
 #define DIR_PIN_FR GPIO_Pin_12
@@ -177,7 +177,7 @@ int getRightCount(void){
   return (RIGHT_COUNT());
 }
 
-void setSpeeds(float l, float r){
+void setSpeeds(Motors self, float l, float r){
   long L_PWM = 0;
   long R_PWM = 0;
   
@@ -201,20 +201,32 @@ void setSpeeds(float l, float r){
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
 
-  L_PWM = PWM_MIN + l * PWM_SCALER; 
-  R_PWM = PWM_MIN + r * PWM_SCALER; 
+  L_PWM = self->PWM_Min + (long)(l * PWM_SCALER); 
+  R_PWM = self->PWM_Min + (long)(r * PWM_SCALER); 
+  USART_puts("Motor Speeds: ");
+  USART_putInt(L_PWM);
+  USART_puts(", ");
+  USART_putInt(R_PWM);
+  USART_puts("\n\r");
   TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
   TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
 }; 
 
+void setOffset(Motors self, int offset){
+  self->PWM_Min = offset; 
+}
+
 Motors createMotors(void){
   Motors m = &_storage; 
+
+  m->PWM_Min = 0x3000;
 
   m->getLeftCount   = getLeftCount;
   m->getRightCount  = getRightCount;
   m->resetCounts    = encodersReset;
 
   m->setSpeeds      = setSpeeds; 
+  m->setOffset      = setOffset;
 
   initEncoders();
   initPWM(); 

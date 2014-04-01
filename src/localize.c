@@ -2,6 +2,7 @@
 #include "math.h"
 #include "usart.h"
 
+static float compliFilter = 0.75;						//More implies more weight to accel
 static struct localizer _storage; 
 
 typedef struct enc{
@@ -15,24 +16,27 @@ static state_t _state;
 
 // Derive update, currently uses encoders to get dS and Accel to get theta
 void update(Localizer self){
-  float dSL, dSR, dS, dTheta; // Updates from encoders
-  int newL = self->m->getLeftCount(),
-      newR = self->m->getRightCount();
-  self->state->theta = self->acc->getAngle(); 
+  float dSL, dSR, dS, dTheta;									//Updates from encoders
   
-  // Encoder differences
+  int newL = self->m->getLeftCount(),						//Get encoder ticks
+      newR = self->m->getRightCount();
+  
+  // Encoder differences										//Inverse Kinematics
   dSL = newL - self->enc->L; 
   dSR = newR - self->enc->R; 
 
   // Translate to position updates
   dS      = ENC_TO_D((dSL + dSR) / 2.f);  
   dTheta  = (dSR - dSL) / WHEEL_BASE_WIDTH;
+  
   // Apply Rw = Rw + dRw
   self->state->vel = dS;
 
-  self->state->x += self->state->vel * cosf(self->state->theta + dTheta);  
-  self->state->y += self->state->vel * sinf(self->state->theta + dTheta);  
-
+  self->state->x += dS * cosf(self->state->theta + dTheta/2);  
+  self->state->y += dS * sinf(self->state->theta + dTheta/2);  
+																		//Get accel angle and do complimentary filter
+  self->state->theta = compliFilter*self->acc->getAngle() + 
+  								(1-compliFilter)*(self->state->theta + dTheta);
   self->enc->L = newL;
   self->enc->R = newR;
   // TODO Update the Transforms here??
