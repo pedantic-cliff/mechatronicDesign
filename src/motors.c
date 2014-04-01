@@ -203,11 +203,6 @@ void setSpeeds(Motors self, float l, float r){
 
   L_PWM = self->PWM_Min + (long)(l * PWM_SCALER); 
   R_PWM = self->PWM_Min + (long)(r * PWM_SCALER); 
-  USART_puts("Motor Speeds: ");
-  USART_putInt(L_PWM);
-  USART_puts(", ");
-  USART_putInt(R_PWM);
-  USART_puts("\n\r");
   TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
   TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
 }; 

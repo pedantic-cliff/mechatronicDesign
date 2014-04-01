@@ -21,6 +21,7 @@ typedef struct localizer{
   Accel  acc;
 
   void (*update)(Localizer self);
+  void (*restart)(Localizer self);
 
 } localizer_t;
 

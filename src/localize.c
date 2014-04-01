@@ -42,6 +42,13 @@ void update(Localizer self){
   // TODO Update the Transforms here??
 }
 
+void restart(Localizer self){
+  self->state->x = 0.f;
+  self->state->y = 0.f;
+  self->state->theta = self->acc->getAngle();
+  self->state->vel = 0.0f;
+}
+
 Localizer createLocalizer(Motors m, Accel acc){
   Localizer l = &_storage;
 
@@ -59,6 +66,7 @@ Localizer createLocalizer(Motors m, Accel acc){
   l->acc = acc;
 
   l->update = update; 
+  l->restart = restart; 
   
   return l;
 }

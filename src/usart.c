@@ -258,9 +258,9 @@ void parseParams(void){
       distGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
-      bearGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
-      bearGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
-      bearGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      bearGains.Kp = angleGains.Kp; 
+      bearGains.Ks = angleGains.Ks; 
+      bearGains.Kd = angleGains.Kd; 
       pid->setGains(pid, distGains, bearGains, angleGains);
       break;
   }

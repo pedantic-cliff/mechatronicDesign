@@ -59,13 +59,13 @@ class Application(Frame):
 
   def create_widgets(self):
     "Creating the widgets"
-    self.label_left_P=Label(self,text="Left Position").grid(row=1, column=1, sticky=W)
-    self.label_left_S=Label(self,text="Left Sum").grid(row=1, column=2, sticky=W)
-    self.label_left_D=Label(self,text="Left Difference").grid(row=1, column=2, sticky=W)
+    self.label_left_P=Label(self,text="Angle Position").grid(row=1, column=1, sticky=W)
+    self.label_left_S=Label(self,text="Angle Sum").grid(row=1, column=2, sticky=W)
+    self.label_left_D=Label(self,text="Angle Difference").grid(row=1, column=3, sticky=W)
 
-    self.label_right_P=Label(self,text="Right Position").grid(row=3, column=1, sticky=W)
-    self.label_right_S=Label(self,text="Right Sum").grid(row=3, column=2, sticky=W)
-    self.label_right_D=Label(self,text="Right Difference").grid(row=3, column=3, sticky=W)
+    self.label_right_P=Label(self,text="Dist Position").grid(row=3, column=1, sticky=W)
+    self.label_right_S=Label(self,text="Dist Sum").grid(row=3, column=2, sticky=W)
+    self.label_right_D=Label(self,text="Dist Difference").grid(row=3, column=3, sticky=W)
 
     self.data_L_P= Entry(self)
     self.data_L_P.grid(row=2, column=1,sticky=W)                                                                  

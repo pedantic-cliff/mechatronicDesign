@@ -5,12 +5,6 @@
 
 static volatile int running = 0;
 
-void start(void){
-  running = 1;
-}
-void halt(void){
-  running = 0;
-}
 
 ColorSensors colorSensors; 
 Accel accel; 
@@ -27,6 +21,14 @@ PID_Gains angleGains  = { 0.0f, 0.0f, 0.0f },
           bearGains   = { 0.0f, 0.0f, 0.0f };
 static void init(void);
 static void loop(void);
+
+void start(void){
+  localizer->restart(localizer);
+  running = 1;
+}
+void halt(void){
+  running = 0;
+}
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
@@ -119,8 +121,6 @@ void doPID(void){
 
 static void loop() {
   static int i = 0; 
-  USART_puts("Loop\n");
-  delay(3000);
   //doColors();
   doLocalize();
   doPID();
