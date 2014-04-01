@@ -10,25 +10,28 @@
 #include <stdio.h>
 #include "math.h"
 
-static ColorSensors colorSensors; 
-static Accel accel; 
-static Motors motors; 
+volatile int running = 0;
 
-static Localizer localizer;
+ColorSensors colorSensors; 
+Accel accel; 
+Motors motors; 
 
-static state_t _targState; 
-static State targState;
+Localizer localizer;
 
-static Pid pid; 
-static PID_Gains angleGains = { 1.f, 0.5f, 0.0f },
-                 posGains   = { 0.0f, 0.0f, 0.0f },
-                 velGains   = { 1.0f, 0.0f, 0.0f };
+state_t _targState; 
+State targState;
+
+Pid pid; 
+PID_Gains angleGains = { 0.0f,  0.0f, 0.0f },
+          posGains   = { 0.0f, 0.0f, 0.0f },
+          velGains   = { 0.0f, 0.0f, 0.0f };
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
   do {
-    loop();
+    if(running)
+      loop();
     delay(300);
   } while (1);
 }
@@ -45,7 +48,7 @@ void init() {
   delay(500);
   localizer = createLocalizer(motors, accel);
   pid = createPID(angleGains, posGains, velGains, motors); 
-  USART_puts("Init finished \r\n");
+  //USART_puts("Init finished \r\n");
 }
 
 int doColor(Color c){
@@ -113,6 +116,8 @@ void doPID(void){
 
 void loop() {
   static int i = 0; 
+  USART_puts("Loop\n");
+  delay(3000);
   //doColors();
   doLocalize();
   doPID();
