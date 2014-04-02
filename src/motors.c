@@ -214,7 +214,7 @@ void setOffset(Motors self, int offset){
 Motors createMotors(void){
   Motors m = &_storage; 
 
-  m->PWM_Min = 0x3000;
+  m->PWM_Min = 0x0000;
 
   m->getLeftCount   = getLeftCount;
   m->getRightCount  = getRightCount;
