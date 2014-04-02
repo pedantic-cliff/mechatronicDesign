@@ -97,6 +97,14 @@ void setGains(Pid pid, PID_Gains distG, PID_Gains bearG, PID_Gains angG){
 
 }
 
+void resetPIDError(void){
+	eT.p = 0.f;eT.s = 0.f;eT.d = 0.f;eT.first = 1.f;
+	eB.p = 0.f;eB.s = 0.f;eB.d = 0.f;eB.first = 1.f;
+	eDist.p = 0.f;eDist.s = 0.f;eDist.d = 0.f;eDist.first = 1.f;
+	eLm.p = 0.f;eLm.s = 0.f;eLm.d = 0.f;eLm.first = 1.f;
+	eRm.p = 0.f;eRm.s = 0.f;eRm.d = 0.f;eRm.first = 1.f;
+}
+
 Pid createPID(PID_Gains distG, PID_Gains bearG, PID_Gains angG, Motors m){
 	Pid pid = & _storage;
 
