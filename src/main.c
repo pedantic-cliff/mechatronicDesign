@@ -24,7 +24,6 @@ static void loop(void);
 
 void start(void){
   localizer->restart(localizer);
-  motors->setSpeeds(motors, 0x3000,-0x3000);
   running = 1;
 }
 void halt(void){
@@ -35,6 +34,7 @@ void halt(void){
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
+  motors->setSpeeds(motors, 0x1,0x1); 
   //start();
   do {
     if(running)
@@ -123,8 +123,8 @@ static void loop() {
   static int i = 0; 
   //doColors();
   doLocalize();
-  //doPID();
-  doLog();
+  doPID();
+  //doLog();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
