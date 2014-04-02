@@ -47,10 +47,10 @@
 #define PWM_SCALER 1
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
-#define DIR_PIN_RR GPIO_Pin_12
-#define DIR_PIN_FR GPIO_Pin_14
-#define DIR_PIN_FL GPIO_Pin_13
-#define DIR_PIN_RL GPIO_Pin_15
+#define DIR_PIN_FR GPIO_Pin_12
+#define DIR_PIN_RR GPIO_Pin_14
+#define DIR_PIN_RL GPIO_Pin_13
+#define DIR_PIN_FL GPIO_Pin_15
 
 // Private storage
 static motors_t _storage;
