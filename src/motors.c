@@ -44,7 +44,7 @@
 
 // MOTOR CONTROL 
 #define PWM_MAX 0x8000
-#define PWM_SCALER 1
+#define PWM_SCALER 700
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
 #define DIR_PIN_FR GPIO_Pin_12
@@ -215,8 +215,8 @@ void setOffset(Motors self, int offset_L, int offset_R){
 Motors createMotors(void){
   Motors m = &_storage; 
 
-  m->PWM_Min_L = 0xC00;
-  m->PWM_Min_R = 0xB00;
+  m->PWM_Min_L = 0xA80;
+  m->PWM_Min_R = 0x800;
 
   m->getLeftCount   = getLeftCount;
   m->getRightCount  = getRightCount;

@@ -98,7 +98,7 @@ class Application(Frame):
     self.scroller.config(width='1')
 
 
-    self.output=Text(self, width=30, height=25, wrap=WORD)
+    self.output=Text(self, width=90, height=25, wrap=WORD)
     self.output.grid(row=15, column=2,sticky='nsew')
     global output
     output = self.output

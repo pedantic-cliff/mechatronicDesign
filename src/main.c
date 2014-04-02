@@ -34,7 +34,7 @@ void halt(void){
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
-  motors->setSpeeds(motors, 0x1,0x1); 
+  motors->setSpeeds(motors, 5, 5); 
   //start();
   do {
     if(running)
@@ -71,7 +71,6 @@ void doLocalize(void){
 }
 
 void doLog(void){
-  USART_puts("Encoders: ");
   USART_putInt(motors->getLeftCount());
   USART_puts("\t");
   USART_putInt(motors->getRightCount());
@@ -123,8 +122,8 @@ static void loop() {
   static int i = 0; 
   //doColors();
   doLocalize();
-  doPID();
-  //doLog();
+  //doPID();
+  doLog();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
