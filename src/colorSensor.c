@@ -181,18 +181,18 @@ void ADC_IRQHandler(void){
 }
 
 void measureColor(ColorSensors cs, Color c){
-  GPIO_ResetBits(LIGHT_PORT, ALL_LIGHTS);
+  GPIO_SetBits(LIGHT_PORT, GREEN_PIN |  RED_PIN | BLUE_PIN);
   switch(c){
     case RED:
-      GPIO_SetBits(LIGHT_PORT, RED_PIN); 
+      GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
       currIdx = RED_IDX;
       break;
     case GREEN:
-      GPIO_SetBits(LIGHT_PORT, GREEN_PIN); 
+      GPIO_ResetBits(LIGHT_PORT, GREEN_PIN); 
       currIdx = GREEN_IDX;
       break;
     case BLUE: 
-      GPIO_SetBits(LIGHT_PORT, BLUE_PIN); 
+      GPIO_ResetBits(LIGHT_PORT, BLUE_PIN); 
       currIdx = BLUE_IDX;
       break;
     case NONE: 

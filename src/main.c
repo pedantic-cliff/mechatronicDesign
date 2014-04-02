@@ -73,18 +73,13 @@ void doColors(void){
   g = doColor(GREEN);
   b = doColor(BLUE);
 
-  min = n;
-  min = min < r ? min: r;
-  min = min < b ? min: b;
-  min = min < g ? min: g;
-
-  USART_putInt(n - min);
+  USART_putInt(n );
   USART_puts("\t");
-  USART_putInt(r - min);
+  USART_putInt(r);
   USART_puts("\t");
-  USART_putInt(g - min);
+  USART_putInt(g);
   USART_puts("\t");
-  USART_putInt(b - min);
+  USART_putInt(b);
   USART_puts("\n\r");
 }
 
