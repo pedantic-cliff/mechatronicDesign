@@ -201,20 +201,22 @@ void setSpeeds(Motors self, float l, float r){
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
 
-  L_PWM = self->PWM_Min + (long)(l * PWM_SCALER); 
-  R_PWM = self->PWM_Min + (long)(r * PWM_SCALER); 
+  L_PWM = self->PWM_Min_L + (long)(l * PWM_SCALER); 
+  R_PWM = self->PWM_Min_R + (long)(r * PWM_SCALER); 
   TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
   TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
 }; 
 
-void setOffset(Motors self, int offset){
-  self->PWM_Min = offset; 
+void setOffset(Motors self, int offset_L, int offset_R){
+  self->PWM_Min_L = offset_L; 
+  self->PWM_Min_R = offset_R; 
 }
 
 Motors createMotors(void){
   Motors m = &_storage; 
 
-  m->PWM_Min = 0x0000;
+  m->PWM_Min_L = 0xC00;
+  m->PWM_Min_R = 0xB00;
 
   m->getLeftCount   = getLeftCount;
   m->getRightCount  = getRightCount;
