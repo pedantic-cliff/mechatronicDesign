@@ -24,6 +24,7 @@ static void loop(void);
 
 void start(void){
   localizer->restart(localizer);
+  motors->setSpeeds(motors, 0x3000,-0x3000);
   running = 1;
 }
 void halt(void){
@@ -70,16 +71,13 @@ void doLocalize(void){
 }
 
 void doLog(void){
-  USART_puts("State Vector: [");
-  USART_puts("\n\r");
-  
   USART_puts("Encoders: ");
   USART_putInt(motors->getLeftCount());
   USART_puts("\t");
   USART_putInt(motors->getRightCount());
   USART_puts("\n\r");
 
-
+/*
   USART_puts("x, y: ");
   USART_putFloat(localizer->state->x);
   USART_puts("\t");
@@ -92,6 +90,7 @@ void doLog(void){
   USART_puts("Vel: ");
   USART_putFloat(localizer->state->vel);
   USART_puts("\n\r");
+  */
 }
 
 void doColors(void){
@@ -124,8 +123,8 @@ static void loop() {
   static int i = 0; 
   //doColors();
   doLocalize();
-  doPID();
-  //doLog();
+  //doPID();
+  doLog();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 

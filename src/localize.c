@@ -2,7 +2,7 @@
 #include "math.h"
 #include "usart.h"
 
-static float compliFilter = 0.75;						//More implies more weight to accel
+static float compliFilter = 0;						//More implies more weight to accel
 static struct localizer _storage; 
 
 typedef struct enc{
@@ -26,8 +26,8 @@ void update(Localizer self){
   dSR = newR - self->enc->R; 
 
   // Translate to position updates
-  dS      = ENC_TO_D((dSL + dSR) / 2.f);  
-  dTheta  = (dSR - dSL) / WHEEL_BASE_WIDTH;
+  dS      =  ENC_TO_D((dSL + dSR) / 2.f);  
+  dTheta  = (ENC_TO_D(dSR - dSL)) / WHEEL_BASE_WIDTH;
   
   // Apply Rw = Rw + dRw
   self->state->vel = dS;
@@ -45,7 +45,7 @@ void update(Localizer self){
 void restart(Localizer self){
   self->state->x = 0.f;
   self->state->y = 0.f;
-  self->state->theta = self->acc->getAngle();
+  self->state->theta = 0.f;//self->acc->getAngle();
   self->state->vel = 0.0f;
 }
 
@@ -55,7 +55,7 @@ Localizer createLocalizer(Motors m, Accel acc){
   l->state = &_state;
   l->state->x = 0.f;
   l->state->y = 0.f;
-  l->state->theta = acc->getAngle();
+  l->state->theta = 0.f;//acc->getAngle();
   l->state->vel = 0.f;
 
   l->enc = &_enc;
