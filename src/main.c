@@ -12,7 +12,7 @@ Motors motors;
 
 Localizer localizer;
 
-state_t _targState {0.f,0.f,PI/2,0.f}; 
+state_t _targState = {0.f,0.f,PI/2,0.f}; 
 State targState;
 
 Pid pid; 
@@ -28,12 +28,13 @@ void start(void){
 }
 void halt(void){
   running = 0;
+  motors->setSpeeds(motors, 0,0);
 }
 
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
-  start();
+  //start();
   do {
     if(running)
       loop();

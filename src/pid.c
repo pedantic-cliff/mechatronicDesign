@@ -91,20 +91,6 @@ void setGains(Pid pid, PID_Gains distG, PID_Gains bearG, PID_Gains angG){
 	pid->angGains.Ks = angG.Ks;
 	pid->angGains.Kd = angG.Kd;
 
-  USART_puts("Got: ");
-  USART_putFloat(distG.Kp);
-  USART_puts("\t");
-  USART_putFloat(distG.Ks);
-  USART_puts("\t");
-  USART_putFloat(distG.Kd);
-  USART_puts("\t");
-  USART_putFloat(angG.Kp);
-  USART_puts("\t");
-  USART_putFloat(angG.Ks);
-  USART_puts("\t");
-  USART_putFloat(angG.Kd);
-  USART_puts("\n");
-
 }
 
 Pid createPID(PID_Gains distG, PID_Gains bearG, PID_Gains angG, Motors m){
