@@ -1,6 +1,6 @@
 #demonstrating a PID GUI using tkinter
 
-from tkinter import *
+from Tkinter import *
 import threading
 import time
 import serial
@@ -37,7 +37,7 @@ class Port:
     return str(self.serial.read(size),'ascii')
 
 global p
-p = Port("/dev/ttyUSB0")
+#p = Port("/dev/ttyUSB0")
 
 def updateSerialLog():
   i = 0
