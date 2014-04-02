@@ -69,16 +69,14 @@ void doLog(void){
 void doColors(void){
   int n,r,g,b,min;
   n = doColor(NONE);
-  r = doColor(RED);
-  g = doColor(GREEN);
-  b = doColor(BLUE);
+  r = doColor(RED)   - n;
+  g = doColor(GREEN) - n;
+  b = doColor(BLUE)  - n;
 
-  min = n;
-  min = min < r ? min: r;
-  min = min < b ? min: b;
-  min = min < g ? min: g;
-/*
-  USART_putInt(n - min);
+  colorSensors->guessColor(r,g,b);
+
+  
+  USART_putInt(n);
   USART_puts("\t");
   USART_putInt(r);
   USART_puts("\t");
@@ -86,7 +84,7 @@ void doColors(void){
   USART_puts("\t");
   USART_putInt(b);
   USART_puts("\n\r");
-*/
+  
 }
 
 void loop() {
