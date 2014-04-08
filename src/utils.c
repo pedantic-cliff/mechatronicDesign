@@ -5,6 +5,7 @@
 #include "stm32f4xx_syscfg.h"
 #include "stm32f4xx_exti.h"
 #include "misc.h"
+#include "main.h"
 
 /******* Init USER_BUTTON on the project board *********/
 void initButton(void) {
@@ -103,6 +104,10 @@ long getCurrentTime(void){
 
 void SysTick_Handler(void){
   currentTime++; 
+  enableLEDs(RED);
+  if(running)
+    tick_loop();
+  disableLEDs(RED);
 }
 
 void delay(uint32_t ms) {

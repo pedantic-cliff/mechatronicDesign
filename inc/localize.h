@@ -11,6 +11,7 @@ typedef struct enc *Enc;
 typedef struct localizer *Localizer;
 typedef struct localizer{
   // Coordinates of robot in world frame
+  State _state;
   State state;
 
   // Current counts of L and R encoders
@@ -21,6 +22,7 @@ typedef struct localizer{
   Accel  acc;
 
   void (*update)(Localizer self);
+  void (*cacheState)(Localizer self);
   void (*restart)(Localizer self);
 
 } localizer_t;
