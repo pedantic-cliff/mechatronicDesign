@@ -11,13 +11,13 @@ Motors motors;
 
 Localizer localizer;
 
-state_t _targState = {36.f,0.f,0.f,0.f}; 
+state_t _targState = {24.f,0.f,0.f,0.f}; 
 State targState;
 
 Pid pid; 
-PID_Gains angleGains  = { 1.0f, 0.0f, 0.0f },
-          distGains   = { 1.0f, 0.0f, 0.0f },
-          bearGains   = { 1.0f, 0.0f, 0.0f };
+PID_Gains angleGains  = { 5.0f, 0.0f, 0.0f },
+          distGains   = { 10.0f, 0.0f, 0.0f },
+          bearGains   = { 0.0f, 0.0f, 0.0f };
 static void init(void);
 static void loop(void);
 

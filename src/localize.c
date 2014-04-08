@@ -48,6 +48,7 @@ static void update(Localizer self){
   } else { 
     self->_state->theta = (self->_state->theta + dTheta);
   }
+  
   self->_state->theta = fixAngle(self->_state->theta);
   self->enc->L = newL;
   self->enc->R = newR;

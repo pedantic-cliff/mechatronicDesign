@@ -43,8 +43,9 @@
 #define RIGHT_COUNT() ENCR_TIMER->CNT
 
 // MOTOR CONTROL 
-#define PWM_MAX 0x8000
-#define PWM_SCALER 700
+#define PWM_PERIOD 	0x8000
+#define PWM_MAX 		0x2000
+#define PWM_SCALER 	700
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
 #define DIR_PIN_FR GPIO_Pin_12
@@ -129,7 +130,7 @@ void initPWM(void){
   /* Compute the prescaler value */
   PrescalerValue = (uint16_t) ((SystemCoreClock /2) / 28000000) - 1;
   /* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = PWM_MAX;
+  TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Down;
