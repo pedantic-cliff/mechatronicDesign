@@ -3,6 +3,7 @@
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_rcc.h>
 #include <math.h>
+#include "utils.h"
 
 #define CTRL_REG1 0x20
 #define OUT_X     0x29
@@ -27,6 +28,7 @@ uint8_t accel_getZ(void){
 }
 
 float accel_getAngle(){ 
+  int i = 0; 
   int8_t x, y; 
   x = accel_getX(); 
   y = accel_getY();
