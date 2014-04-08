@@ -10,7 +10,9 @@
 
 void halt(void);
 void start(void);
+void tick_loop(void);
 
+extern volatile int running;
 extern ColorSensors colorSensors; 
 extern Accel accel; 
 extern Motors motors; 

@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include "math.h"
 
-static volatile int running = 0;
-
+volatile int running = 0;
 
 ColorSensors colorSensors; 
 Accel accel; 
@@ -31,11 +30,6 @@ void halt(void){
   motors->setSpeeds(motors, 0,0);
 }
 
-void tick_loop(void){
-  doLocalize();
-  doPID();
-}
-
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
@@ -56,6 +50,7 @@ static void init() {
   delay(500);
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
+  initSysTick(); 
   //USART_puts("Init finished \r\n");
 }
 
@@ -64,10 +59,6 @@ int doColor(Color c){
   while(colorSensors->done < COLOR_SENSOR_ITERS); 
   volatile uint16_t* res = colorSensors->getResult(); 
   return res[0];
-}
-
-void doLocalize(void){
-  localizer->update(localizer);
 }
 
 void doLog(void){
@@ -122,17 +113,18 @@ void doCalibrateColors(){
   colorSensors->calibrateColor(colorSensors, BLUE);
 }
 
-void doPID(void){
-  pid->loop(pid, targState, localizer->state);
+void updateState(void){
+  __disable_irq();
+  localizer->cacheState(localizer);
+  __enable_irq();
 }
 
 void loop(void) {
   static int i = 0; 
   //doCalibrateColors();
   //doColors();
+  
   doLog();
-  //doLocalize();
-  //doLog();
   delay(50);
   if(i++ & 0x1)
     enableLEDs(BLUE);
@@ -140,4 +132,7 @@ void loop(void) {
     disableLEDs(BLUE);
 }
 
-
+void tick_loop(void){
+  localizer->update(localizer);
+  pid->loop(pid, targState, localizer->state);
+}
