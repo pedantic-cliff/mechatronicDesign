@@ -113,7 +113,7 @@ void doCalibrateColors(){
   colorSensors->calibrateColor(colorSensors, BLUE);
 }
 
-void updateState(void){
+void doUpdateState(void){
   __disable_irq();
   localizer->cacheState(localizer);
   __enable_irq();
@@ -121,11 +121,11 @@ void updateState(void){
 
 void loop(void) {
   static int i = 0; 
+  //doUpdateState();
   //doCalibrateColors();
   //doColors();
-  
   doLog();
-  delay(50);
+  delay(200);
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 

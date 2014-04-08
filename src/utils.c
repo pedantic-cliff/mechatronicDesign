@@ -94,7 +94,7 @@ void disableLEDs(Color c){
 static long currentTime; 
 void initSysTick(void){
   currentTime = 0; 
-  SysTick_Config(SystemCoreClock / 1000);
+  SysTick_Config(SystemCoreClock / 10000);
   NVIC_SetPriority(SysTick_IRQn, 1); 
 }
 

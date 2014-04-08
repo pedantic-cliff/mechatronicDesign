@@ -224,8 +224,17 @@ void USART_putFloat(float num){
   }
   int numI = num;
   USART_putInt(numI); 
-  numI = ((int)(1000 * num)) % 1000;
+  numI = ((int)(100000 * num)) % 100000;
   USART_puts("."); 
+  if(numI < 10000) 
+    USART_puts("0");
+  if(numI < 1000) 
+    USART_puts("0");
+  if(numI < 100) 
+    USART_puts("0");
+  if(numI < 10) 
+    USART_puts("0");
+
   USART_putInt(numI);
 }
 extern volatile int running; 

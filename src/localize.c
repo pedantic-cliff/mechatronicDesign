@@ -18,6 +18,8 @@ static state_t _state;
 
 // Derive update, currently uses encoders to get dS and Accel to get theta
 static void update(Localizer self){
+  static int iters = 0; 
+  iters++;
   float dSL, dSR, dS, dTheta;									//Updates from encoders
   
   int newL = self->m->getLeftCount(),						//Get encoder ticks
@@ -36,9 +38,16 @@ static void update(Localizer self){
 
   self->_state->x += dS * cosf(self->_state->theta + dTheta/2);  
   self->_state->y += dS * sinf(self->_state->theta + dTheta/2);  
-																		//Get accel angle and do complimentary filter
-  self->_state->theta = compliFilter*self->acc->getAngle() + 
-  								(1-compliFilter)*(self->_state->theta + dTheta);
+
+  if (iters & 0x10){
+    iters = 0; 
+    // Get accel angle and do complimentary filter
+    // This is a delay as accelerometer is much slower
+    self->_state->theta = compliFilter*self->acc->getAngle() + 
+                    (1-compliFilter)*(self->_state->theta + dTheta);
+  } else { 
+    self->_state->theta = (self->_state->theta + dTheta);
+  }
   self->_state->theta = fixAngle(self->_state->theta);
   self->enc->L = newL;
   self->enc->R = newR;
