@@ -99,11 +99,15 @@ void initSysTick(void){
 }
 
 long getCurrentTime(void){ 
-  return currentTime; 
+  long time; 
+  __disable_irq();
+  time = currentTime; 
+  __enable_irq();
+  return time / 1000; 
 }
 
 void SysTick_Handler(void){
-  currentTime++; 
+  currentTime += 200; 
   enableLEDs(RED);
   if(running)
     tick_loop();
