@@ -7,6 +7,7 @@
 
 #define NUM_COLORS  4
 #define COLOR_SENSOR_ITERS 8
+#define COLOR_SENSOR_CALIB_ITERS 250
 
 #define NONE_IDX    0
 #define RED_IDX     1
@@ -35,6 +36,7 @@ typedef struct colorSensors_t {
 
   void (*measureColor) (ColorSensors sensors, Color color); 
   void (*guessColor) (int r, int g, int b); 
+  void (*calibrateColor) (ColorSensors sensors, Color color); 
   volatile uint16_t* (*getResult) (void); 
   volatile int done; 
 } colorSensor;

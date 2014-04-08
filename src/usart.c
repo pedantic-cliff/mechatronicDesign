@@ -6,7 +6,7 @@
 #include <stm32f4xx_conf.h> 
 
 #define MAX_STRLEN 64 // this is the maximum string length of our string in characters
-#define BAUD_RATE 15000     // Somehow this corresponds to 4800!!
+#define BAUD_RATE 30000     // Somehow this corresponds to 4800!!
 
 volatile char received_string[MAX_STRLEN+1]; // this will hold the recieved string
 

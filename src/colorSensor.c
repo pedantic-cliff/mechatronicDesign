@@ -173,7 +173,6 @@ void startADC(void){
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
   }
-  delay(150);
   enableLEDs(GREEN);
 //  TIM_SetCounter(TIM8, 0xFFF);
 //  TIM_Cmd(TIM8, ENABLE);
@@ -213,7 +212,56 @@ void measureColor(ColorSensors cs, Color c){
       break;
   }
   currColor = c;
+  delay(150);
   startADC(); 
+}
+
+void calibrateColor(ColorSensors cs, Color c){ 
+  int i = 0, j = 0; 
+  volatile uint16_t *results; 
+
+  enableLEDs(RED);
+  float senMeans[NUM_SENSORS];
+  for(i = 0; i < NUM_SENSORS; i++){
+    senMeans[i] = 0.f;
+  }
+  GPIO_ResetBits(LIGHT_PORT, ALL_LIGHTS);
+  switch(c){
+    case RED:
+      GPIO_SetBits(LIGHT_PORT, RED_PIN); 
+      currIdx = RED_IDX;
+      break;
+    case GREEN:
+      GPIO_SetBits(LIGHT_PORT, GREEN_PIN); 
+      currIdx = GREEN_IDX;
+      break;
+    case BLUE: 
+      GPIO_SetBits(LIGHT_PORT, BLUE_PIN); 
+      currIdx = BLUE_IDX;
+      break;
+    case NONE: 
+    default: 
+      currIdx = NONE_IDX;
+      break;
+  }
+  currColor = c;
+  delay(150);
+  for(i = 0; i < COLOR_SENSOR_CALIB_ITERS; i++){
+    startADC(); 
+    while(cs->done < COLOR_SENSOR_ITERS); 
+    results = cs->getResult(); 
+    for(j = 0; j < NUM_SENSORS; j++){
+      senMeans[j] += results[j]; 
+    }
+  }
+  disableLEDs(RED);
+  USART_puts("Means: "); 
+  for(j = 0; j < NUM_SENSORS; j++){
+    senMeans[j] /= COLOR_SENSOR_CALIB_ITERS; 
+    USART_putFloat(senMeans[j]);
+    USART_puts(",\t"); 
+  }
+  USART_puts("\n\r");
 }
 
 volatile uint16_t* getResult(void){
@@ -269,6 +317,9 @@ ColorSensors createColorSensors(void){
   centroids[1] = &metal;
   centroids[2] = &yellow;
   centroids[3] = &white;
+  cs->measureColor    = measureColor;
+  cs->calibrateColor  = calibrateColor;
+  cs->getResult       = getResult; 
 
   return &colorSensors;
 }

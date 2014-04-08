@@ -13,7 +13,6 @@ ColorSensors colorSensors;
 Accel accel; 
 Motors motors; 
 Localizer localizer;
-
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
@@ -87,11 +86,27 @@ void doColors(void){
   
 }
 
-void loop() {
+/*void doPID(void){
+  pid->loop(pid, targState, localizer->state);
+}*/
+
+void doCalibrateColors(){
+  colorSensors->calibrateColor(colorSensors, NONE);
+  colorSensors->calibrateColor(colorSensors, RED);
+  colorSensors->calibrateColor(colorSensors, GREEN);
+  colorSensors->calibrateColor(colorSensors, BLUE);
+}
+
+void loop(void) {
   static int i = 0; 
-  doColors();
+  doCalibrateColors();
+  //doColors();
+  //doLocalize();
+  //doPID();
+  //doLog();
   //doLocalize();
   //doLog();
+  delay(1000);
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
