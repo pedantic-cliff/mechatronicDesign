@@ -42,7 +42,7 @@ void calcAllErrs(State targ,State curr){
 	xTrans =  (targ->x - curr->x)*cosf(theta) + (targ->y - curr->y)*sinf(theta);
 	yTrans = -(targ->x - curr->x)*sinf(theta) + (targ->y - curr->y)*cosf(theta);
 	
-	xyDistErr = sqrt((xTrans*xTrans)+(yTrans*yTrans));					
+	xyDistErr = (xTrans * sqrt((xTrans*xTrans)+(yTrans*yTrans)))/fabsf(xTrans);
 	bearErr = atan2f(yTrans,xTrans);
 	angErr = targ->theta - curr->theta;
 	angErr = fixAngle(angErr);
