@@ -23,13 +23,6 @@ static pidError_t eDist = {0.f, 0.f, 0.f, 1};
 static pidError_t eLm = {0.f, 0.f, 0.f, 1};
 static pidError_t eRm = {0.f, 0.f, 0.f, 1};
 
-float fixAngles(float inAngle){
-	float outAngle;								//Calc and convert angular error to (-pi,pi]
-	outAngle = atan2f(sinf(inAngle),cosf(inAngle));
-	return outAngle;
-}
-
-
 void calcErr(const float err, Error E, float integThresh){
 	if(E->first==1){								//Check if the error struct is virgin yet
 		E->p = err;
@@ -52,7 +45,7 @@ void calcAllErrs(State targ,State curr){
 	xyDistErr = sqrt((xTrans*xTrans)+(yTrans*yTrans));					
 	bearErr = atan2f(yTrans,xTrans);
 	angErr = targ->theta - curr->theta;
-	angErr = fixAngles(angErr);
+	angErr = fixAngle(angErr);
 	
 	calcErr(xyDistErr,&eDist,2.0f);
 	calcErr(bearErr,&eB, PI/18.f);

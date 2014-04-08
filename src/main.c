@@ -12,12 +12,12 @@ Motors motors;
 
 Localizer localizer;
 
-state_t _targState = {0.f,0.f,PI/2,0.f}; 
+state_t _targState = {10.f,10.f,PI/2,0.f}; 
 State targState;
 
 Pid pid; 
 PID_Gains angleGains  = { 0.0f, 0.0f, 0.0f },
-          distGains   = { 0.0f, 0.0f, 0.0f },
+          distGains   = { 0.01f, 0.0f, 0.0f },
           bearGains   = { 0.0f, 0.0f, 0.0f };
 static void init(void);
 static void loop(void);
@@ -31,22 +31,22 @@ void halt(void){
   motors->setSpeeds(motors, 0,0);
 }
 
+void tick_loop(void){
+  doLocalize();
+  doPID();
+}
+
 int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
-  motors->setSpeeds(motors, 5, 5); 
-  //start();
+  start();
   do {
     if(running)
       loop();
-    delay(300);
   } while (1);
 }
 
 static void init() {
-  static PID_Gains angleGains = { 0.0f, 0.0f, 0.0f },
-                   posGains   = { 0.0f, 0.0f, 0.0f },
-                   velGains   = { 0.0f, 0.0f, 0.0f };
   targState = &_targState;
   init_USART(); 
   initLEDs();
@@ -55,7 +55,7 @@ static void init() {
   motors  = createMotors(); 
   delay(500);
   localizer = createLocalizer(motors, accel);
-  pid = createPID(angleGains, posGains, velGains, motors); 
+  pid = createPID(distGains, bearGains,angleGains, motors); 
   //USART_puts("Init finished \r\n");
 }
 
@@ -76,7 +76,6 @@ void doLog(void){
   USART_putInt(motors->getRightCount());
   USART_puts("\n\r");
 
-/*
   USART_puts("x, y: ");
   USART_putFloat(localizer->state->x);
   USART_puts("\t");
@@ -89,41 +88,52 @@ void doLog(void){
   USART_puts("Vel: ");
   USART_putFloat(localizer->state->vel);
   USART_puts("\n\r");
-  */
 }
 
 void doColors(void){
   int n,r,g,b,min;
   n = doColor(NONE);
-  r = doColor(RED);
-  g = doColor(GREEN);
-  b = doColor(BLUE);
+  r = doColor(RED)   - n;
+  g = doColor(GREEN) - n;
+  b = doColor(BLUE)  - n;
 
-  min = n;
-  min = min < r ? min: r;
-  min = min < b ? min: b;
-  min = min < g ? min: g;
+  colorSensors->guessColor(r,g,b);
 
-  USART_putInt(n - min);
+  
+  USART_putInt(n);
   USART_puts("\t");
-  USART_putInt(r - min);
+  USART_putInt(r);
   USART_puts("\t");
-  USART_putInt(g - min);
+  USART_putInt(g);
   USART_puts("\t");
-  USART_putInt(b - min);
+  USART_putInt(b);
   USART_puts("\n\r");
+  
+}
+
+/*void doPID(void){
+  pid->loop(pid, targState, localizer->state);
+}*/
+
+void doCalibrateColors(){
+  colorSensors->calibrateColor(colorSensors, NONE);
+  colorSensors->calibrateColor(colorSensors, RED);
+  colorSensors->calibrateColor(colorSensors, GREEN);
+  colorSensors->calibrateColor(colorSensors, BLUE);
 }
 
 void doPID(void){
   pid->loop(pid, targState, localizer->state);
 }
 
-static void loop() {
+void loop(void) {
   static int i = 0; 
+  //doCalibrateColors();
   //doColors();
-  doLocalize();
-  //doPID();
   doLog();
+  //doLocalize();
+  //doLog();
+  delay(50);
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 

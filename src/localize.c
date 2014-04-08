@@ -2,7 +2,9 @@
 #include "math.h"
 #include "usart.h"
 
-static float compliFilter = 0;						//More implies more weight to accel
+#define CLEAN_ANGLE(X) ( atan2f(cos(Y
+
+static float compliFilter = 0.f;						//More implies more weight to accel
 static struct localizer _storage; 
 
 typedef struct enc{
@@ -11,7 +13,6 @@ typedef struct enc{
 } enc_t, *Enc;
 static enc_t _enc;
 static state_t _state;
-
 
 
 // Derive update, currently uses encoders to get dS and Accel to get theta
@@ -27,8 +28,8 @@ void update(Localizer self){
 
   // Translate to position updates
   dS      =  ENC_TO_D((dSL + dSR) / 2.f);  
-  dTheta  = (ENC_TO_D(dSR - dSL)) / WHEEL_BASE_WIDTH;
-  
+  dTheta  = fixAngle((ENC_TO_D(dSR - dSL)) / WHEEL_BASE_WIDTH);
+
   // Apply Rw = Rw + dRw
   self->state->vel = dS;
 
@@ -37,6 +38,7 @@ void update(Localizer self){
 																		//Get accel angle and do complimentary filter
   self->state->theta = compliFilter*self->acc->getAngle() + 
   								(1-compliFilter)*(self->state->theta + dTheta);
+  self->state->theta = fixAngle(self->state->theta);
   self->enc->L = newL;
   self->enc->R = newR;
   // TODO Update the Transforms here??

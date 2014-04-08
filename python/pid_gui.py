@@ -15,7 +15,7 @@ class Port:
 
   def __init__(self, port):
     self.port = port
-    self.serial = serial.Serial(self.port,4800,timeout=0.1)
+    self.serial = serial.Serial(self.port,9600,timeout=0.1)
 
   def write(self, key, values = None):
     cnt = 0
@@ -37,7 +37,7 @@ class Port:
     return str(self.serial.read(size))
 
 global p
-p = Port("/dev/ttyUSB1")
+p = Port("/dev/ttyUSB0")
 
 def updateSerialLog():
   i = 0

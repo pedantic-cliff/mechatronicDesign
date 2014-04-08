@@ -13,6 +13,18 @@
 
 #define SENSOR_PORT GPIOD
 
+typedef struct centroid{ 
+  float r; 
+  float g; 
+  float b;
+} centroid_t; 
+
+static struct centroid edge    = { 101.0463f,  243.8729f,  280.8654f };
+static struct centroid metal   = { 1172.3f,    1740.8f,   1944.7f    };
+static struct centroid yellow  = { 2274.5f,    621.7f,    1933.0f    };
+static struct centroid white   = { 2239.8f,    2219.5f,   2158.0f    };
+
+static struct centroid *centroids[4]; 
 __IO uint16_t ADC1ConvertedValue[NUM_SENSORS];
 
 volatile Color currColor; 
@@ -161,7 +173,6 @@ void startADC(void){
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
   }
-  delay(150);
   enableLEDs(GREEN);
 //  TIM_SetCounter(TIM8, 0xFFF);
 //  TIM_Cmd(TIM8, ENABLE);
@@ -181,18 +192,18 @@ void ADC_IRQHandler(void){
 }
 
 void measureColor(ColorSensors cs, Color c){
-  GPIO_ResetBits(LIGHT_PORT, ALL_LIGHTS);
+  GPIO_SetBits(LIGHT_PORT, GREEN_PIN |  RED_PIN | BLUE_PIN);
   switch(c){
     case RED:
-      GPIO_SetBits(LIGHT_PORT, RED_PIN); 
+      GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
       currIdx = RED_IDX;
       break;
     case GREEN:
-      GPIO_SetBits(LIGHT_PORT, GREEN_PIN); 
+      GPIO_ResetBits(LIGHT_PORT, GREEN_PIN); 
       currIdx = GREEN_IDX;
       break;
     case BLUE: 
-      GPIO_SetBits(LIGHT_PORT, BLUE_PIN); 
+      GPIO_ResetBits(LIGHT_PORT, BLUE_PIN); 
       currIdx = BLUE_IDX;
       break;
     case NONE: 
@@ -201,11 +212,93 @@ void measureColor(ColorSensors cs, Color c){
       break;
   }
   currColor = c;
+  delay(1350);
   startADC(); 
+}
+
+void calibrateColor(ColorSensors cs, Color c){ 
+  int i = 0, j = 0; 
+  volatile uint16_t *results; 
+
+  float senMeans[NUM_SENSORS];
+  for(i = 0; i < NUM_SENSORS; i++){
+    senMeans[i] = 0.f;
+  }
+  GPIO_SetBits(LIGHT_PORT, ALL_LIGHTS);
+  switch(c){
+    case RED:
+      GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
+      currIdx = RED_IDX;
+      break;
+    case GREEN:
+      GPIO_ResetBits(LIGHT_PORT, GREEN_PIN); 
+      currIdx = GREEN_IDX;
+      break;
+    case BLUE: 
+      GPIO_ResetBits(LIGHT_PORT, BLUE_PIN); 
+      currIdx = BLUE_IDX;
+      break;
+    case NONE: 
+    default: 
+      currIdx = NONE_IDX;
+      break;
+  }
+  currColor = c;
+  delay(150);
+  for(i = 0; i < COLOR_SENSOR_CALIB_ITERS; i++){
+    startADC(); 
+    while(cs->done < COLOR_SENSOR_ITERS); 
+    results = cs->getResult(); 
+    for(j = 0; j < NUM_SENSORS; j++){
+      senMeans[j] += results[j]; 
+    }
+  }
+  USART_puts("Means: "); 
+  for(j = 0; j < NUM_SENSORS; j++){
+    senMeans[j] /= COLOR_SENSOR_CALIB_ITERS; 
+    USART_putFloat(senMeans[j]);
+    USART_puts(",\t"); 
+  }
+  USART_puts("\n\r");
 }
 
 volatile uint16_t* getResult(void){
   return ADC1ConvertedValue;
+}
+
+float calcCentDiff(int r, int g, int b, centroid_t *cent){
+  float score = (cent->r - r)*(cent->r - r) 
+              + (cent->g - g)*(cent->g - g) 
+              + (cent->b - b)*(cent->b - b);
+  return score;
+}
+void guessColor(int r, int g, int b){
+  int i = 0; 
+  int minIdx = 0; 
+  float min = calcCentDiff(r,g,b,centroids[0]);
+  float val = 0.f;
+  for(i = 1; i < 4; i++){
+    val = calcCentDiff(r,g,b,centroids[i]); 
+    if(val < min){
+      min = val;
+      minIdx = i;
+    }
+  } 
+
+  switch(minIdx){
+    case 0:
+      USART_puts("Edge\n");
+      break;
+    case 1:
+      USART_puts("Metal\n");
+      break;
+    case 2:
+      USART_puts("Yellow\n");
+      break;
+    case 3: 
+      USART_puts("White\n");
+      break;
+  }
 }
 
 ColorSensors createColorSensors(void){
@@ -216,6 +309,15 @@ ColorSensors createColorSensors(void){
 
   cs->measureColor  = measureColor;
   cs->getResult     = getResult; 
+  cs->guessColor    = guessColor; 
+
+  centroids[0] = &edge;
+  centroids[1] = &metal;
+  centroids[2] = &yellow;
+  centroids[3] = &white;
+  cs->measureColor    = measureColor;
+  cs->calibrateColor  = calibrateColor;
+  cs->getResult       = getResult; 
 
   return &colorSensors;
 }

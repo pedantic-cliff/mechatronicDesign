@@ -103,6 +103,9 @@ long getCurrentTime(void){
 
 void SysTick_Handler(void){
   currentTime++; 
+  enableLEDs(RED);
+  tick_loop();
+  disableLEDs(RED);
 }
 
 void delay(uint32_t ms) {
