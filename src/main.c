@@ -11,18 +11,19 @@ Motors motors;
 
 Localizer localizer;
 
-state_t _targState = {10.f,10.f,PI/2,0.f}; 
+state_t _targState = {36.f,0.f,0.f,0.f}; 
 State targState;
 
 Pid pid; 
-PID_Gains angleGains  = { 0.0f, 0.0f, 0.0f },
-          distGains   = { 0.01f, 0.0f, 0.0f },
-          bearGains   = { 0.0f, 0.0f, 0.0f };
+PID_Gains angleGains  = { 1.0f, 0.0f, 0.0f },
+          distGains   = { 1.0f, 0.0f, 0.0f },
+          bearGains   = { 1.0f, 0.0f, 0.0f };
 static void init(void);
 static void loop(void);
 
 void start(void){
   localizer->restart(localizer);
+  delay(3000);
   running = 1;
 }
 void halt(void){
@@ -102,10 +103,6 @@ void doColors(void){
   
 }
 
-/*void doPID(void){
-  pid->loop(pid, targState, localizer->state);
-}*/
-
 void doCalibrateColors(){
   colorSensors->calibrateColor(colorSensors, NONE);
   colorSensors->calibrateColor(colorSensors, RED);
@@ -121,10 +118,10 @@ void doUpdateState(void){
 
 void loop(void) {
   static int i = 0; 
-  //doUpdateState();
+  doUpdateState();
   //doCalibrateColors();
   //doColors();
-  doLog();
+  //doLog();
   delay(200);
   if(i++ & 0x1)
     enableLEDs(BLUE);
@@ -134,5 +131,5 @@ void loop(void) {
 
 void tick_loop(void){
   localizer->update(localizer);
-  pid->loop(pid, targState, localizer->state);
+  pid->loop(pid, targState, localizer->_state);
 }
