@@ -44,7 +44,7 @@
 
 // MOTOR CONTROL 
 #define PWM_PERIOD 	0x8000
-#define PWM_MAX 		0x2000
+#define PWM_MAX 		0x4000
 #define PWM_SCALER 	700
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE

@@ -11,18 +11,26 @@ Motors motors;
 
 Localizer localizer;
 
-state_t _targState = {24.f,0.f,0.f,0.f}; 
+state_t _targStates[] = {
+                         {24.f,   0.f,    0.f,      0.f},
+                         {24.f,   0.f,    PI/2.0f,  0.f},
+                         {24.f,   24.f,   PI/2.0f,  0.f}
+}; 
+int numStates = sizeof(_targStates)/sizeof(state_t);
+int currentState = 0; 
 State targState;
 
 Pid pid; 
-PID_Gains angleGains  = { 5.0f, 0.0f, 0.0f },
-          distGains   = { 10.0f, 0.0f, 0.0f },
-          bearGains   = { 0.0f, 0.0f, 0.0f };
+PID_Gains angleGains  = { 2.00f, 0.02f, 3.0f },
+          distGains   = { 3.5f, 0.03f, 8.0f },
+          bearGains   = { 2.0f, 0.02f, 3.0f };
 static void init(void);
 static void loop(void);
 
 void start(void){
   localizer->restart(localizer);
+  currentState = 0; 
+  targState = &_targStates[currentState];
   delay(3000);
   running = 1;
 }
@@ -42,7 +50,6 @@ int main(void) {
 }
 
 static void init() {
-  targState = &_targState;
   init_USART(); 
   initLEDs();
   colorSensors = createColorSensors(); 
@@ -116,13 +123,24 @@ void doUpdateState(void){
   __enable_irq();
 }
 
+int checkStateDone(void){
+  return ( (fabsf(targState->x - localizer->state->x) < 0.5f)
+      && ( fabsf(targState->y - localizer->state->y) < 0.5f)
+      && ( fabsf(targState->theta - localizer->state->theta) < 1.0f) );
+}
+
 void loop(void) {
   static int i = 0; 
   doUpdateState();
-  //doCalibrateColors();
-  //doColors();
-  //doLog();
-  delay(200);
+  if(checkStateDone()){
+    if(currentState == numStates){
+      motors->setSpeeds(motors,0,0);
+    } else {
+      delay(1000);
+      targState = &_targStates[++currentState];
+    }
+  }
+  doCalibrateColors();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
