@@ -21,9 +21,9 @@ int currentState = 0;
 State targState;
 
 Pid pid; 
-PID_Gains angleGains  = { 2.00f, 0.02f, 3.0f },
-          distGains   = { 3.5f, 0.03f, 8.0f },
-          bearGains   = { 2.0f, 0.02f, 3.0f };
+PID_Gains angleGains  = { 3.50f, 0.00f, 3.0f },
+          distGains   = { 3.5f, 0.00f, 8.0f },
+          bearGains   = { 2.0f, 0.00f, 3.0f };
 static void init(void);
 static void loop(void);
 
@@ -111,10 +111,15 @@ void doColors(void){
 }
 
 void doCalibrateColors(){
+  USART_puts("NONE:\t\t");
   colorSensors->calibrateColor(colorSensors, NONE);
+  USART_puts("RED:\t\t");
   colorSensors->calibrateColor(colorSensors, RED);
+  USART_puts("GREEN:\t\t");
   colorSensors->calibrateColor(colorSensors, GREEN);
+  USART_puts("BLUE:\t\t");
   colorSensors->calibrateColor(colorSensors, BLUE);
+  USART_puts("\r\n\r\n");
 }
 
 void doUpdateState(void){
@@ -124,9 +129,9 @@ void doUpdateState(void){
 }
 
 int checkStateDone(void){
-  return ( (fabsf(targState->x - localizer->state->x) < 0.5f)
-      && ( fabsf(targState->y - localizer->state->y) < 0.5f)
-      && ( fabsf(targState->theta - localizer->state->theta) < 1.0f) );
+  return ( (fabsf(targState->x - localizer->state->x) < 1.0f)
+//      && ( fabsf(targState->y - localizer->state->y) < 1.0f)
+      && ( fabsf(targState->theta - localizer->state->theta) < 0.1f) );
 }
 
 void loop(void) {
@@ -140,7 +145,8 @@ void loop(void) {
       targState = &_targStates[++currentState];
     }
   }
-  doCalibrateColors();
+  //doCalibrateColors();
+  doColors();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
