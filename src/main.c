@@ -49,11 +49,14 @@ void halt(void){
 int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
-  init();
-  start();
+//  init();
+  initLEDs();
+  enableLEDs(ORANGE);
+  colorSensors = createColorSensors(); 
+//  start();
   do {
-    if(running)
-      loop();
+//    if(running)
+//      loop();
   } while (1);
 }
 
