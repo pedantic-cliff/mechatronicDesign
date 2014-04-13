@@ -115,8 +115,8 @@ void SysTick_Handler(void){
 }
 
 void delay(uint32_t ms) {
-  ms *= 9270;
-  while(ms--) {
+  long start = getCurrentTime();
+  while(getCurrentTime() < start + ms) {
     __NOP();
   }
 }

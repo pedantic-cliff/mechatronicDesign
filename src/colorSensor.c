@@ -63,7 +63,7 @@ void initDMA(void){
 void RCC_Configuration(void){
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
 }
   
 void GPIO_Configuration(void)
@@ -88,25 +88,12 @@ void ADC_TimerConfig(void){
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_OCInitTypeDef TIM_OCInitStructure;
   
-  TIM_TimeBaseStructure.TIM_Period = 0xFF;
+  TIM_TimeBaseStructure.TIM_Period = -1;
   TIM_TimeBaseStructure.TIM_Prescaler = 0x4;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0x0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM8, &TIM_TimeBaseStructure);
- 
-  // Stop Timer after one iteration
-  TIM_SelectOnePulseMode(TIM8, TIM_OPMode_Single); 
-  // Set iterrupt bit but don't call interrupts
-  
-  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Timing;
-  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-  TIM_OCInitStructure.TIM_Pulse = 0;
-  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-  TIM_OC1Init(TIM8, &TIM_OCInitStructure);
-  TIM_OC1PreloadConfig(TIM8, TIM_OCPreload_Enable);
-  TIM8->CCR1 = 0; 
-  TIM_ITConfig(TIM8, TIM_IT_CC1, ENABLE);
+  TIM_SelectOutputTrigger(TIM8,TIM_TRGOSource_OC1);
 }
 
 void ADC_Configuration(void)
@@ -125,7 +112,7 @@ void ADC_Configuration(void)
   ADC_InitStructure.ADC_ScanConvMode          = ENABLE; 
   ADC_InitStructure.ADC_ContinuousConvMode    = DISABLE; // Conversions Triggered
   ADC_InitStructure.ADC_ExternalTrigConvEdge  = ADC_ExternalTrigConvEdge_Rising;
-  ADC_InitStructure.ADC_ExternalTrigConv      = ADC_ExternalTrigConv_T8_CC1;
+  ADC_InitStructure.ADC_ExternalTrigConv      = ADC_ExternalTrigConv_T2_TRGO;
   ADC_InitStructure.ADC_DataAlign             = ADC_DataAlign_Right;
   ADC_InitStructure.ADC_NbrOfConversion       = NUM_SENSORS;
   ADC_Init(ADC1, &ADC_InitStructure);
@@ -173,14 +160,12 @@ void startADC(void){
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
   }
-  enableLEDs(GREEN);
-//  TIM_SetCounter(TIM8, 0xFFF);
-//  TIM_Cmd(TIM8, ENABLE);
-  ADC_SoftwareStartConv(ADC1);
+  TIM_Cmd(TIM8, ENABLE);
 } 
 
 void ADC_IRQHandler(void){
   int i ;
+  enableLEDs(GREEN);
   for(i = 0; i < NUM_SENSORS; i++){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
