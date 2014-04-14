@@ -37,7 +37,7 @@ class Port:
     return str(self.serial.read(size))
 
 global p
-p = Port("/dev/ttyUSB0")
+#p = Port("/dev/ttyUSB0")
 
 def updateSerialLog():
   i = 0
@@ -59,47 +59,59 @@ class Application(Frame):
 
   def create_widgets(self):
     "Creating the widgets"
-    self.label_left_P=Label(self,text="Angle Position").grid(row=1, column=1, sticky=W)
-    self.label_left_S=Label(self,text="Angle Sum").grid(row=1, column=2, sticky=W)
-    self.label_left_D=Label(self,text="Angle Difference").grid(row=1, column=3, sticky=W)
+    self.label_P=Label(self,text="Kp").grid(row=1, column=2, sticky=W)
+    self.label_S=Label(self,text="Ks").grid(row=1, column=3, sticky=W)
+    self.label_D=Label(self,text="Kd").grid(row=1, column=4, sticky=W)
+    
+    self.label_dist=Label(self,text="Distance").grid(row=2, column=2, sticky=W)
+    self.label_angle=Label(self,text="Angle").grid(row=3, column=2, sticky=W)
+    self.label_motor=Label(self,text="Motor").grid(row=4, column=2, sticky=W)
 
-    self.label_right_P=Label(self,text="Dist Position").grid(row=3, column=1, sticky=W)
-    self.label_right_S=Label(self,text="Dist Sum").grid(row=3, column=2, sticky=W)
-    self.label_right_D=Label(self,text="Dist Difference").grid(row=3, column=3, sticky=W)
+    self.data_aP= Entry(self)
+    self.data_aP.grid(row=2, column=3,sticky=W)                                                                  
+    self.data_aS= Entry(self)
+    self.data_aS.grid(row=2, column=4,sticky=W)
+    self.data_aD= Entry(self)
+    self.data_aD.grid(row=2, column=5,sticky=W)
 
-    self.data_L_P= Entry(self)
-    self.data_L_P.grid(row=2, column=1,sticky=W)                                                                  
-    self.data_L_S= Entry(self)
-    self.data_L_S.grid(row=2, column=2,sticky=W)
-    self.data_L_D= Entry(self)
-    self.data_L_D.grid(row=2, column=3,sticky=W)
+    self.data_dP= Entry(self)
+    self.data_dP.grid(row=3, column=3,sticky=W)
+    self.data_dS= Entry(self)
+    self.data_dS.grid(row=3, column=4,sticky=W)
+    self.data_dD= Entry(self)
+    self.data_dD.grid(row=3, column=5,sticky=W)
 
-    self.data_R_P= Entry(self)
-    self.data_R_P.grid(row=4, column=1,sticky=W)
-    self.data_R_S= Entry(self)
-    self.data_R_S.grid(row=4, column=2,sticky=W)
-    self.data_R_D= Entry(self)
-    self.data_R_D.grid(row=4, column=3,sticky=W)
+    self.data_mP= Entry(self)
+    self.data_mP.grid(row=4, column=3,sticky=W)
+    self.data_mS= Entry(self)
+    self.data_mS.grid(row=4, column=4,sticky=W)
+    self.data_mD= Entry(self)
+    self.data_mD.grid(row=4, column=5,sticky=W)
 
-    self.data_L_P.insert(0,"0")
-    self.data_L_S.insert(0,"0")
-    self.data_L_D.insert(0,"0")
-    self.data_R_P.insert(0,"0")
-    self.data_R_S.insert(0,"0")
-    self.data_R_D.insert(0,"0")
+    self.data_aP.insert(0,"0")
+    self.data_aS.insert(0,"0")
+    self.data_aD.insert(0,"0")
+    
+    self.data_dP.insert(0,"0")
+    self.data_dS.insert(0,"0")
+    self.data_dD.insert(0,"0")
 
-    self.button=Button(self,text="Send Values",command=self.send).grid(row=8, column=3,sticky=W)
-    self.start=Button(self,text="START!",command=self.begin).grid(row=8, column=4,sticky=W)
-    self.halt=Button(self,text="STOP!",command=self.stop).grid(row=9, column=3,sticky=W)                                                                   
-    self.reset=Button(self,text="Reset",command=self.reset).grid(row=9, column=4,sticky=W)
+    self.data_mP.insert(0,"0")
+    self.data_mS.insert(0,"0")
+    self.data_mD.insert(0,"0")
+
+    self.button=Button(self,text="Send Values",command=self.send).grid(row=5, column=2,sticky=W)
+    self.start=Button(self,text="START!",command=self.begin).grid(row=5, column=3,sticky=W)
+    self.halt=Button(self,text="STOP!",command=self.stop).grid(row=5, column=4,sticky=W)                                                                   
+    self.reset=Button(self,text="Reset",command=self.reset).grid(row=5, column=5,sticky=W)
     
     self.scroller=Scrollbar(self)
     self.scroller.grid(row=15,column=1,sticky='nsew')
-    self.scroller.config(width='1')
+    self.scroller.config(width='20')
 
 
     self.output=Text(self, width=90, height=25, wrap=WORD)
-    self.output.grid(row=15, column=2,sticky='nsew')
+    self.output.grid(row=15, column=2,columnspan=6,sticky='nsew')
     global output
     output = self.output
 
@@ -108,12 +120,19 @@ class Application(Frame):
 
   def send(self):
     """collects and sends the value"""
-    values = [self.data_L_P.get(),
-        self.data_L_S.get(),
-        self.data_L_D.get(),
-        self.data_R_P.get(),
-        self.data_R_S.get(),
-        self.data_R_D.get()]
+    values = [
+        self.data_aP.get(),
+        self.data_aS.get(),
+        self.data_aD.get(),
+        
+        self.data_dP.get(),
+        self.data_dS.get(),
+        self.data_dD.get(),
+
+        self.data_mP.get(),
+        self.data_mS.get(),
+        self.data_mD.get(),
+      ]
     values = list(map(lambda x: float(x), values))
     p.write('g', values); 
     
@@ -141,7 +160,7 @@ class Application(Frame):
 
 root=Tk()
 root.title("PID Control")
-root.geometry("600x600")
+root.geometry("900x600")
 
 app=Application(root)
 

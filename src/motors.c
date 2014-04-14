@@ -219,10 +219,10 @@ void setMotorTargSpeeds(Motors self, float leftTargSpeed, float rightTargSpeed){
 	self->rightTargetSpeed = rightTargSpeed;
 }
 
-void setMotorPIDGains(Motors self, float prop, float sum, float diff){
-	self->p = prop;
-	self->s = sum;
-	self->d = diff;
+void setMotorPIDGains(Motors self, PID_Gains gains){
+	self->p = gains.Kp;
+	self->s = gains.Ks;
+	self->d = gains.Kd;
 }
 
 static pidError_t eLm = {0.f, 0.f, 0.f, 1};
@@ -291,9 +291,11 @@ Motors createMotors(void){
   m->getRightCount  = getRightCount;
   m->resetCounts    = encodersReset;
 
-  m->setSpeeds      = setSpeeds; 
-  m->setOffset      = setOffset;
-  m->doMotorPID     = doMotorPID;
+  m->setSpeeds          = setSpeeds; 
+  m->setOffset          = setOffset;
+  m->setMotorPIDGains   = setMotorPIDGains;
+  m->doMotorPID         = doMotorPID;
+  m->setMotorTargSpeeds = setMotorTargSpeeds;
 
   initEncoders();
   initPWM(); 

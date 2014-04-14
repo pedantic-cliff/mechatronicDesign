@@ -271,6 +271,11 @@ void parseParams(void){
       bearGains.Ks = angleGains.Ks; 
       bearGains.Kd = angleGains.Kd; 
       pid->setGains(pid, distGains, bearGains, angleGains);
+
+      motorGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
+      motorGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      motorGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      motors->setMotorPIDGains(motors, motorGains); 
       break;
   }
   command = 'n'; 

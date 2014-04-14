@@ -1,6 +1,6 @@
 #ifndef _MOTORS_H_
 #define _MOTORS_H_
-
+#include "common.h"
 typedef struct motors *Motors; 
 
 typedef struct motors{
@@ -18,7 +18,7 @@ typedef struct motors{
 
   void (*setSpeeds)(Motors self, float left, float right); 
   void (*setOffset)(Motors self, int offset_L, int offset_R); 
-  void (*setMotorPIDGains)(Motors self, float prop, float sum, float diff);
+  void (*setMotorPIDGains)(Motors self, PID_Gains gains);
   void (*doMotorPID)(Motors self);
   void (*setMotorTargSpeeds)(Motors self, float leftTargSpeed, float rightTargSpeed);
   

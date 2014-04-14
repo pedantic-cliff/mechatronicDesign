@@ -28,7 +28,9 @@ State targState;
 Pid pid; 
 PID_Gains angleGains  = { 3.50f, 0.00f, 3.0f },
           distGains   = { 3.5f, 0.00f, 8.0f },
-          bearGains   = { 2.0f, 0.00f, 3.0f };
+          bearGains   = { 2.0f, 0.00f, 3.0f },
+          motorGains  = { 3.5f, 0.00f, 8.0f };
+
 static void init(void);
 static void loop(void);
 

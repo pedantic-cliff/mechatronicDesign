@@ -23,6 +23,12 @@ typedef struct {
 	char first;
 } pidError_t, *Error; 
 
+typedef struct {
+  float Kp; 
+  float Ks; 
+  float Kd;
+} PID_Gains;
+
 void calcErr(const float err, Error E, float integThresh);
 
 #endif //_COMMON_H_

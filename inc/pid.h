@@ -13,12 +13,6 @@ typedef struct {
   float theta; 
 } *Point; 
 
-typedef struct {
-  float Kp; 
-  float Ks; 
-  float Kd;
-} PID_Gains;
-
 typedef struct pid *Pid;
 typedef struct pid {
   PID_Gains xyDistGains; 

@@ -24,6 +24,7 @@ extern State targState;
 extern Pid pid; 
 extern PID_Gains angleGains,
                  distGains ,
+                 motorGains, 
                  bearGains ;
 
 
