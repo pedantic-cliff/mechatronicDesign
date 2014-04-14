@@ -98,7 +98,7 @@ void doLog(void){
 }
 
 void doColors(void){
-  int n,r,g,b,min;
+  int n,r,g,b;
   n = doColor(NONE);
   r = doColor(RED)   - n;
   g = doColor(GREEN) - n;
@@ -163,6 +163,12 @@ void loop(void) {
 }
 
 void tick_loop(void){
-  localizer->update(localizer);
-  pid->loop(pid, targState, localizer->_state);
+  static int loopCount = 0;
+  if(loopCount == 0){
+    localizer->update(localizer);
+    pid->loop(pid, targState, localizer->_state);
+    loopCount = 10; 
+  }
+  motors->doMotorPID(motors); 
+  loopCount--;
 }

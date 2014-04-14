@@ -293,6 +293,7 @@ Motors createMotors(void){
 
   m->setSpeeds      = setSpeeds; 
   m->setOffset      = setOffset;
+  m->doMotorPID     = doMotorPID;
 
   initEncoders();
   initPWM(); 

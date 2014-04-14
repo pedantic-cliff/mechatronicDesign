@@ -28,7 +28,6 @@ uint8_t accel_getZ(void){
 }
 
 float accel_getAngle(){ 
-  int i = 0; 
   int8_t x, y; 
   x = accel_getX(); 
   y = accel_getY();

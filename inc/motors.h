@@ -19,7 +19,7 @@ typedef struct motors{
   void (*setSpeeds)(Motors self, float left, float right); 
   void (*setOffset)(Motors self, int offset_L, int offset_R); 
   void (*setMotorPIDGains)(Motors self, float prop, float sum, float diff);
-  void (*doMotorPID)(void);
+  void (*doMotorPID)(Motors self);
   void (*setMotorTargSpeeds)(Motors self, float leftTargSpeed, float rightTargSpeed);
   
 } motors_t; 
