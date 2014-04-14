@@ -149,7 +149,7 @@ void ADC_Configuration(void)
   ADC_CommonInit(&ADC_CommonInitStructure);  
 
   ADC_InitStructure.ADC_Resolution            = ADC_Resolution_10b; //12b 10b 8b 6b
-  ADC_InitStructure.ADC_ScanConvMode          = DISABLE; //ENABLE;
+  ADC_InitStructure.ADC_ScanConvMode          = ENABLE;
   ADC_InitStructure.ADC_ContinuousConvMode    = DISABLE; // Conversions Triggered
   ADC_InitStructure.ADC_ExternalTrigConvEdge  = ADC_ExternalTrigConvEdge_Rising;
   ADC_InitStructure.ADC_ExternalTrigConv      = ADC_ExternalTrigConv_T4_CC4;
