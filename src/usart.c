@@ -266,7 +266,9 @@ void parseParams(void){
       angleGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      /*
       distGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+
       bearGains.Kp = angleGains.Kp; 
       bearGains.Ks = angleGains.Ks; 
       bearGains.Kd = angleGains.Kd; 
@@ -275,7 +277,29 @@ void parseParams(void){
       motorGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       motorGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
       motorGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      */
       motors->setMotorPIDGains(motors, motorGains); 
+      USART_puts("Got: ");
+      USART_putFloat(angleGains.Kp);
+      USART_puts("\t");
+      USART_putFloat(angleGains.Ks);
+      USART_puts("\t");
+      USART_putFloat(angleGains.Kd);
+      USART_puts("\t");
+      USART_putFloat(distGains.Kp);
+      USART_puts("\t");
+      USART_putFloat(distGains.Ks);
+      /*
+      USART_puts("\t");
+      USART_putFloat(distGains.Kd);
+      USART_puts("\t");
+      USART_putFloat(bearGains.Kd);
+      USART_puts("\t");
+      USART_putFloat(bearGains.Kd);
+      USART_puts("\t");
+      USART_putFloat(bearGains.Kd);
+      */
+      USART_puts("\n");
       break;
   }
   command = 'n'; 
@@ -298,16 +322,24 @@ void USART1_IRQHandler(void){
     if(received_index == 1){
       command = t; 
       enableLEDs(ORANGE);
+      USART_puts("Command byte: ");
+      USART_sendByte(command);
+      USART_puts("\n");
     }
     // Second byte is the length of remainder
     else if(received_index == 2){
       commandLen = t; 
+      USART_puts("Waiting for bytes: ");
+      USART_putInt(commandLen);
+      USART_puts("\n");
     }
     
     if(received_index - 2 == commandLen){
       parseParams(); 
     }
 
+    USART_putInt(t); 
+    USART_puts("\n");
     //USART_SendData(USART1,t);
     /* check if the received character is not the LF character (used to determine end of string)
      * or the if the maximum string length has been been reached

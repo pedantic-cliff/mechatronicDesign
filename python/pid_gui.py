@@ -59,9 +59,9 @@ class Application(Frame):
 
   def create_widgets(self):
     "Creating the widgets"
-    self.label_P=Label(self,text="Kp").grid(row=1, column=2, sticky=W)
-    self.label_S=Label(self,text="Ks").grid(row=1, column=3, sticky=W)
-    self.label_D=Label(self,text="Kd").grid(row=1, column=4, sticky=W)
+    self.label_P=Label(self,text="Kp").grid(row=1, column=3, sticky=W)
+    self.label_S=Label(self,text="Ks").grid(row=1, column=4, sticky=W)
+    self.label_D=Label(self,text="Kd").grid(row=1, column=5, sticky=W)
     
     self.label_dist=Label(self,text="Distance").grid(row=2, column=2, sticky=W)
     self.label_angle=Label(self,text="Angle").grid(row=3, column=2, sticky=W)

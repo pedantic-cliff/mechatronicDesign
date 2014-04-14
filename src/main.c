@@ -157,6 +157,7 @@ void loop(void) {
     }
   }
   //doLog();
+  delay(1000);
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 

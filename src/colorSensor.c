@@ -227,11 +227,10 @@ void startColor(Color c){
       break;
   }
   startADC();
-  enableLEDs(ORANGE);
 }
 
 void nextColor(void){
-  disableLEDs(BLUE);
+  disableLEDs(GREEN);
   switch(colorState){
     case RED:
       startColor(GREEN);
@@ -265,13 +264,13 @@ void finishColor(){
 void ADC_IRQHandler(void){
   int i ;
   ADC_TimerStop();
-  enableLEDs(BLUE);
+  enableLEDs(GREEN);
   for(i = 0; i < NUM_SENSORS; i++){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
   colorSensors.done++;
   if(colorSensors.done == COLOR_SENSOR_ITERS){
-    finishColor();
+//    finishColor();
     nextColor();
   } else {
     ADC_SoftwareStartConv(ADC1);
