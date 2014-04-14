@@ -53,6 +53,7 @@ int main(void) {
   initLEDs();
   enableLEDs(ORANGE);
   colorSensors = createColorSensors(); 
+  colorSensors->startColor(NONE);
 //  start();
   do {
 //    if(running)

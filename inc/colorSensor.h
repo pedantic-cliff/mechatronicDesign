@@ -7,7 +7,7 @@
 
 #define NUM_COLORS  4
 #define NUM_SENSORS 6
-#define COLOR_SENSOR_ITERS 8
+#define COLOR_SENSOR_ITERS 20
 #define COLOR_SENSOR_CALIB_ITERS 250
 
 #define NONE_IDX    0
@@ -29,12 +29,12 @@ typedef struct lightSensor_t{
 } lightSensor; 
 
 
-
 typedef struct colorSensors_t *ColorSensors; 
 typedef struct colorSensors_t {
   LightSensor sensors[NUM_SENSORS]; 
 
   void (*measureColor) (ColorSensors sensors, Color color); 
+  void (*startColor) (Color color); 
   void (*calibrateColor) (ColorSensors sensors, Color color); 
   void (*guessColor) (int r, int g, int b); 
   

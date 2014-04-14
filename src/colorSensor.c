@@ -34,6 +34,8 @@ volatile int done;
 struct lightSensor_t sensors[NUM_SENSORS]; 
 struct colorSensors_t colorSensors;
 
+Color colorState; 
+
 void initDMA(void){
   DMA_InitTypeDef       DMA_InitStructure;
 
@@ -89,17 +91,17 @@ void ADC_TimerConfig(void){
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_OCInitTypeDef TIM_OCInitStructure;
 
-  TIM_TimeBaseStructure.TIM_Period = 0xFF;
+  TIM_TimeBaseStructure.TIM_Period = 0x8000;
   TIM_TimeBaseStructure.TIM_Prescaler = 0x4;
-  TIM_TimeBaseStructure.TIM_ClockDivision = 0x0;
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV4;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
 //  TIM_SelectOutputTrigger(TIM8,TIM_TRGOSource_OC1);
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
+  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
   TIM_OC4Init(TIM4, &TIM_OCInitStructure);
-  TIM_OC4PreloadConfig(TIM4, TIM_OCPreload_Enable);
+  TIM_OC4PreloadConfig(TIM4, TIM_OCPreload_Disable);
   
   GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -112,6 +114,7 @@ void ADC_TimerConfig(void){
 
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_TIM4);
   TIM_Cmd(TIM4, ENABLE);
+  TIM4->CCR4 = 0x4000;
 }
 
 void ADC_Configuration(void)
@@ -152,7 +155,6 @@ void ADC_Configuration(void)
 
   /* Enable ADC1 */
   ADC_Cmd(ADC1, ENABLE);
-  TIM4->CCR4 = 0x40;
 } 
 
 void initLights(void){
@@ -167,6 +169,7 @@ void initLights(void){
 }
 
 void initSensors(void){
+  colorState = NONE;
   initDMA();
   ADC_TimerConfig();
   RCC_Configuration();
@@ -180,20 +183,66 @@ void startADC(void){
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
   }
-  enableLEDs(ORANGE);
-  TIM4->CCR4 = 0x40;
 } 
+
+void startColor(Color c){
+  switch(c){
+    case RED:
+      GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
+      currIdx = RED_IDX;
+      break;
+    case GREEN:
+      GPIO_ResetBits(LIGHT_PORT, GREEN_PIN); 
+      currIdx = GREEN_IDX;
+      break;
+    case BLUE: 
+      GPIO_ResetBits(LIGHT_PORT, BLUE_PIN); 
+      currIdx = BLUE_IDX;
+      break;
+    case NONE: 
+    default: 
+      currIdx = NONE_IDX;
+      break;
+  }
+  startADC();
+  enableLEDs(ORANGE);
+  TIM4->CCR4 = 0x4000;
+}
+
+void nextColor(void){
+  disableLEDs(GREEN);
+  enableLEDs(ORANGE);
+  switch(colorState){
+    case RED:
+      startColor(GREEN);
+      break;
+    case GREEN:
+      startColor(BLUE);
+      break;
+    case BLUE: 
+      startColor(NONE);
+      break;
+    case NONE: 
+      startColor(RED);
+      break;
+    default: 
+      startColor(NONE);
+      break;
+  }
+}
+
 
 void ADC_IRQHandler(void){
   int i ;
-  enableLEDs(GREEN);
   disableLEDs(ORANGE);
+  enableLEDs(GREEN);
   for(i = 0; i < NUM_SENSORS; i++){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
   colorSensors.done++;
   if(colorSensors.done == COLOR_SENSOR_ITERS){
-    startADC();
+    nextColor();
+  } else {
   }
 }
 
@@ -278,6 +327,7 @@ float calcCentDiff(int r, int g, int b, centroid_t *cent){
     + (cent->b - b)*(cent->b - b);
   return score;
 }
+
 void guessColor(int r, int g, int b){
   int i = 0; 
   int minIdx = 0; 
@@ -315,15 +365,13 @@ ColorSensors createColorSensors(void){
 
   cs->measureColor  = measureColor;
   cs->getResult     = getResult; 
+  cs->startColor    = startColor; 
   cs->guessColor    = guessColor; 
 
   centroids[0] = &edge;
   centroids[1] = &metal;
   centroids[2] = &yellow;
   centroids[3] = &white;
-  cs->measureColor    = measureColor;
-  cs->calibrateColor  = calibrateColor;
-  cs->getResult       = getResult; 
 
   return &colorSensors;
 }
