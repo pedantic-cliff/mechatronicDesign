@@ -40,6 +40,7 @@ void start(void){
   delay(3000);
   running = 1;
   time = getCurrentTime();
+  colorSensors->startColor(NONE);
 }
 void halt(void){
   running = 0;
@@ -153,9 +154,7 @@ void loop(void) {
       time = getCurrentTime();
     }
   }
-  doCalibrateColors();
-  doLog();
-  //doColors();
+  //doLog();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 

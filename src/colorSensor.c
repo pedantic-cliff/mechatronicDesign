@@ -13,6 +13,9 @@
 
 #define SENSOR_PORT GPIOD
 
+#define TIMER_PRESCALER 20800
+#define TIMER_DELAY     100
+
 typedef struct centroid{ 
   float r; 
   float g; 
@@ -34,12 +37,14 @@ volatile int done;
 struct lightSensor_t sensors[NUM_SENSORS]; 
 struct colorSensors_t colorSensors;
 
+Color colorState; 
+
 void initDMA(void){
   DMA_InitTypeDef       DMA_InitStructure;
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
 
- // * DMA2 Stream0 channel0 configuration ************************************* //
+  // * DMA2 Stream0 channel0 configuration ************************************* //
   DMA_DeInit(DMA2_Stream0);
   DMA_InitStructure.DMA_Channel = DMA_Channel_0;
   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)ADC1_DR_ADDRESS;
@@ -65,58 +70,93 @@ void RCC_Configuration(void){
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
 }
-  
+
 void GPIO_Configuration(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
-  
+
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
-  
+
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 
-                              | GPIO_Pin_4 | GPIO_Pin_5;
+    | GPIO_Pin_4 | GPIO_Pin_5;
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
-  
+
+void ADC_TimerStop(void){
+  TIM_Cmd(TIM4, DISABLE);
+}
+
+void ADC_UpdateTimerPeriod(int period){
+  TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+  TIM_Cmd(TIM4, DISABLE);
+  TIM_TimeBaseStructure.TIM_Period = period;
+  TIM_TimeBaseStructure.TIM_Prescaler = TIMER_PRESCALER;
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+  TIM4->CCR4 = period;
+  TIM_Cmd(TIM4, ENABLE);
+}
+
 /**************************************************************************************/
 void ADC_TimerConfig(void){
-  RCC_APB1PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);
-  
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_OCInitTypeDef TIM_OCInitStructure;
-  
-  TIM_TimeBaseStructure.TIM_Period = -1;
-  TIM_TimeBaseStructure.TIM_Prescaler = 0x4;
-  TIM_TimeBaseStructure.TIM_ClockDivision = 0x0;
+
+  TIM_TimeBaseStructure.TIM_Period = 0xF000;
+  TIM_TimeBaseStructure.TIM_Prescaler = 0;
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM_TimeBaseInit(TIM8, &TIM_TimeBaseStructure);
-  TIM_SelectOutputTrigger(TIM8,TIM_TRGOSource_OC1);
+  TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+//  TIM_SelectOutputTrigger(TIM8,TIM_TRGOSource_OC1);
+  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Toggle;
+  TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+  TIM_OC4Init(TIM4, &TIM_OCInitStructure);
+  TIM_OC4PreloadConfig(TIM4, TIM_OCPreload_Disable);
+  
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; 
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+  GPIO_Init(GPIOB, &GPIO_InitStructure); 
+
+  GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_TIM4);
+  TIM_Cmd(TIM4, ENABLE);
+  TIM4->CCR4 = 0x1000;
 }
 
 void ADC_Configuration(void)
 {
   ADC_CommonInitTypeDef ADC_CommonInitStructure;
   ADC_InitTypeDef ADC_InitStructure;
-  
+
   /* ADC Common Init */
   ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
   ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div8; // 2 4 6 or 8
   ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
   ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_10Cycles; //min is 10
   ADC_CommonInit(&ADC_CommonInitStructure);  
-  
-  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_12b; //12b 10b 8b 6b
-  ADC_InitStructure.ADC_ScanConvMode          = ENABLE; 
+
+  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_10b; //12b 10b 8b 6b
+  ADC_InitStructure.ADC_ScanConvMode          = ENABLE;
   ADC_InitStructure.ADC_ContinuousConvMode    = DISABLE; // Conversions Triggered
   ADC_InitStructure.ADC_ExternalTrigConvEdge  = ADC_ExternalTrigConvEdge_Rising;
-  ADC_InitStructure.ADC_ExternalTrigConv      = ADC_ExternalTrigConv_T2_TRGO;
+  ADC_InitStructure.ADC_ExternalTrigConv      = ADC_ExternalTrigConv_T4_CC4;
   ADC_InitStructure.ADC_DataAlign             = ADC_DataAlign_Right;
   ADC_InitStructure.ADC_NbrOfConversion       = NUM_SENSORS;
   ADC_Init(ADC1, &ADC_InitStructure);
-  
+
   /* ADC1 regular channel 11 configuration */
   ADC_RegularChannelConfig(ADC1, ADC_Channel_3,  1, ADC_SampleTime_144Cycles); // this is max
   ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, ADC_SampleTime_144Cycles); // this is max
@@ -129,13 +169,13 @@ void ADC_Configuration(void)
   NVIC_EnableIRQ(ADC_IRQn);
 
   ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
-  
+
   ADC_DMACmd(ADC1, ENABLE);
 
   /* Enable ADC1 */
   ADC_Cmd(ADC1, ENABLE);
 } 
-  
+
 void initLights(void){
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
@@ -148,7 +188,9 @@ void initLights(void){
 }
 
 void initSensors(void){
+  colorState = NONE;
   initDMA();
+  ADC_TimerConfig();
   RCC_Configuration();
   GPIO_Configuration();
   ADC_Configuration();
@@ -159,21 +201,81 @@ void startADC(void){
   colorSensors.done = 0;
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
+    sensors[i].measurements[currIdx] = 0;
   }
-  TIM_Cmd(TIM8, ENABLE);
 } 
+
+void startColor(Color c){
+  GPIO_SetBits(LIGHT_PORT, GREEN_PIN |  RED_PIN | BLUE_PIN);
+  colorState = c;
+  switch(c){
+    case RED:
+      GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
+      currIdx = RED_IDX;
+      break;
+    case GREEN:
+      GPIO_ResetBits(LIGHT_PORT, GREEN_PIN); 
+      currIdx = GREEN_IDX;
+      break;
+    case BLUE: 
+      GPIO_ResetBits(LIGHT_PORT, BLUE_PIN); 
+      currIdx = BLUE_IDX;
+      break;
+    case NONE: 
+    default: 
+      currIdx = NONE_IDX;
+      break;
+  }
+  startADC();
+  enableLEDs(ORANGE);
+}
+
+void nextColor(void){
+  disableLEDs(BLUE);
+  switch(colorState){
+    case RED:
+      startColor(GREEN);
+      break;
+    case GREEN:
+      startColor(BLUE);
+      break;
+    case BLUE: 
+      startColor(NONE);
+      break;
+    case NONE: 
+      startColor(RED);
+      break;
+    default: 
+      startColor(NONE);
+      break;
+  }
+  ADC_UpdateTimerPeriod(TIMER_DELAY);
+}
+
+void finishColor(){
+  int i; 
+  USART_puts("Color: ");
+  for(i = 0; i < NUM_SENSORS; i++){
+    USART_putInt(sensors[i].measurements[currIdx]/5);
+  USART_puts("\t");
+  }
+  USART_puts("\n");
+}
 
 void ADC_IRQHandler(void){
   int i ;
-  enableLEDs(GREEN);
+  ADC_TimerStop();
+  enableLEDs(BLUE);
   for(i = 0; i < NUM_SENSORS; i++){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
-  colorSensors.done += 1;
-  if(colorSensors.done < COLOR_SENSOR_ITERS)
+  colorSensors.done++;
+  if(colorSensors.done == COLOR_SENSOR_ITERS){
+    finishColor();
+    nextColor();
+  } else {
     ADC_SoftwareStartConv(ADC1);
-  else
-    disableLEDs(GREEN);
+  }
 }
 
 void measureColor(ColorSensors cs, Color c){
@@ -253,10 +355,11 @@ volatile uint16_t* getResult(void){
 
 float calcCentDiff(int r, int g, int b, centroid_t *cent){
   float score = (cent->r - r)*(cent->r - r) 
-              + (cent->g - g)*(cent->g - g) 
-              + (cent->b - b)*(cent->b - b);
+    + (cent->g - g)*(cent->g - g) 
+    + (cent->b - b)*(cent->b - b);
   return score;
 }
+
 void guessColor(int r, int g, int b){
   int i = 0; 
   int minIdx = 0; 
@@ -294,15 +397,13 @@ ColorSensors createColorSensors(void){
 
   cs->measureColor  = measureColor;
   cs->getResult     = getResult; 
+  cs->startColor    = startColor; 
   cs->guessColor    = guessColor; 
 
   centroids[0] = &edge;
   centroids[1] = &metal;
   centroids[2] = &yellow;
   centroids[3] = &white;
-  cs->measureColor    = measureColor;
-  cs->calibrateColor  = calibrateColor;
-  cs->getResult       = getResult; 
 
   return &colorSensors;
 }

@@ -91,10 +91,11 @@ void disableLEDs(Color c){
 }
 
 /************ Timing ********************/
+// Current Loop Period is 400usec
 static long currentTime; 
 void initSysTick(void){
   currentTime = 0; 
-  SysTick_Config(SystemCoreClock / 10000);
+  SysTick_Config(SystemCoreClock /  5000);
   NVIC_SetPriority(SysTick_IRQn, 1); 
 }
 
@@ -107,7 +108,7 @@ long getCurrentTime(void){
 }
 
 void SysTick_Handler(void){
-  currentTime += 200; 
+  currentTime += 400; 
   enableLEDs(RED);
   if(running)
     tick_loop();
