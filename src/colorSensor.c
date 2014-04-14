@@ -14,7 +14,7 @@
 #define SENSOR_PORT GPIOD
 
 #define TIMER_PRESCALER 20800
-#define TIMER_DELAY     70
+#define TIMER_DELAY     100
 
 typedef struct centroid{ 
   float r; 
@@ -148,7 +148,7 @@ void ADC_Configuration(void)
   ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_10Cycles; //min is 10
   ADC_CommonInit(&ADC_CommonInitStructure);  
 
-  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_12b; //12b 10b 8b 6b
+  ADC_InitStructure.ADC_Resolution            = ADC_Resolution_10b; //12b 10b 8b 6b
   ADC_InitStructure.ADC_ScanConvMode          = DISABLE; //ENABLE;
   ADC_InitStructure.ADC_ContinuousConvMode    = DISABLE; // Conversions Triggered
   ADC_InitStructure.ADC_ExternalTrigConvEdge  = ADC_ExternalTrigConvEdge_Rising;
@@ -201,6 +201,7 @@ void startADC(void){
   colorSensors.done = 0;
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
+    sensors[i].measurements[currIdx] = 0;
   }
 } 
 
@@ -231,7 +232,6 @@ void startColor(Color c){
 
 void nextColor(void){
   disableLEDs(BLUE);
-  enableLEDs(ORANGE);
   switch(colorState){
     case RED:
       startColor(GREEN);
@@ -252,17 +252,26 @@ void nextColor(void){
   ADC_UpdateTimerPeriod(TIMER_DELAY);
 }
 
+void finishColor(){
+  int i; 
+  USART_puts("Color: ");
+  for(i = 0; i < NUM_SENSORS; i++){
+    USART_putInt(sensors[i].measurements[currIdx]/5);
+  USART_puts("\t");
+  }
+  USART_puts("\n");
+}
 
 void ADC_IRQHandler(void){
   int i ;
   ADC_TimerStop();
-  disableLEDs(ORANGE);
   enableLEDs(BLUE);
   for(i = 0; i < NUM_SENSORS; i++){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
   colorSensors.done++;
   if(colorSensors.done == COLOR_SENSOR_ITERS){
+    finishColor();
     nextColor();
   } else {
     ADC_SoftwareStartConv(ADC1);

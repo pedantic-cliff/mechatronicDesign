@@ -40,6 +40,7 @@ void start(void){
   delay(3000);
   running = 1;
   time = getCurrentTime();
+  colorSensors->startColor(NONE);
 }
 void halt(void){
   running = 0;
@@ -49,15 +50,11 @@ void halt(void){
 int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
-//  init();
-  initLEDs();
-  enableLEDs(ORANGE);
-  colorSensors = createColorSensors(); 
-  colorSensors->startColor(NONE);
-//  start();
+  init();
+  start();
   do {
-//    if(running)
-//      loop();
+    if(running)
+      loop();
   } while (1);
 }
 
@@ -157,9 +154,7 @@ void loop(void) {
       time = getCurrentTime();
     }
   }
-  doCalibrateColors();
-  doLog();
-  //doColors();
+  //doLog();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
