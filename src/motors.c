@@ -5,6 +5,7 @@
 #include "misc.h"
 #include "motors.h"
 #include "usart.h"
+#include "common.h"
 
 // Left Motor Channels 
 #define ENCRA_PIN GPIO_Pin_0
@@ -213,9 +214,76 @@ void setOffset(Motors self, int offset_L, int offset_R){
   self->PWM_Min_R = offset_R; 
 }
 
+void setMotorTargSpeeds(Motors self, float leftTargSpeed, float rightTargSpeed){
+	self->leftTargetSpeed = leftTargSpeed;
+	self->rightTargetSpeed = rightTargSpeed;
+}
+
+void setMotorPIDGains(Motors self, float prop, float sum, float diff){
+	self->p = prop;
+	self->s = sum;
+	self->d = diff;
+}
+
+static pidError_t eLm = {0.f, 0.f, 0.f, 1};
+static pidError_t eRm = {0.f, 0.f, 0.f, 1};
+
+
+static int firstMotorPID = 1;
+static float initialMotorTime = 0;
+
+static long currentLeftTicks = 0;
+static long currentRightTicks = 0;
+static long prevLeftTicks = 0;
+static long prevRightTicks = 0;
+
+static float currentTime = 0;
+static float previousTime = 0;
+
+void doMotorPID(Motors self){
+	if(firstMotorPID){
+		firstMotorPID = 0;
+		initialMotorTime = 1;
+		currentTime = 1 - initialMotorTime;
+		currentLeftTicks = self->getLeftCount();
+		currentRightTicks = self->getRightCount();
+		self->setSpeeds(self,self->leftTargetSpeed,self->rightTargetSpeed);
+		return;
+	}
+	
+	previousTime = currentTime;
+	currentTime = 1 - initialMotorTime;
+	prevLeftTicks = currentLeftTicks;
+	prevRightTicks = currentRightTicks;
+	currentLeftTicks = self->getLeftCount();
+	currentRightTicks = self->getRightCount();
+	
+	float leftVelErr,rightVelErr,deltaT,leftFbkVel,rightFbkVel;
+	
+	deltaT = currentTime - previousTime;
+	
+	leftVelErr = self->leftTargetSpeed - (ENC_TO_D(currentLeftTicks-prevLeftTicks))/(deltaT);
+	rightVelErr = self->rightTargetSpeed - (ENC_TO_D(currentRightTicks-prevRightTicks))/(deltaT);
+	
+	calcErr(leftVelErr,&eLm,0.f);
+	calcErr(rightVelErr,&eRm,0.f);
+	
+	leftFbkVel = eLm.p*self->p + eLm.s*self->s + eLm.d*self->d;
+	rightFbkVel = eRm.p*self->p + eRm.s*self->s + eRm.d*self->d;
+	
+	self->setSpeeds(self,self->leftTargetSpeed+leftFbkVel,self->rightTargetSpeed+rightFbkVel);
+}
+
 Motors createMotors(void){
   Motors m = &_storage; 
-
+	
+  m->leftTargetSpeed = 0;
+  m->rightTargetSpeed = 0;
+  
+  m->p = 0;
+  m->s = 0;
+  m->d = 0;
+  	
   m->PWM_Min_L = 0xA80;
   m->PWM_Min_R = 0x800;
 

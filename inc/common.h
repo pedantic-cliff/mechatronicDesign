@@ -16,4 +16,13 @@ typedef struct state{
     float vel;
 } state_t;
 
+typedef struct { 
+	float p;
+	float s; 
+	float d;
+	char first;
+} pidError_t, *Error; 
+
+void calcErr(const float err, Error E, float integThresh);
+
 #endif //_COMMON_H_
