@@ -8,20 +8,11 @@
 
 static Pid_t _storage; 
 
-typedef struct { 
-  float p;
-  float s; 
-  float d;
-  char first;
-} pidError_t, *Error; 
-
 int __errno;
 
 static pidError_t eT = {0.f, 0.f, 0.f, 1};
 static pidError_t eB = {0.f, 0.f, 0.f, 1};
 static pidError_t eDist = {0.f, 0.f, 0.f, 1};
-static pidError_t eLm = {0.f, 0.f, 0.f, 1};
-static pidError_t eRm = {0.f, 0.f, 0.f, 1};
 
 void calcErr(const float err, Error E, float integThresh){
   if(E->first==1){								//Check if the error struct is virgin yet
@@ -80,7 +71,9 @@ static void loop (Pid self, State target, State current){
 
   //Feed forward part yet to be done
 
-  self->m->setSpeeds(self->m,vleft,vright);
+	self->m->setMotorTargSpeeds(self->m,vleft,vright);
+	
+	//Feed forward part yet to be done
 }
 
 void setGains(Pid pid, PID_Gains distG, PID_Gains bearG, PID_Gains angG){
