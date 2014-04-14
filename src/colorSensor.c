@@ -13,6 +13,9 @@
 
 #define SENSOR_PORT GPIOD
 
+#define TIMER_PRESCALER 20800
+#define TIMER_DELAY     70
+
 typedef struct centroid{ 
   float r; 
   float g; 
@@ -83,6 +86,22 @@ void GPIO_Configuration(void)
   GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
+void ADC_TimerStop(void){
+  TIM_Cmd(TIM4, DISABLE);
+}
+
+void ADC_UpdateTimerPeriod(int period){
+  TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+  TIM_Cmd(TIM4, DISABLE);
+  TIM_TimeBaseStructure.TIM_Period = period;
+  TIM_TimeBaseStructure.TIM_Prescaler = TIMER_PRESCALER;
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
+  TIM4->CCR4 = period;
+  TIM_Cmd(TIM4, ENABLE);
+}
+
 /**************************************************************************************/
 void ADC_TimerConfig(void){
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
@@ -91,13 +110,13 @@ void ADC_TimerConfig(void){
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_OCInitTypeDef TIM_OCInitStructure;
 
-  TIM_TimeBaseStructure.TIM_Period = 0x8000;
-  TIM_TimeBaseStructure.TIM_Prescaler = 0x4;
-  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV4;
+  TIM_TimeBaseStructure.TIM_Period = 0xF000;
+  TIM_TimeBaseStructure.TIM_Prescaler = 0;
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
 //  TIM_SelectOutputTrigger(TIM8,TIM_TRGOSource_OC1);
-  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+  TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Toggle;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
   TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
   TIM_OC4Init(TIM4, &TIM_OCInitStructure);
@@ -114,7 +133,7 @@ void ADC_TimerConfig(void){
 
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_TIM4);
   TIM_Cmd(TIM4, ENABLE);
-  TIM4->CCR4 = 0x4000;
+  TIM4->CCR4 = 0x1000;
 }
 
 void ADC_Configuration(void)
@@ -186,6 +205,8 @@ void startADC(void){
 } 
 
 void startColor(Color c){
+  GPIO_SetBits(LIGHT_PORT, GREEN_PIN |  RED_PIN | BLUE_PIN);
+  colorState = c;
   switch(c){
     case RED:
       GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
@@ -206,11 +227,10 @@ void startColor(Color c){
   }
   startADC();
   enableLEDs(ORANGE);
-  TIM4->CCR4 = 0x4000;
 }
 
 void nextColor(void){
-  disableLEDs(GREEN);
+  disableLEDs(BLUE);
   enableLEDs(ORANGE);
   switch(colorState){
     case RED:
@@ -229,13 +249,15 @@ void nextColor(void){
       startColor(NONE);
       break;
   }
+  ADC_UpdateTimerPeriod(TIMER_DELAY);
 }
 
 
 void ADC_IRQHandler(void){
   int i ;
+  ADC_TimerStop();
   disableLEDs(ORANGE);
-  enableLEDs(GREEN);
+  enableLEDs(BLUE);
   for(i = 0; i < NUM_SENSORS; i++){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
@@ -243,6 +265,7 @@ void ADC_IRQHandler(void){
   if(colorSensors.done == COLOR_SENSOR_ITERS){
     nextColor();
   } else {
+    ADC_SoftwareStartConv(ADC1);
   }
 }
 
