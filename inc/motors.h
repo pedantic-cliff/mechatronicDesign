@@ -21,7 +21,8 @@ typedef struct motors{
   void (*setMotorPIDGains)(Motors self, PID_Gains gains);
   void (*doMotorPID)(Motors self);
   void (*setMotorTargSpeeds)(Motors self, float leftTargSpeed, float rightTargSpeed);
-  
+  void (*resetMotorPIDErrors)(void);
+  void (*resetMotorPID)(Motors self);
 } motors_t; 
 
 Motors createMotors(void); 

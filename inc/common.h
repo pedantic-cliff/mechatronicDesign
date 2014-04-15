@@ -29,6 +29,15 @@ typedef struct {
   float Kd;
 } PID_Gains;
 
+typedef struct {
+	int row;
+	int col;	
+} sensorCoords, *sensorCoordPtr;
+
+typedef struct {
+	sensorCoords s1,s2,s3,s4,s5,s6;
+} sensorPos, *sensorPosPtr;
+
 void calcErr(const float err, Error E, float integThresh);
 
 #endif //_COMMON_H_

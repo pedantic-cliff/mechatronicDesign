@@ -99,12 +99,12 @@ void initSysTick(void){
   NVIC_SetPriority(SysTick_IRQn, 1); 
 }
 
-long getCurrentTime(void){ 
+float getCurrentTime(void){ 
   long time; 
   __disable_irq();
   time = currentTime; 
   __enable_irq();
-  return time / 1000; 
+  return time / 1000.f; 
 }
 
 void SysTick_Handler(void){

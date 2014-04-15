@@ -65,7 +65,8 @@ static void init() {
   initLEDs();
   colorSensors = createColorSensors(); 
   accel   = initAccel(); 
-  motors  = createMotors(); 
+  motors  = createMotors();
+  motors->setMotorPIDGains(motors,motorGains); 
   delay(500);
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
@@ -150,7 +151,7 @@ void loop(void) {
   doUpdateState();
   if(checkStateDone() || (time + 1200 < getCurrentTime())){
     if(currentState == numStates){
-      motors->setSpeeds(motors,0,0);
+      motors->setMotorTargSpeeds(motors,0,0);
     } else {
       targState = &_targStates[++currentState];
       time = getCurrentTime();
