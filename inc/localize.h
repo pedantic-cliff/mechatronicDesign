@@ -24,6 +24,7 @@ typedef struct localizer{
   void (*update)(Localizer self);
   void (*cacheState)(Localizer self);
   void (*restart)(Localizer self);
+  sensorPos (*findSensorLocations)(Localizer self);
 
 } localizer_t;
 

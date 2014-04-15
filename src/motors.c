@@ -6,6 +6,7 @@
 #include "motors.h"
 #include "usart.h"
 #include "common.h"
+#include "utils.h"
 
 // Left Motor Channels 
 #define ENCRA_PIN GPIO_Pin_0
@@ -225,26 +226,31 @@ void setMotorPIDGains(Motors self, PID_Gains gains){
 	self->d = gains.Kd;
 }
 
+
 static pidError_t eLm = {0.f, 0.f, 0.f, 1};
 static pidError_t eRm = {0.f, 0.f, 0.f, 1};
 
+void resetMotorPIDErrors(void){
+	eLm.p = 0.f;eLm.s = 0.f;eLm.d = 0.f;eLm.first = 1.f;
+  eRm.p = 0.f;eRm.s = 0.f;eRm.d = 0.f;eRm.first = 1.f;
+}
 
 static int firstMotorPID = 1;
-static float initialMotorTime = 0;
+static float initialMotorTime = 0.f;
 
 static long currentLeftTicks = 0;
 static long currentRightTicks = 0;
 static long prevLeftTicks = 0;
 static long prevRightTicks = 0;
 
-static float currentTime = 0;
-static float previousTime = 0;
+static float currentTime = 0.f;
+static float previousTime = 0.f;
 
 void doMotorPID(Motors self){
 	if(firstMotorPID){
 		firstMotorPID = 0;
-		initialMotorTime = 1;
-		currentTime = 1 - initialMotorTime;
+		initialMotorTime = getCurrentTime()/1000.f;
+		currentTime = getCurrentTime()/1000.f - initialMotorTime;
 		currentLeftTicks = self->getLeftCount();
 		currentRightTicks = self->getRightCount();
 		self->setSpeeds(self,self->leftTargetSpeed,self->rightTargetSpeed);
@@ -252,7 +258,7 @@ void doMotorPID(Motors self){
 	}
 	
 	previousTime = currentTime;
-	currentTime = 1 - initialMotorTime;
+	currentTime = getCurrentTime()/1000 - initialMotorTime;
 	prevLeftTicks = currentLeftTicks;
 	prevRightTicks = currentRightTicks;
 	currentLeftTicks = self->getLeftCount();
@@ -272,6 +278,11 @@ void doMotorPID(Motors self){
 	rightFbkVel = eRm.p*self->p + eRm.s*self->s + eRm.d*self->d;
 	
 	self->setSpeeds(self,self->leftTargetSpeed+leftFbkVel,self->rightTargetSpeed+rightFbkVel);
+}
+
+void resetMotorPID(Motors self){
+	firstMotorPID = 1;
+	self->setSpeeds(self,0,0);
 }
 
 Motors createMotors(void){
@@ -296,6 +307,9 @@ Motors createMotors(void){
   m->setMotorPIDGains   = setMotorPIDGains;
   m->doMotorPID         = doMotorPID;
   m->setMotorTargSpeeds = setMotorTargSpeeds;
+  m->setMotorPIDGains = setMotorPIDGains;
+  m->resetMotorPIDErrors = resetMotorPIDErrors;
+  m->resetMotorPID = resetMotorPID;
 
   initEncoders();
   initPWM(); 

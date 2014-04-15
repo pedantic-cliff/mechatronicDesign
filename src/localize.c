@@ -2,6 +2,24 @@
 #include "math.h"
 #include "usart.h"
 
+#define s1x (-4)
+#define s1y (-4)
+
+#define s2x (-4)
+#define s2y ( 0)
+
+#define s3x (-4)
+#define s3y ( 4)
+
+#define s4x ( 4)
+#define s4y (-4)
+
+#define s5x ( 4)
+#define s5y ( 0)
+
+#define s6x ( 4)
+#define s6y ( 4)
+
 #define CLEAN_ANGLE(X) ( atan2f(cos(Y
 
 static float compliFilter = 0.f;						//More implies more weight to accel
@@ -71,6 +89,34 @@ static void restart(Localizer self){
   self->cacheState(self);
 }
 
+sensorPos findSensorLocations(Localizer self){
+	float xRobot,yRobot,tRobot;
+	
+	sensorPos senPositions;
+	
+	xRobot = self->_state->x;
+	yRobot = self->_state->y;
+	tRobot = self->_state->theta;
+	
+	senPositions.s1.row = (xRobot + s1x*cosf(tRobot) - s1y*sinf(tRobot))/4;
+	senPositions.s1.col = (yRobot + s1x*sinf(tRobot) + s1y*cosf(tRobot))/4;
+
+	senPositions.s2.row = (xRobot + s2x*cosf(tRobot) - s2y*sinf(tRobot))/4;
+	senPositions.s2.col = (yRobot + s2x*sinf(tRobot) + s2y*cosf(tRobot))/4;
+
+	senPositions.s3.row = (xRobot + s3x*cosf(tRobot) - s3y*sinf(tRobot))/4;
+	senPositions.s3.col = (yRobot + s3y*sinf(tRobot) + s3y*cosf(tRobot))/4;
+
+	senPositions.s4.row = (xRobot + s4x*cosf(tRobot) - s4y*sinf(tRobot))/4;
+	senPositions.s4.col = (yRobot + s4x*sinf(tRobot) + s4y*cosf(tRobot))/4;
+
+	senPositions.s5.row = (xRobot + s5x*cosf(tRobot) - s5y*sinf(tRobot))/4;
+	senPositions.s5.col = (yRobot + s5x*sinf(tRobot) + s5y*cosf(tRobot))/4;
+	
+	senPositions.s6.row = (xRobot + s6x*cosf(tRobot) - s6y*sinf(tRobot))/4;
+	senPositions.s6.col = (yRobot + s6x*sinf(tRobot) + s6y*cosf(tRobot))/4;
+}
+
 Localizer createLocalizer(Motors m, Accel acc){
   Localizer l = &_storage;
 
@@ -85,7 +131,7 @@ Localizer createLocalizer(Motors m, Accel acc){
 
   l->m    = m;
   l->acc  = acc;
-
+  l->findSensorLocations = findSensorLocations;
   l->update     = update; 
   l->restart    = restart; 
   l->cacheState = cacheState;
