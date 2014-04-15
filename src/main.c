@@ -12,12 +12,12 @@ Motors motors;
 Localizer localizer;
 
 state_t _targStates[] = {
-                         {12.f,   0.f,    0.f,      0.f},
-                         {12.f,   0.f,    PI/2.0f,  0.f},
-                         {12.f,   12.f,   PI/2.0f,  0.f},
-                         {12.f,   12.f,   PI,       0.f},
-                         {0.0f,   12.f,   PI,       0.f},
-                         {0.0f,   12.f,  3*PI/2.0f, 0.f},
+                         {36.f,   0.f,    0.f,      0.f},
+                         {36.f,   0.f,    PI/2.0f,  0.f},
+                         {36.f,   36.f,   PI/2.0f,  0.f},
+                         {36.f,   36.f,   PI,       0.f},
+                         {0.0f,   36.f,   PI,       0.f},
+                         {0.0f,   36.f,  3*PI/2.0f, 0.f},
                          {0.0f,   0.0f,  3*PI/2.0f, 0.f},
                          {0.0f,   0.0f,  0.0f,      0.f}
 }; 
@@ -26,10 +26,10 @@ int currentState = 0;
 State targState;
 
 Pid pid; 
-PID_Gains angleGains  = { 3.50f, 0.00f, 3.0f },
-          distGains   = { 3.5f, 0.00f, 8.0f },
-          bearGains   = { 2.0f, 0.00f, 3.0f },
-          motorGains  = { 3.5f, 0.00f, 8.0f };
+PID_Gains angleGains  = { 35.f, 0.00f, 0.0f },
+          distGains   = { 40.f, 0.00f, 0.0f },
+          bearGains   = { -20.f, 0.00f, 0.0f },
+          motorGains  = { 100.f, 0.00f, 50.0f };
 
 static void init(void);
 static void loop(void);
@@ -141,15 +141,15 @@ void doUpdateState(void){
 }
 
 int checkStateDone(void){
-  return ( (fabsf(targState->x - localizer->state->x) < 2.0f)
-      && ( fabsf(targState->y - localizer->state->y) < 2.0f)
+  return ( (fabsf(targState->x - localizer->state->x) < 0.7f)
+//      && ( fabsf(targState->y - localizer->state->y) < 0.2f)
       && ( fabsf(targState->theta - localizer->state->theta) < 0.5f) );
 }
 
 void loop(void) {
   static int i = 0; 
   doUpdateState();
-  if(checkStateDone() || (time + 1200 < getCurrentTime())){
+  if(checkStateDone() || (time + 10000 < getCurrentTime())){
     if(currentState == numStates){
       motors->setMotorTargSpeeds(motors,0,0);
     } else {
