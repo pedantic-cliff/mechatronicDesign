@@ -99,23 +99,22 @@ sensorPos findSensorLocations(Localizer self){
 	tRobot = self->_state->theta;
 	
 	sensorPos.s1.row = (xRobot + s1x*cosf(tRobot) - s1y*sinf(tRobot))/4 + 1;
-	sensorPos.s1.col = (yRobot + s1x*sinf(tRobot) + s1y*cosf(tRobot))/4 + 1;	
-	
+	sensorPos.s1.col = (yRobot + s1x*sinf(tRobot) + s1y*cosf(tRobot))/4 + 1;
+
 	sensorPos.s2.row = (xRobot + s2x*cosf(tRobot) - s2y*sinf(tRobot))/4 + 1;
-	sensorPos.s2.col = (yRobot + s2x*sinf(tRobot) + s2y*cosf(tRobot))/4 + 1;	
-	
+	sensorPos.s2.col = (yRobot + s2x*sinf(tRobot) + s2y*cosf(tRobot))/4 + 1;
+
 	sensorPos.s3.row = (xRobot + s3x*cosf(tRobot) - s3y*sinf(tRobot))/4 + 1;
-	sensorPos.s3.col = (yRobot + s3y*sinf(tRobot) + s3y*cosf(tRobot))/4 + 1;	
-	
+	sensorPos.s3.col = (yRobot + s3y*sinf(tRobot) + s3y*cosf(tRobot))/4 + 1;
+
 	sensorPos.s4.row = (xRobot + s4x*cosf(tRobot) - s4y*sinf(tRobot))/4 + 1;
-	sensorPos.s4.col = (yRobot + s4x*sinf(tRobot) + s4y*cosf(tRobot))/4 + 1;	
-	
+	sensorPos.s4.col = (yRobot + s4x*sinf(tRobot) + s4y*cosf(tRobot))/4 + 1;
+
 	sensorPos.s5.row = (xRobot + s5x*cosf(tRobot) - s5y*sinf(tRobot))/4 + 1;
-	sensorPos.s5.col = (yRobot + s5x*sinf(tRobot) + s5y*cosf(tRobot))/4 + 1;	
+	sensorPos.s5.col = (yRobot + s5x*sinf(tRobot) + s5y*cosf(tRobot))/4 + 1;
 	
 	sensorPos.s6.row = (xRobot + s6x*cosf(tRobot) - s6y*sinf(tRobot))/4 + 1;
-	sensorPos.s6.col = (yRobot + s6x*sinf(tRobot) + s6y*cosf(tRobot))/4 + 1;	
-	
+	sensorPos.s6.col = (yRobot + s6x*sinf(tRobot) + s6y*cosf(tRobot))/4 + 1;
 }
 
 Localizer createLocalizer(Motors m, Accel acc){
@@ -132,7 +131,7 @@ Localizer createLocalizer(Motors m, Accel acc){
 
   l->m    = m;
   l->acc  = acc;
-
+  l->findSensorLocations = findSensorLocations;
   l->update     = update; 
   l->restart    = restart; 
   l->cacheState = cacheState;
