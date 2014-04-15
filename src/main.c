@@ -63,12 +63,14 @@ int main(void) {
 static void init() {
   init_USART(); 
   initLEDs();
+  createGrid();
   colorSensors = createColorSensors(); 
   accel   = initAccel(); 
   motors  = createMotors(); 
   delay(500);
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
+  sendGuesses();
   initSysTick(); 
   //USART_puts("Init finished \r\n");
 }

@@ -7,6 +7,7 @@
 #include "localize.h"
 #include "motors.h"
 #include "pid.h"
+#include "map.h"
 
 void halt(void);
 void start(void);

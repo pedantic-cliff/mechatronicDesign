@@ -29,6 +29,12 @@ typedef struct {
   float Kd;
 } PID_Gains;
 
+typedef struct {
+  float metal; 
+  float yellow; 
+  float boundary; 
+} confidences_t, pConfidences; 
+
 void calcErr(const float err, Error E, float integThresh);
 
 #endif //_COMMON_H_
