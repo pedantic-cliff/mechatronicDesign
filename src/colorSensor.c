@@ -4,6 +4,9 @@
 #include "stm32f4xx_tim.h"
 #include "colorSensor.h"
 #include "usart.h"
+#include "localize.h"
+#include "map.h"
+#include "main.h"
 
 #define LIGHT_PORT  GPIOE
 #define RED_PIN     GPIO_Pin_9
@@ -35,10 +38,11 @@ volatile int currIdx;
 volatile int done;
 
 struct lightSensor_t sensors[NUM_SENSORS]; 
-struct colorSensors_t colorSensors;
+struct colorSensors_t _colorSensors;
 
 Color colorState; 
 
+void guessColor(pConfidences c, int r, int g, int b);
 void initDMA(void){
   DMA_InitTypeDef       DMA_InitStructure;
 
@@ -198,7 +202,7 @@ void initSensors(void){
 
 void startADC(void){
   int i = 0;
-  colorSensors.done = 0;
+  _colorSensors.done = 0;
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
     sensors[i].measurements[currIdx] = 0;
@@ -229,6 +233,22 @@ void startColor(Color c){
   startADC();
 }
 
+void finish(){
+  int s, c;
+  float ambient, red, green, blue; 
+  confidences_t conf;
+  sensorPos poses = localizer->findSensorLocations(localizer);
+  for(s = 0; s < NUM_SENSORS; s++){
+    ambient = _colorSensors.sensors[s]->measurements[NONE_IDX];
+    red     = _colorSensors.sensors[s]->measurements[RED_IDX] - ambient;
+    green   = _colorSensors.sensors[s]->measurements[GREEN_IDX] - ambient;
+    blue    = _colorSensors.sensors[s]->measurements[BLUE_IDX] - ambient;
+
+    guessColor(&conf, red,green,blue);
+    
+  }
+}
+
 void nextColor(void){
   disableLEDs(GREEN);
   switch(colorState){
@@ -251,16 +271,6 @@ void nextColor(void){
   ADC_UpdateTimerPeriod(TIMER_DELAY);
 }
 
-void finishColor(){
-  int i; 
-  USART_puts("Color: ");
-  for(i = 0; i < NUM_SENSORS; i++){
-    USART_putInt(sensors[i].measurements[currIdx]/5);
-  USART_puts("\t");
-  }
-  USART_puts("\n");
-}
-
 void ADC_IRQHandler(void){
   int i ;
   ADC_TimerStop();
@@ -268,9 +278,8 @@ void ADC_IRQHandler(void){
   for(i = 0; i < NUM_SENSORS; i++){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
-  colorSensors.done++;
-  if(colorSensors.done == COLOR_SENSOR_ITERS){
-//    finishColor();
+  _colorSensors.done++;
+  if(_colorSensors.done == COLOR_SENSOR_ITERS){
     nextColor();
   } else {
     ADC_SoftwareStartConv(ADC1);
@@ -359,37 +368,17 @@ float calcCentDiff(int r, int g, int b, centroid_t *cent){
   return score;
 }
 
-void guessColor(int r, int g, int b){
+void guessColor(pConfidences c, int r, int g, int b){
   int i = 0; 
   int minIdx = 0; 
-  float min = calcCentDiff(r,g,b,centroids[0]);
-  float val = 0.f;
-  for(i = 1; i < 4; i++){
-    val = calcCentDiff(r,g,b,centroids[i]); 
-    if(val < min){
-      min = val;
-      minIdx = i;
-    }
-  } 
-
-  switch(minIdx){
-    case 0:
-      USART_puts("Edge\n");
-      break;
-    case 1:
-      USART_puts("Metal\n");
-      break;
-    case 2:
-      USART_puts("Yellow\n");
-      break;
-    case 3: 
-      USART_puts("White\n");
-      break;
-  }
+  
+  c->boundary = calcCentDiff(r,g,b,centroids[0]); 
+  c->metal = calcCentDiff(r,g,b,centroids[1]); 
+  c->yellow= calcCentDiff(r,g,b,centroids[2]); 
 }
 
 ColorSensors createColorSensors(void){
-  ColorSensors cs = &colorSensors; 
+  ColorSensors cs = &_colorSensors; 
 
   initLights(); 
   initSensors(); 
@@ -404,6 +393,6 @@ ColorSensors createColorSensors(void){
   centroids[2] = &yellow;
   centroids[3] = &white;
 
-  return &colorSensors;
+  return cs;
 }
 

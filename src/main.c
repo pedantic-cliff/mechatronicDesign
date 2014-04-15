@@ -53,6 +53,7 @@ int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
   init();
+  sendGuesses();
   start();
   do {
     if(running)
@@ -71,7 +72,6 @@ static void init() {
   delay(500);
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
-  sendGuesses();
   initSysTick(); 
   //USART_puts("Init finished \r\n");
 }
@@ -101,27 +101,6 @@ void doLog(void){
   USART_puts("Vel: ");
   USART_putFloat(localizer->state->vel);
   USART_puts("\n\r");
-}
-
-void doColors(void){
-  int n,r,g,b;
-  n = doColor(NONE);
-  r = doColor(RED)   - n;
-  g = doColor(GREEN) - n;
-  b = doColor(BLUE)  - n;
-
-  colorSensors->guessColor(r,g,b);
-
-  
-  USART_putInt(n);
-  USART_puts("\t");
-  USART_putInt(r);
-  USART_puts("\t");
-  USART_putInt(g);
-  USART_puts("\t");
-  USART_putInt(b);
-  USART_puts("\n\r");
-  
 }
 
 void doCalibrateColors(){
@@ -159,6 +138,7 @@ void loop(void) {
       time = getCurrentTime();
     }
   }
+  USART_puts("Hello,World!\n");
   //doLog();
   delay(1000);
   if(i++ & 0x1)

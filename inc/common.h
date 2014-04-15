@@ -33,7 +33,7 @@ typedef struct {
   float metal; 
   float yellow; 
   float boundary; 
-} confidences_t, pConfidences; 
+} confidences_t, *pConfidences; 
 
 typedef struct { 
 	int row;
@@ -41,7 +41,7 @@ typedef struct {
 } sensorCoords, *sensorCoordPtr;
 
 typedef struct {
-	sensorCoords s1,s2,s3,s4,s5,s6;
+	sensorCoords s[6];
 } sensorPos, *sensorPosPtr;
 
 void calcErr(const float err, Error E, float integThresh);

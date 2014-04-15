@@ -1,4 +1,5 @@
 #include "map.h"
+#include "usart.h"
 
 
 #define NROWS 9 
@@ -11,7 +12,7 @@ typedef struct {
   unsigned int count;
 } cell_t;
 
-cell_t grid[NROW][NCOLS];
+cell_t grid[NROWS][NCOLS];
 
 struct { 
   char numMeas;
@@ -22,15 +23,15 @@ struct {
 int guessCell(int x, int y){
   int minIdx = 0; 
   y = RMAX - y; 
-  pConfidences conf = grid[y][x].conf;
-  int minVal = conf.metal;
-  if (minVal > conf.yellow){
+  pConfidences conf = &grid[y][x].conf;
+  int minVal = conf->metal;
+  if (minVal > conf->yellow){
     minIdx = 1; 
-    minVal = conf.yellow;
+    minVal = conf->yellow;
   }
-  if (minVal > conf.boundary){
+  if (minVal > conf->boundary){
     minIdx = 2; 
-    minVal = conf.boundary;
+    minVal = conf->boundary;
   }
   return minIdx;
 }
@@ -45,7 +46,7 @@ void sendGuesses(void){
       if(grid[y][x].count > 0)
         sendBuff.numMeas++; 
       else{
-        sendBuff.cells[y][x] = guessCell(x,y); 
+        sendBuff.cells[y][x] = 2; 
         continue;
       }
       
@@ -64,25 +65,44 @@ void sendGuesses(void){
   USART_sendByte(0xFF);
 }
 
-void applyConfidence(int x, int y, confidences_t conf){
+void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
-  grid[y][x][0] += conf.metal; 
-  grid[y][x][1] += conf.yellow; 
-  grid[y][x][2] += conf.boundary; 
+  pConfidences confs = &grid[y][x].conf;
+  confs->metal += pConf->metal; 
+  confs->yellow += pConf->yellow; 
+  confs->boundary += pConf->boundary; 
+}
+
+int fakes[] = { 0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1 };
+
+void _fakepoint(int x,int y,int val){
+  grid[y][x].count++;
+  if(val) 
+    grid[y][x].conf.metal = 1.0f;
+  else
+    grid[y][x].conf.yellow = 1.0f;
+}
+void fakeData(void){
+  int i,j,k=0;; 
+  for(i = 0; i < NROWS; i++){
+    for(j = 0; j < NCOLS; j++){
+      _fakepoint(i,j,fakes[k++]);
+    }
+  }
 }
 
 void createGrid(void){
   int i,j;
-  pConfidence conf;
-  fr(i = 0; i < NROWS; i++){
+  pConfidences conf;
+  for(i = 0; i < NROWS; i++){
     for(j = 0; j < NCOLS; j++){
-        conf = grid[i][j].conf; 
-        conf.metal    = 0.f;
-        conf.yellow   = 0.f;
-        conf.boundary = 0.f;
-        grid[i][j].count = 0; 
-      }
+      conf = &grid[i][j].conf; 
+      conf->metal    = 0.f;
+      conf->yellow   = 0.f;
+      conf->boundary = 0.f;
+      grid[i][j].count = 0; 
     }
   }
+  fakeData();
 }
 

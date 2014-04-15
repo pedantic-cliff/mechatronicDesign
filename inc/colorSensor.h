@@ -4,6 +4,7 @@
 #include "stm32f4xx_dma.h"
 #include "stm32f4xx_adc.h"
 #include "utils.h"
+#include "common.h"
 
 #define NUM_COLORS  4
 #define NUM_SENSORS 6
@@ -36,7 +37,7 @@ typedef struct colorSensors_t {
   void (*measureColor) (ColorSensors sensors, Color color); 
   void (*startColor) (Color color); 
   void (*calibrateColor) (ColorSensors sensors, Color color); 
-  void (*guessColor) (int r, int g, int b); 
+  void (*guessColor) (pConfidences c, int r, int g, int b); 
   
   volatile uint16_t* (*getResult) (void); 
   volatile int done; 

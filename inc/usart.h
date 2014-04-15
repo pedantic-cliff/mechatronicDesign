@@ -8,6 +8,6 @@ void init_USART(void);
 void USART_puts(volatile char * str); 
 void USART_putInt(int value); 
 void USART_putFloat(float value); 
-void USART_sendByte(uint8_t byte); 
+void USART_sendByte(char byte); 
 
 #endif //_USART_H_

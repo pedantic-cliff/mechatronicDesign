@@ -213,7 +213,8 @@ void USART_putInt(int input){
   USART_puts(buffer); 
 }
 
-void USART_sendByte(uint8_t byte){
+void USART_sendByte(char byte){
+  while( !(USART1->SR & 0x00000040) );
   USART_SendData(USART1, byte);
 }
 
