@@ -50,9 +50,6 @@ void doColor(void){
     delay(10);
   }
 
-  
-
-  digitalWrite(BLUE_PIN,HIGH);
 }
 
 float calcCentDiff(int r, int g, int b, centroid_t *cent){
