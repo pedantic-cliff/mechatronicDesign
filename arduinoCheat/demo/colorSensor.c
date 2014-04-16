@@ -55,12 +55,16 @@ pConfidances doColor(void){
     blue += analogRead(SENSOR_PIN);
     delay(10);
   }
+<<<<<<< HEAD
   digitalWrite(BLUE_PIN,LOW);
   blue -= ambient;
   
   guessColor(&colorConfidance,red,green,blue);
   
   return &colorConfidance;
+=======
+
+>>>>>>> b73ef68d5b976a0375b2a49150ac1d719af788e7
 }
 
 float calcCentDiff(int r, int g, int b, centroid_t *cent){
