@@ -1,10 +1,13 @@
 #include "colorSensor.h"
 #include "localize.h"
 #include "map.h"
+#include "Arduino.h"
 
-#define RED_PIN     GPIO_Pin_9
-#define GREEN_PIN   GPIO_Pin_10
-#define BLUE_PIN    GPIO_Pin_11
+
+#define RED_PIN     9
+#define GREEN_PIN   10
+#define BLUE_PIN    11
+#define SENSOR_PIN  A0
 
 typedef struct centroid{ 
   float r; 
@@ -19,9 +22,9 @@ static struct centroid yellow  = { 2274.5f,    621.7f,    1933.0f    };
 
 static struct centroid *centroids[4]; //Why buddy!!! Why???
 
-static confidances_t colorConfidance; //Stores updates for color confidance values
+static confidences_t colorConfidence; //Stores updates for color confidence values
 
-pConfidances doColor(void){
+pConfidences doColor(void){
   int red = 0, green = 0, blue = 0, ambient = 0;
   int i; 
   delay(100);
@@ -58,9 +61,9 @@ pConfidances doColor(void){
   digitalWrite(BLUE_PIN,LOW);
   blue -= ambient;
   
-  guessColor(&colorConfidance,red,green,blue);
+  guessColor(&colorConfidence,red,green,blue);
   
-  return &colorConfidance;
+  return &colorConfidence;
 }
 
 float calcCentDiff(int r, int g, int b, centroid_t *cent){
@@ -77,23 +80,23 @@ void guessColor(pConfidences c, int r, int g, int b){
   c->yellow   = calcCentDiff(r,g,b,&yellow);
 }
 
-void calibrateForEachColorCentroid(centroid *colorCentorid){
-	int	i;
-	int 	red=0,
-			green =0,
-			blue =0,
-			ambient =0;
+void calibrateForEachColorCentroid(struct centroid *colorCentroid){
+  int i,j;
+  int red=0,
+      green =0,
+      blue =0,
+      ambient =0;
+   
+  for(j=0;j<100;j++){
+    delay(50);
+    for(i = 0; i < 4; i++){
+    	ambient += analogRead(SENSOR_PIN);
+    	delay(10);
+    }
 
-	for(int j=0;j<100,j++){
-		delay(50);
-		for(i = 0; i < 4; i++){
-    		ambient += analogRead(SENSOR_PIN);
-    		delay(10);
-  		}
-
-  		digitalWrite(RED_PIN,HIGH);
-  		delay(50);
-  		for(i = 0; i < 4; i++){
+    digitalWrite(RED_PIN,HIGH);
+    delay(50);
+    for(i = 0; i < 4; i++){
     		red += analogRead(SENSOR_PIN);
     		delay(10);
   		}

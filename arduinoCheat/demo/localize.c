@@ -1,6 +1,5 @@
 #include "localize.h"
 #include "math.h"
-#include "usart.h"
 
 #define s1x (-4)
 #define s1y (-4)
@@ -56,7 +55,7 @@ sensorPos findSensorLocations(float x, float y, float th){
 	xRobot = x;
 	yRobot = y;
 	tRobot = th;
-	
+
 	senPositions.s[0].row = (xRobot + s1x*cosf(tRobot) - s1y*sinf(tRobot))/4;
 	senPositions.s[0].col = (yRobot + s1x*sinf(tRobot) + s1y*cosf(tRobot))/4;
 

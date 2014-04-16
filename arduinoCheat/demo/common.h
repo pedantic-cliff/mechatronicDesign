@@ -1,6 +1,6 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
-
+#define PI (3.14159)
 
 typedef struct {
   float metal; 

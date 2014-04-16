@@ -1,11 +1,11 @@
 #include "map.h"
-#include "usart.h"
-
-
+#include "Arduino.h"
 #define NROWS 9 
 #define NCOLS 9
 #define RMAX  (NROWS-1)
 #define NCLASSES 4
+
+void serialWrite(char b);
 
 typedef struct {
   confidences_t conf; 
@@ -55,14 +55,14 @@ void sendGuesses(void){
         sendBuff.numDefect++; 
     }
   }
-  Serial.write(sendBuff.numMeas);
-  Serial.write(sendBuff.numDefect);
+  serialWrite(sendBuff.numMeas);
+  serialWrite(sendBuff.numDefect);
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
-      Serial.write(sendBuff.cells[y][x]); 
+      serialWrite(sendBuff.cells[y][x]); 
     }
   }
-  Serial.write(0xFF);
+  serialWrite(0xFF);
 }
 
 void applyConfidence(int x, int y, pConfidences pConf){

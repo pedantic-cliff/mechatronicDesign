@@ -6,15 +6,20 @@
 #define rectangleLength 36
 #define rectangleBreath 36
 
+void serialWrite(char b){
+ Serial.write(b);
+}
+
+int numHorizontalSteps,numVerticalSteps,numRightAngleSteps;
+
 void start(){
   Serial.begin(9600);
 
   createGrid();
   static int loopCounter = 0;
-  int numHorizontalSteps,numVerticalSteps,numRightAngleSteps;
   
   numHorizontalSteps 	= rectangleLength/eachStepDeltaDist;
-  numVerticalSteps 		= rectangleBreath/eachStepDeltaDist;
+  numVerticalSteps     = rectangleBreath/eachStepDeltaDist;
   numRightAngleSteps 	= PI/2/eachStepDeltaAngle;
 }
 
