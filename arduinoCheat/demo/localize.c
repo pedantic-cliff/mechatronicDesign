@@ -20,7 +20,33 @@
 #define s6x ( 4)
 #define s6y ( 4)
 
-#define CLEAN_ANGLE(X) ( atan2f(cos(Y
+#define CLEAN_ANGLE(X) (atan2f(sinf(X),cosf(X))
+
+					// These variables reflect the robots state in global frame and control simulation 
+					// rate
+static float 	robotGlobalX =0,
+					robotGlobalY=0,
+					robotGlobalTh=0,
+					eachStepDeltaDist = 0.5,		//Corresponds to 0.5 inches
+					eachStepDeltaAngle = PI/18; 	//Corresponds to 10 deg
+					
+void incrementRobotDist(){
+	robotGlobalX += eachStepDeltaDist*cosf(robotGlobalTh);
+	robotGlobalY += eachStepDeltaDist*sinf(robotGlobalTh);
+}
+
+void incrementRobotAngle(){
+	robotGlobalTh += eachStepDeltaAngle;
+}
+
+void decrementRobotDist(){
+	robotGlobalX -= eachStepDeltaDist*cosf(robotGlobalTh);
+	robotGlobalY -= eachStepDeltaDist*sinf(robotGlobalTh);
+}
+
+void decrementRobotAngle(){
+	robotGlobalTh -= eachStepDeltaAngle;
+}
 
 sensorPos findSensorLocations(float x, float y, float th){
 	float xRobot,yRobot,tRobot;
