@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-pConfidences doColor(void);
+confidences_t doColor(void);
 
 #endif // _COLOR_SENSOR_H_
 
