@@ -5,7 +5,8 @@
 typedef struct {
   float metal; 
   float yellow; 
-  float boundary; 
+  float boundary;
+  float white;
 } confidences_t, *pConfidences; 
 
 typedef struct { 

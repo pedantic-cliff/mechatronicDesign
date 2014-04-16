@@ -49,4 +49,3 @@ sensorPos findSensorLocations(float x, float y, float th){
 	senPositions.s[5].row = (xRobot + s6x*cosf(tRobot) - s6y*sinf(tRobot))/4;
 	senPositions.s[5].col = (yRobot + s6x*sinf(tRobot) + s6y*cosf(tRobot))/4;
 }
-
