@@ -85,35 +85,35 @@ void calibrateForEachColorCentroid(centroid *colorCentorid){
 			ambient =0;
 
 	for(int j=0;j<100,j++){
-		delay(100);
+		delay(50);
 		for(i = 0; i < 4; i++){
-    	ambient += analogRead(SENSOR_PIN);
-    	delay(10);
+    		ambient += analogRead(SENSOR_PIN);
+    		delay(10);
   		}
 
   		digitalWrite(RED_PIN,HIGH);
-  		delay(100);
+  		delay(50);
   		for(i = 0; i < 4; i++){
-    	red += analogRead(SENSOR_PIN);
-    	delay(10);
+    		red += analogRead(SENSOR_PIN);
+    		delay(10);
   		}
   		digitalWrite(RED_PIN,LOW);
   		red -= ambient;
 
 	   digitalWrite(GREEN_PIN,HIGH);
-		delay(100);
+		delay(50);
 		for(i = 0; i < 4; i++){
-		green += analogRead(SENSOR_PIN);
-		delay(10);
+			green += analogRead(SENSOR_PIN);
+			delay(10);
   		}
   		digitalWrite(GREEN_PIN,LOW);
   		green -= ambient;
 
   		digitalWrite(BLUE_PIN,HIGH);
-  		delay(100);
+  		delay(50);
   		for(i = 0; i < 4; i++){
-    	blue += analogRead(SENSOR_PIN);
-    	delay(10);
+    		blue += analogRead(SENSOR_PIN);
+    		delay(10);
   		}
   		digitalWrite(BLUE_PIN,LOW);
   		blue -= ambient;

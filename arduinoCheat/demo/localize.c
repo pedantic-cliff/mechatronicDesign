@@ -30,21 +30,21 @@ static float 	robotGlobalX =0,
 					eachStepDeltaDist = 0.5,		//Corresponds to 0.5 inches
 					eachStepDeltaAngle = PI/18; 	//Corresponds to 10 deg
 					
-void incrementRobotDist(){
+void incrementRobotDist(void){
 	robotGlobalX += eachStepDeltaDist*cosf(robotGlobalTh);
 	robotGlobalY += eachStepDeltaDist*sinf(robotGlobalTh);
 }
 
-void incrementRobotAngle(){
+void incrementRobotAngle(void){
 	robotGlobalTh += eachStepDeltaAngle;
 }
 
-void decrementRobotDist(){
+void decrementRobotDist(void){
 	robotGlobalX -= eachStepDeltaDist*cosf(robotGlobalTh);
 	robotGlobalY -= eachStepDeltaDist*sinf(robotGlobalTh);
 }
 
-void decrementRobotAngle(){
+void decrementRobotAngle(void){
 	robotGlobalTh -= eachStepDeltaAngle;
 }
 
