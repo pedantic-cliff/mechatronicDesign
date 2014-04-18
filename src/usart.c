@@ -6,6 +6,7 @@
 #include <stm32f4xx_conf.h> 
 #include "utils.h"
 #include "main.h"
+#include "math.h"
 
 #define MAX_STRLEN 64 // this is the maximum string length of our string in characters
 #define BAUD_RATE 30000     // Somehow this corresponds to 4800!!
@@ -254,6 +255,7 @@ float extractFloat(volatile char *buf){
 
 void parseParams(void){
   int i = 0; 
+  float val1, val2; 
   switch(command){
     case 's': 
       start();
@@ -261,13 +263,25 @@ void parseParams(void){
     case 'h':
       halt();
       break; 
+    case 'f':
+      val1 = extractFloat(&received_string[2]); 
+      targState->x = localizer->state->x + val1 * cosf(localizer->state->theta);
+      targState->y = localizer->state->y + val1 * sinf(localizer->state->theta);
+      break;
+    case 'r':
+      val1 = extractFloat(&received_string[2]);
+      targState->theta = localizer->state->theta - PI/2; 
+      break;
+    case 'l': 
+      val1 = extractFloat(&received_string[2]);
+      targState->theta = localizer->state->theta + PI/2; 
+      break; 
     case 'g': 
       angleGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       angleGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
       angleGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
-      /*
       distGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
 
       bearGains.Kp = angleGains.Kp; 
@@ -278,29 +292,11 @@ void parseParams(void){
       motorGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       motorGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
       motorGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
-      */
       motors->setMotorPIDGains(motors, motorGains); 
-      USART_puts("Got: ");
-      USART_putFloat(angleGains.Kp);
-      USART_puts("\t");
-      USART_putFloat(angleGains.Ks);
-      USART_puts("\t");
-      USART_putFloat(angleGains.Kd);
-      USART_puts("\t");
-      USART_putFloat(distGains.Kp);
-      USART_puts("\t");
-      USART_putFloat(distGains.Ks);
-      /*
-      USART_puts("\t");
-      USART_putFloat(distGains.Kd);
-      USART_puts("\t");
-      USART_putFloat(bearGains.Kd);
-      USART_puts("\t");
-      USART_putFloat(bearGains.Kd);
-      USART_puts("\t");
-      USART_putFloat(bearGains.Kd);
-      */
-      USART_puts("\n");
+
+      val1 = extractFloat(&received_string[2 + 4*(i++)]);
+      val2 = extractFloat(&received_string[2 + 4*(i++)]);
+
       break;
   }
   command = 'n'; 

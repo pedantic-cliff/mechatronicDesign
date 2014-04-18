@@ -204,8 +204,8 @@ void setSpeeds(Motors self, float l, float r){
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
 
-  L_PWM = self->PWM_Min_L + (long)(l * PWM_SCALER); 
-  R_PWM = self->PWM_Min_R + (long)(r * PWM_SCALER); 
+  L_PWM = l; //self->PWM_Min_L + (long)(l * PWM_SCALER); 
+  R_PWM = r; //self->PWM_Min_R + (long)(r * PWM_SCALER); 
   TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
   TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
 }; 

@@ -73,7 +73,7 @@ static void init() {
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
   initSysTick(); 
-  //USART_puts("Init finished \r\n");
+  USART_puts("Init finished \r\n");
 }
 
 int doColor(Color c){
@@ -129,18 +129,15 @@ int checkStateDone(void){
 
 void loop(void) {
   static int i = 0; 
-  doUpdateState();
-  if(checkStateDone() || (time + 10000 < getCurrentTime())){
-    if(currentState == numStates){
-      motors->setMotorTargSpeeds(motors,0,0);
-    } else {
-      targState = &_targStates[++currentState];
-      time = getCurrentTime();
-    }
+  doLog();
+  if(localizer->state->x < targState->x){
+    motors->setSpeeds(motors, 0x2000, 0x1a00);
+    doUpdateState();
+    delay(100);
+  }else{
+    motors->setSpeeds(motors, 0x0, 0x0);
+    delay(1000);
   }
-  USART_puts("Hello,World!\n");
-  //doLog();
-  delay(1000);
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
@@ -149,6 +146,8 @@ void loop(void) {
 
 void tick_loop(void){
   static int loopCount = 0;
+  localizer->update(localizer);
+  return;
   if(loopCount == 0){
     localizer->update(localizer);
     pid->loop(pid, targState, localizer->_state);
