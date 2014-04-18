@@ -3,6 +3,7 @@
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_tim.h"
 #include "colorSensor.h"
+#include "sensorConfig.h"
 #include "usart.h"
 #include "localize.h"
 #include "map.h"
@@ -19,18 +20,9 @@
 #define TIMER_PRESCALER 20800
 #define TIMER_DELAY     100
 
-typedef struct centroid{ 
-  float r; 
-  float g; 
-  float b;
-} centroid_t; 
 
-static struct centroid edge    = { 101.0463f,  243.8729f,  280.8654f };
-static struct centroid metal   = { 1172.3f,    1740.8f,   1944.7f    };
-static struct centroid yellow  = { 2274.5f,    621.7f,    1933.0f    };
-static struct centroid white   = { 2239.8f,    2219.5f,   2158.0f    };
-
-static struct centroid *centroids[4]; 
+// Order goes edge+black, metal, yellow
+static struct centroid *centroids[6]; 
 __IO uint16_t ADC1ConvertedValue[NUM_SENSORS];
 
 volatile Color currColor; 
@@ -42,7 +34,7 @@ struct colorSensors_t _colorSensors;
 
 Color colorState; 
 
-void guessColor(pConfidences c, int r, int g, int b);
+void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent);
 void initDMA(void){
   DMA_InitTypeDef       DMA_InitStructure;
 
@@ -234,7 +226,7 @@ void startColor(Color c){
 }
 
 void finish(){
-  int s, c;
+  int s;
   float ambient, red, green, blue; 
   confidences_t conf;
   sensorPos poses = localizer->findSensorLocations(localizer);
@@ -244,8 +236,8 @@ void finish(){
     green   = _colorSensors.sensors[s]->measurements[GREEN_IDX] - ambient;
     blue    = _colorSensors.sensors[s]->measurements[BLUE_IDX] - ambient;
 
-    guessColor(&conf, red,green,blue);
-    
+    guessColor(&conf, red,green,blue, centroids[s]);
+    applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
   }
 }
 
@@ -361,20 +353,17 @@ volatile uint16_t* getResult(void){
   return ADC1ConvertedValue;
 }
 
-float calcCentDiff(int r, int g, int b, centroid_t *cent){
+float calcCentDiff(int r, int g, int b, struct centroid *cent){
   float score = (cent->r - r)*(cent->r - r) 
     + (cent->g - g)*(cent->g - g) 
     + (cent->b - b)*(cent->b - b);
   return score;
 }
 
-void guessColor(pConfidences c, int r, int g, int b){
-  int i = 0; 
-  int minIdx = 0; 
-  
-  c->boundary = calcCentDiff(r,g,b,centroids[0]); 
-  c->metal = calcCentDiff(r,g,b,centroids[1]); 
-  c->yellow= calcCentDiff(r,g,b,centroids[2]); 
+void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent){
+  c->boundary = calcCentDiff(r,g,b,&cent[0]); 
+  c->metal    = calcCentDiff(r,g,b,&cent[1]); 
+  c->yellow   = calcCentDiff(r,g,b,&cent[2]); 
 }
 
 ColorSensors createColorSensors(void){
@@ -386,12 +375,13 @@ ColorSensors createColorSensors(void){
   cs->measureColor  = measureColor;
   cs->getResult     = getResult; 
   cs->startColor    = startColor; 
-  cs->guessColor    = guessColor; 
 
-  centroids[0] = &edge;
-  centroids[1] = &metal;
-  centroids[2] = &yellow;
-  centroids[3] = &white;
+  centroids[0] = cent_sen1;
+  centroids[1] = cent_sen2;
+  centroids[2] = cent_sen3;
+  centroids[3] = cent_sen4;
+  centroids[4] = cent_sen5;
+  centroids[5] = cent_sen6;
 
   return cs;
 }

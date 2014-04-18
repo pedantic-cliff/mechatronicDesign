@@ -2,7 +2,7 @@
 #define _MAP_H_
 #include "common.h"
 
-void applyConfidence(int x, int y, pConfidences conf);
+void applyConfidence(int r, int c, pConfidences conf);
 void sendGuesses(void);
 
 void createGrid(void);
