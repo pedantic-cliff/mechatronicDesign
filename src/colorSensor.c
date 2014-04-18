@@ -181,6 +181,7 @@ void initLights(void){
   gpio.GPIO_Mode = GPIO_Mode_OUT;
   gpio.GPIO_Pin  = ALL_LIGHTS;
   GPIO_Init(LIGHT_PORT, &gpio);
+  GPIO_SetBits(LIGHT_PORT, ALL_LIGHTS);
 }
 
 void initSensors(void){
@@ -366,6 +367,13 @@ void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent){
   c->yellow   = calcCentDiff(r,g,b,&cent[2]); 
 }
 
+void startColorSensor(void){
+
+}
+void haltColorSensor(void){
+  GPIO_SetBits(LIGHT_PORT, ALL_LIGHTS);
+}
+
 ColorSensors createColorSensors(void){
   ColorSensors cs = &_colorSensors; 
 
@@ -375,6 +383,8 @@ ColorSensors createColorSensors(void){
   cs->measureColor  = measureColor;
   cs->getResult     = getResult; 
   cs->startColor    = startColor; 
+  cs->start         = startColorSensor;
+  cs->halt          = haltColorSensor; 
 
   centroids[0] = cent_sen1;
   centroids[1] = cent_sen2;
