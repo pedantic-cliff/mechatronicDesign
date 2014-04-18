@@ -63,9 +63,20 @@ class Application(Frame):
     self.label_S=Label(self,text="Ks").grid(row=1, column=4, sticky=W)
     self.label_D=Label(self,text="Kd").grid(row=1, column=5, sticky=W)
     
+    
     self.label_dist=Label(self,text="Distance").grid(row=2, column=2, sticky=W)
     self.label_angle=Label(self,text="Angle").grid(row=3, column=2, sticky=W)
     self.label_motor=Label(self,text="Motor").grid(row=4, column=2, sticky=W)
+    
+    self.label_Dist=Label(self,text="FWD Dist").grid(row=1, column=6, sticky=W)
+    self.label_min_pwm_l=Label(self,text="Min PWN Left").grid(row=1, column=7, sticky=W)
+    self.label_min_pwn_r=Label(self,text="Min PWM Right").grid(row=1, column=8, sticky=W)
+    self.label_encoder_weight_l=Label(self,text="Left encoder weight").grid(row=3, column=7, sticky=W)
+    self.label_encoder_weight_r=Label(self,text="Right encoder weight").grid(row=3, column=8, sticky=W)
+    self.label_pwm_bias_l=Label(self,text="Left PWM Bias").grid(row=5, column=7, sticky=W)
+    self.label_pwm_bias_r=Label(self,text="Right PWM Bias").grid(row=5, column=8, sticky=W)
+
+    #self.label_integ_thres=Label(self,text="Integral Threshold").grid(row=1, column=9, sticky=W)
 
     self.data_aP= Entry(self)
     self.data_aP.grid(row=2, column=3,sticky=W)                                                                  
@@ -88,6 +99,29 @@ class Application(Frame):
     self.data_mD= Entry(self)
     self.data_mD.grid(row=4, column=5,sticky=W)
 
+    self.data_fwd= Entry(self)
+    self.data_fwd.grid(row=2, column=6,sticky=W)
+
+    self.data_min_pwm_l= Entry(self)
+    self.data_min_pwm_l.grid(row=2, column=7,sticky=W)
+    self.data_min_pwm_r= Entry(self)
+    self.data_min_pwm_r.grid(row=2, column=8,sticky=W)
+
+    self.data_encoder_weight_l= Entry(self)
+    self.data_encoder_weight_l.grid(row=4, column=7,sticky=W)
+
+    self.data_encoder_weight_r= Entry(self)
+    self.data_encoder_weight_r.grid(row=4, column=8,sticky=W)
+
+    self.data_pwm_bias_l= Entry(self)
+    self.data_pwm_bias_l.grid(row=6, column=7,sticky=W)
+
+    self.data_pwm_bias_r= Entry(self)
+    self.data_pwm_bias_r.grid(row=6, column=8,sticky=W)
+
+    #self.data_integ_thres= Entry(self)
+    #self.data_integ_thres.grid(row=2, column=9,sticky=W)
+    
     self.data_aP.insert(0,"0")
     self.data_aS.insert(0,"0")
     self.data_aD.insert(0,"0")
@@ -100,18 +134,32 @@ class Application(Frame):
     self.data_mS.insert(0,"0")
     self.data_mD.insert(0,"0")
 
+    self.data_fwd.insert(24,"24")
+    #self.data_integ_thres.insert(5,"5")
+    self.data_min_pwm_l.insert(4000,"4000")
+    self.data_min_pwm_r.insert(4000,"4000")
+
+    self.data_encoder_weight_l.insert(1,"1")
+    self.data_encoder_weight_r.insert(1,"1")
+
+    self.data_pwm_bias_l.insert(1,"1")
+    self.data_pwm_bias_r.insert(1,"1")
+
     self.button=Button(self,text="Send Values",command=self.send).grid(row=5, column=2,sticky=W)
     self.start=Button(self,text="START!",command=self.begin).grid(row=5, column=3,sticky=W)
-    self.halt=Button(self,text="STOP!",command=self.stop).grid(row=5, column=4,sticky=W)                                                                   
+    self.halt=Button(self,text="STOP!",command=self.stop).grid(row=5,column=4,sticky=W)                                                                   
     self.reset=Button(self,text="Reset",command=self.reset).grid(row=5, column=5,sticky=W)
+    self.forward=Button(self,text="FWD",command=self.forward).grid(row=3, column=6,sticky=W)
+    self.right=Button(self,text="Right",command=self.right).grid(row=4, column=6,sticky=W)
+    self.left=Button(self,text="Left",command=self.left).grid(row=5, column=6,sticky=W)
     
     self.scroller=Scrollbar(self)
-    self.scroller.grid(row=15,column=1,sticky='nsew')
+    self.scroller.grid(row=19,column=1,sticky='nsew')
     self.scroller.config(width='20')
 
 
     self.output=Text(self, width=90, height=25, wrap=WORD)
-    self.output.grid(row=15, column=2,columnspan=6,sticky='nsew')
+    self.output.grid(row=19, column=2,columnspan=6,sticky='nsew')
     global output
     output = self.output
 
@@ -132,6 +180,16 @@ class Application(Frame):
         self.data_mP.get(),
         self.data_mS.get(),
         self.data_mD.get(),
+
+	#self.data_integ_thres.get(),
+        self.data_min_pwm_l.get(),
+        self.data_min_pwm_r.get(),
+
+   	self.data_encoder_weight_l.get(),
+	self.data_encoder_weight_r.get(),
+
+	self.data_pwm_bias_l.get(),
+	self.data_pwm_bias_r.get(),
       ]
     values = list(map(lambda x: float(x), values))
     p.write('g', values); 
@@ -158,9 +216,26 @@ class Application(Frame):
   def reset(self):
     self.output.delete(0.0, END)
 
+  def forward(self):
+    """Moves the robot forward by a certain distance""" 
+    global p
+    fwd_value=self.data_fwd.get()
+    fwd_value= list(map(lambda x: float(x), fwd_value))
+    p.write('f',fwd_value);
+
+  def right(self):
+    """Turns the robot right""" 
+    global p
+    p.write('r');
+
+  def left(self):
+    """Turns the robot right""" 
+    global p
+    p.write('l');
+
 root=Tk()
 root.title("PID Control")
-root.geometry("900x600")
+root.geometry("1200x1200")
 
 app=Application(root)
 
