@@ -22,7 +22,7 @@
 
 #define CLEAN_ANGLE(X) ( atan2f(cos(Y
 
-static float compliFilter = 0.f;						//More implies more weight to accel
+static float compliFilter = 0.5f;						//More implies more weight to accel
 static struct localizer _storage; 
 
 typedef struct enc{
@@ -44,12 +44,12 @@ static void update(Localizer self){
       newR = self->m->getRightCount();
   
   // Encoder differences										//Inverse Kinematics
-  dSL = newL - self->enc->L; 
-  dSR = newR - self->enc->R; 
+  dSL = ENC_TO_D_L(newL - self->enc->L);
+  dSR = ENC_TO_D_R(newR - self->enc->R);
 
   // Translate to position updates
-  dS      =  ENC_TO_D((dSL + dSR) / 2.f);  
-  dTheta  = fixAngle((ENC_TO_D(dSR - dSL)) / WHEEL_BASE_WIDTH);
+  dS      = (dSL + dSR) / 2.f;  
+  dTheta  = fixAngle((dSR - dSL) / WHEEL_BASE_WIDTH);
 
   // Apply Rw = Rw + dRw
   self->_state->vel = dS;
@@ -57,13 +57,13 @@ static void update(Localizer self){
   self->_state->x += dS * cosf(self->_state->theta + dTheta/2);  
   self->_state->y += dS * sinf(self->_state->theta + dTheta/2);  
 
-  if (iters & 0x10){
+  if (iters < 10){
     iters = 0; 
     // Get accel angle and do complimentary filter
     // This is a delay as accelerometer is much slower
     self->_state->theta = compliFilter*self->acc->getAngle() + 
                     (1-compliFilter)*(self->_state->theta + dTheta);
-  } else { 
+  } else {
     self->_state->theta = (self->_state->theta + dTheta);
   }
   

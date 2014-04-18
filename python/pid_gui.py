@@ -203,7 +203,7 @@ class Application(Frame):
     global running
     global p 
     p.write('h')
-    running=0
+    #running=0
 
   def begin(self):
     """Starts the process""" 

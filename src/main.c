@@ -12,14 +12,7 @@ Motors motors;
 Localizer localizer;
 
 state_t _targStates[] = {
-                         {36.f,   0.f,    0.f,      0.f},
-                         {36.f,   0.f,    PI/2.0f,  0.f},
-                         {36.f,   36.f,   PI/2.0f,  0.f},
-                         {36.f,   36.f,   PI,       0.f},
-                         {0.0f,   36.f,   PI,       0.f},
-                         {0.0f,   36.f,  3*PI/2.0f, 0.f},
-                         {0.0f,   0.0f,  3*PI/2.0f, 0.f},
-                         {0.0f,   0.0f,  0.0f,      0.f}
+                         {0.f,   24.f,    PI/2,      0.f}
 }; 
 int numStates = sizeof(_targStates)/sizeof(state_t);
 int currentState = 0; 
@@ -129,14 +122,15 @@ int checkStateDone(void){
 void loop(void) {
   static int i = 0; 
   doLog();
+  doUpdateState();
   if(localizer->state->x < targState->x){
-    motors->setSpeeds(motors,1,1);
-    doUpdateState();
+    motors->setSpeeds(motors,10,10);
     delay(100);
   }else{
     motors->setSpeeds(motors, 0x0, 0x0);
     delay(1000);
   }
+  delay(1000);
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
