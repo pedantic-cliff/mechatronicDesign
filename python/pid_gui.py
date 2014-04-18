@@ -19,9 +19,10 @@ class Port:
 
   def write(self, key, values = None):
     cnt = 0
+
     if type(key) is str:
       key = key.encode()
-
+    
     cnt += self.serial.write(key)
     if values != None:
       if type(values) != list:
@@ -37,7 +38,7 @@ class Port:
     return str(self.serial.read(size))
 
 global p
-#p = Port("/dev/ttyUSB0")
+p = Port("/dev/ttyUSB0")
 
 def updateSerialLog():
   i = 0
@@ -45,7 +46,8 @@ def updateSerialLog():
     i+=1
     time.sleep(0.05)
     global p
-    output.insert(0.0, p.read(20))
+    output.insert(END, p.read(10))
+    output.yview(END)
 
 class Application(Frame):
   """ A GUI application"""
@@ -185,11 +187,11 @@ class Application(Frame):
         self.data_min_pwm_l.get(),
         self.data_min_pwm_r.get(),
 
-   	self.data_encoder_weight_l.get(),
-	self.data_encoder_weight_r.get(),
+   	    self.data_encoder_weight_l.get(),
+	      self.data_encoder_weight_r.get(),
 
-	self.data_pwm_bias_l.get(),
-	self.data_pwm_bias_r.get(),
+	      self.data_pwm_bias_l.get(),
+	      self.data_pwm_bias_r.get(),
       ]
     values = list(map(lambda x: float(x), values))
     p.write('g', values); 

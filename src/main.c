@@ -39,11 +39,10 @@ void start(void){
   localizer->restart(localizer);
   currentState = 0; 
   targState = &_targStates[currentState];
-  delay(3000);
   running = 1;
   time = getCurrentTime();
-  colorSensors->startColor(NONE);
 }
+
 void halt(void){
   running = 0;
   motors->setSpeeds(motors, 0,0);
@@ -53,11 +52,11 @@ int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
   init();
-  sendGuesses();
-  start();
   do {
     if(running)
       loop();
+    else
+      delay(500);
   } while (1);
 }
 
@@ -73,7 +72,7 @@ static void init() {
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
   initSysTick(); 
-  USART_puts("Init finished \r\n");
+  USART_puts("Init finished\n");
 }
 
 int doColor(Color c){
@@ -87,20 +86,20 @@ void doLog(void){
   USART_putInt(motors->getLeftCount());
   USART_puts("\t");
   USART_putInt(motors->getRightCount());
-  USART_puts("\n\r");
+  USART_puts("\n");
 
   USART_puts("x, y: ");
   USART_putFloat(localizer->state->x);
   USART_puts("\t");
   USART_putFloat(localizer->state->y);
-  USART_puts("\n\r");
+  USART_puts("\n");
    
   USART_puts("Angle: ");
   USART_putFloat(localizer->state->theta);
-  USART_puts("\n\r");
+  USART_puts("\n");
   USART_puts("Vel: ");
   USART_putFloat(localizer->state->vel);
-  USART_puts("\n\r");
+  USART_puts("\n");
 }
 
 void doCalibrateColors(){
@@ -131,7 +130,7 @@ void loop(void) {
   static int i = 0; 
   doLog();
   if(localizer->state->x < targState->x){
-    motors->setSpeeds(motors, 0x2000, 0x1a00);
+    motors->setSpeeds(motors,1,1);
     doUpdateState();
     delay(100);
   }else{
@@ -147,12 +146,12 @@ void loop(void) {
 void tick_loop(void){
   static int loopCount = 0;
   localizer->update(localizer);
-  return;
-  if(loopCount == 0){
+  /*if(loopCount == 0){
     localizer->update(localizer);
     pid->loop(pid, targState, localizer->_state);
     loopCount = 10; 
   }
   motors->doMotorPID(motors); 
   loopCount--;
+  */
 }

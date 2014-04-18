@@ -47,7 +47,7 @@
 // MOTOR CONTROL 
 #define PWM_PERIOD 	0x8000
 #define PWM_MAX 		0x4000
-#define PWM_SCALER 	700
+#define PWM_SCALER 	1
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
 #define DIR_PIN_FR GPIO_Pin_12
@@ -204,8 +204,8 @@ void setSpeeds(Motors self, float l, float r){
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
 
-  L_PWM = l; //self->PWM_Min_L + (long)(l * PWM_SCALER); 
-  R_PWM = r; //self->PWM_Min_R + (long)(r * PWM_SCALER); 
+  L_PWM = self->PWM_Min_L + (long)(l * PWM_SCALER); 
+  R_PWM = self->PWM_Min_R + (long)(r * PWM_SCALER); 
   TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
   TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
 }; 
@@ -302,14 +302,14 @@ Motors createMotors(void){
   m->getRightCount  = getRightCount;
   m->resetCounts    = encodersReset;
 
-  m->setSpeeds          = setSpeeds; 
-  m->setOffset          = setOffset;
-  m->setMotorPIDGains   = setMotorPIDGains;
-  m->doMotorPID         = doMotorPID;
-  m->setMotorTargSpeeds = setMotorTargSpeeds;
-  m->setMotorPIDGains = setMotorPIDGains;
-  m->resetMotorPIDErrors = resetMotorPIDErrors;
-  m->resetMotorPID = resetMotorPID;
+  m->setSpeeds            = setSpeeds; 
+  m->setOffset            = setOffset;
+  m->setMotorPIDGains     = setMotorPIDGains;
+  m->doMotorPID           = doMotorPID;
+  m->setMotorTargSpeeds   = setMotorTargSpeeds;
+  m->setMotorPIDGains     = setMotorPIDGains;
+  m->resetMotorPIDErrors  = resetMotorPIDErrors;
+  m->resetMotorPID        = resetMotorPID;
 
   initEncoders();
   initPWM(); 
