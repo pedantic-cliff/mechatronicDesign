@@ -9,44 +9,7 @@ ColorSensors colorSensors;
 Accel accel; 
 Motors motors; 
 
-MotorSpeeds speeds;
-Localizer localizer;
 
-state_t _targStates[] = {
-                         {24.f,   0.f,    0.f,      0.f},
-                         {0.0f,   0.f,    PI/2.0f,  0.f},
-                         {24.f,   24.f,   PI/2.0f,  0.f},
-                         {24.f,   24.f,   PI,       0.f},
-                         {0.0f,   24.f,   PI,       0.f},
-                         {0.0f,   24.f,  3*PI/2.0f, 0.f},
-                         {0.0f,   12.0f, 3*PI/2.0f, 0.f},
-                         {0.0f,   12.0f,  0.0f,     0.f},
-                         {12.0f,  12.0f,  0.0f,    0.f}
-												};
-												
-thresholds_t thresholdSettings[] = 	{
-													{	 0,		0},		//RIGHT +X
-													{3000,	3000},		//UP	  +Y
-													{	 0,		0},		//LEFT  -X
-													{-4000, -4000}			//DOWN  -Y
-												};
-												
-thresholds_t speedSettings[] = 		{
-													{8200,9000},			//RIGHT	+X
-													{10500,10200},			//UP		+Y
-													{9000,6400},			//LEFT	-X
-													{0,0},					//DOWN	-Y
-													{0,0},					//LEFT 1
-													{0,0},					//LEFT 2
-													{0,0},					//LEFT 3
-													{0,0},					//LEFT 4
-													{0,0},					//RIGHT 1
-													{0,0},					//RIGHT 2
-													{0,0},					//RIGHT 3
-													{0,0}						//RIGHT 4
-												};
-
-static enum { POSX=0, POSY=1, NEGX=2, NEGY=3 } motionTypeFlag; 
 
 
 int numStates = sizeof(_targStates)/sizeof(state_t);
@@ -64,7 +27,7 @@ static void loop(void);
 
 long time;
 void start(void){
-  localizer->restart(localizer);
+  
   currentState = 1; 
   targState = &_targStates[currentState];
   running = 1;
