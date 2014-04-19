@@ -6,6 +6,7 @@
 #include "stm32f4xx_exti.h"
 #include "misc.h"
 #include "main.h"
+#include "state.h"
 
 /******* Init USER_BUTTON on the project board *********/
 void initButton(void) {

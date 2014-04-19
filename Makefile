@@ -37,6 +37,7 @@ SOURCES += \
 		src/motors.c \
 		src/localize.c \
 		src/map.c \
+		src/state.c \
 		src/pid.c 
 
 OBJECTS = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))

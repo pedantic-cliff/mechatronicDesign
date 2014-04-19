@@ -2,6 +2,7 @@
 #include "misc.h"
 #include <stdio.h>
 #include "math.h"
+#include "state.h"
 
 volatile int running = 0;
 
@@ -9,12 +10,7 @@ ColorSensors colorSensors;
 Accel accel; 
 Motors motors; 
 
-
-
-
-int numStates = sizeof(_targStates)/sizeof(state_t);
 int currentState = 0; 
-State targState;
 
 Pid pid; 
 PID_Gains angleGains  = { 35.f, 0.00f, 0.0f },
@@ -27,7 +23,7 @@ static void loop(void);
 
 long time;
 void start(void){
-  
+  localizer->reset();  
   currentState = 1; 
   targState = &_targStates[currentState];
   running = 1;
@@ -45,6 +41,8 @@ int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
   init();
+  delay(1000); 
+  markStarted();
   do {
     motors->setSpeeds(motors,0,0);
     if(running)
