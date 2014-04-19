@@ -293,11 +293,10 @@ void parseParams(void){
       motorGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       motors->setMotorPIDGains(motors, motorGains); 
 
-      val1 = extractFloat(&received_string[2 + 4*(i++)]);
-      val2 = extractFloat(&received_string[2 + 4*(i++)]);
+      speeds.l = extractFloat(&received_string[2 + 4*(i++)]);
+      speeds.r = extractFloat(&received_string[2 + 4*(i++)]);
 
-      motors->setOffset(motors, val1, val2); 
-
+/*
       USART_puts("Got [adm].[psd]: ");
       USART_putFloat(angleGains.Kp);
       USART_puts("\t");
@@ -322,6 +321,7 @@ void parseParams(void){
       USART_puts("\t");
       USART_putFloat(val2);
       USART_puts("\n");
+*/
       break;
   }
   command = 'n'; 

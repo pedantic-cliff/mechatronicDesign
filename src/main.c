@@ -9,11 +9,12 @@ ColorSensors colorSensors;
 Accel accel; 
 Motors motors; 
 
+MotorSpeeds speeds;
 Localizer localizer;
 
 state_t _targStates[] = {
                          {24.f,   0.f,    0.f,      0.f},
-                         {24.f,   0.f,    PI/2.0f,  0.f},
+                         {0.0f,   0.f,    PI/2.0f,  0.f},
                          {24.f,   24.f,   PI/2.0f,  0.f},
                          {24.f,   24.f,   PI,       0.f},
                          {0.0f,   24.f,   PI,       0.f},
@@ -45,7 +46,7 @@ thresholds_t speedSettings[] = 		{
 													{0,0}						//RIGHT 4
 												};
 
-static enum { POSX, POSY, NEGX, NEGY } motionTypeFlag; 
+static enum { POSX=0, POSY=1, NEGX=2, NEGY=3 } motionTypeFlag; 
 
 
 int numStates = sizeof(_targStates)/sizeof(state_t);
@@ -72,20 +73,22 @@ void start(void){
 
 void halt(void){
   running = 0;
-  motors->setSpeeds(motors,thresholdSettings[motionTypeFlag].l,
-  									thresholdSettings[motionTypeFlag].r
-  						 );
 }
+
+void doLog();
+void doUpdate();
 
 int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
   init();
   do {
+    motors->setSpeeds(motors,0,0);
     if(running)
       loop();
     else
       delay(500);
+      
   } while (1);
 }
 
@@ -151,15 +154,17 @@ void doUpdateState(void){
 
 void loop(void) {
   static int i = 0; 
-  doLog();
   doUpdateState();
   if(localizer->state->theta < targState->theta){
-    motors->setSpeeds(motors,0,0);
+    motors->setSpeeds(motors,speeds.l*cosf(localizer->state->theta)
+                            ,speeds.r*cosf(localizer->state->theta));
+    delay(100);
   }else{
-    motors->setSpeeds(motors, thresholdSettings[1].l, thresholdSettings[1].r);
-    delay(1000);
+    motionTypeFlag = POSY;
+    motors->setSpeeds(motors,0,0);
+    delay(2000);
   }
-  delay(1000);
+  doLog();
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
@@ -169,6 +174,7 @@ void loop(void) {
 void tick_loop(void){
   static int loopCount = 0;
   localizer->update(localizer);
+  motors->setOffset(motors, localizer->_state->theta);
   /*if(loopCount == 0){
     localizer->update(localizer);
     pid->loop(pid, targState, localizer->_state);

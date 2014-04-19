@@ -28,5 +28,10 @@ extern PID_Gains angleGains,
                  motorGains, 
                  bearGains ;
 
+typedef struct {
+  float l; 
+  float r; 
+} MotorSpeeds; 
+extern MotorSpeeds speeds;
 
 #endif //_MAIN_H_

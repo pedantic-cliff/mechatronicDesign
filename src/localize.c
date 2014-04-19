@@ -22,7 +22,7 @@
 
 #define CLEAN_ANGLE(X) ( atan2f(cos(Y
 
-static float compliFilter = 0.5f;						//More implies more weight to accel
+static float compliFilter = 1.f;						//More implies more weight to accel
 static struct localizer _storage; 
 
 typedef struct enc{

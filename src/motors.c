@@ -7,7 +7,7 @@
 #include "usart.h"
 #include "common.h"
 #include "utils.h"
-
+#include "math.h"
 // Left Motor Channels 
 #define ENCRA_PIN GPIO_Pin_0
 #define ENCRA_GPIO_PORT GPIOA
@@ -47,6 +47,7 @@
 // MOTOR CONTROL 
 #define PWM_PERIOD 	0x8000
 #define PWM_MAX 		0x4000
+#define PWM_MIN     4000
 #define PWM_SCALER 	1
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
@@ -181,8 +182,8 @@ int getRightCount(void){
 }
 
 void setSpeeds(Motors self, float l, float r){
-  l = self->PWM_Min_L + (long)(l); 
-  r = self->PWM_Min_R + (long)(r); 
+  l = self->PWM_Min + (long)(l); 
+  r = self->PWM_Min + (long)(r); 
   
   if ( l < 0 ){
     l = -l;
@@ -205,9 +206,8 @@ void setSpeeds(Motors self, float l, float r){
   TIM3->CCR4 = (int) (l < PWM_MAX ? l : PWM_MAX); 
 }; 
 
-void setOffset(Motors self, int offset_L, int offset_R){
-  self->PWM_Min_L = offset_L; 
-  self->PWM_Min_R = offset_R; 
+void setOffset(Motors self, float theta){
+  self->PWM_Min = PWM_MIN * sinf(theta);
 }
 
 void setMotorTargSpeeds(Motors self, float leftTargSpeed, float rightTargSpeed){
@@ -290,9 +290,6 @@ Motors createMotors(void){
   m->s = 0;
   m->d = 0;
   	
-  m->PWM_Min_L = 0xA80;
-  m->PWM_Min_R = 0x800;
-
   m->getLeftCount   = getLeftCount;
   m->getRightCount  = getRightCount;
   m->resetCounts    = encodersReset;
