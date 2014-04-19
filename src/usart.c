@@ -257,13 +257,16 @@ void parseParams(void){
   int i = 0; 
   float val1, val2; 
   switch(command){
+    case 'c': 
+      setCalibrateColor();
+      break;
     case 's': 
       start();
       break; 
     case 'h':
       halt();
       break; 
-    case 'f':
+      case 'f':
       val1 = extractFloat(&received_string[2]); 
       targState->x = localizer->state->x + val1 * cosf(localizer->state->theta);
       targState->y = localizer->state->y + val1 * sinf(localizer->state->theta);

@@ -23,6 +23,8 @@ state_t _targStates[] = {
 }; 
 int numStates = sizeof(_targStates)/sizeof(state_t);
 int currentState = 0; 
+int calibrateColor; 
+
 State targState;
 
 Pid pid; 
@@ -48,16 +50,27 @@ void halt(void){
   motors->setSpeeds(motors, 0,0);
 }
 
+void doColorCalibrate(void){
+  colorSensors->calibrateColors(colorSensors); 
+}
 int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
   init();
   do {
+    if(calibrateColor){
+      doColorCalibrate();
+      calibrateColor = 0; 
+    }
     if(running)
       loop();
     else
       delay(500);
   } while (1);
+}
+
+void setCalibrateColor(void){
+  calibrateColor = 1; 
 }
 
 static void init() {
@@ -75,12 +88,6 @@ static void init() {
   USART_puts("Init finished\n");
 }
 
-int doColor(Color c){
-  colorSensors->measureColor(colorSensors,c); 
-  while(colorSensors->done < COLOR_SENSOR_ITERS); 
-  volatile uint16_t* res = colorSensors->getResult(); 
-  return res[0];
-}
 
 void doLog(void){
   USART_putInt(motors->getLeftCount());
@@ -102,18 +109,6 @@ void doLog(void){
   USART_puts("\n");
 }
 
-void doCalibrateColors(){
-  USART_puts("NONE:\t\t");
-  colorSensors->calibrateColor(colorSensors, NONE);
-  USART_puts("RED:\t\t");
-  colorSensors->calibrateColor(colorSensors, RED);
-  USART_puts("GREEN:\t\t");
-  colorSensors->calibrateColor(colorSensors, GREEN);
-  USART_puts("BLUE:\t\t");
-  colorSensors->calibrateColor(colorSensors, BLUE);
-  USART_puts("\r\n\r\n");
-}
-
 void doUpdateState(void){
   __disable_irq();
   localizer->cacheState(localizer);
@@ -128,7 +123,7 @@ int checkStateDone(void){
 
 void loop(void) {
   static int i = 0; 
-  doLog();
+  //doLog();
   if(localizer->state->x < targState->x){
     motors->setSpeeds(motors,1,1);
     doUpdateState();

@@ -38,7 +38,7 @@ class Port:
     return str(self.serial.read(size))
 
 global p
-p = Port("/dev/ttyUSB0")
+p = Port("/dev/ttyUSB1")
 
 def updateSerialLog():
   i = 0
@@ -155,6 +155,7 @@ class Application(Frame):
     self.right=Button(self,text="Right",command=self.right).grid(row=4, column=6,sticky=W)
     self.left=Button(self,text="Left",command=self.left).grid(row=5, column=6,sticky=W)
     
+    self.left=Button(self,text="Calibrate",command=self.calibrate).grid(row=6, column=6,sticky=W)
     self.scroller=Scrollbar(self)
     self.scroller.grid(row=19,column=1,sticky='nsew')
     self.scroller.config(width='20')
@@ -196,6 +197,9 @@ class Application(Frame):
     values = list(map(lambda x: float(x), values))
     p.write('g', values); 
     
+  def calibrate(self):
+    global p
+    p.write('c')
     
   def stop(self):
     """Stops the process""" 

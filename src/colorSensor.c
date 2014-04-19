@@ -111,13 +111,13 @@ void ADC_TimerConfig(void){
   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
-//  TIM_SelectOutputTrigger(TIM8,TIM_TRGOSource_OC1);
+  //  TIM_SelectOutputTrigger(TIM8,TIM_TRGOSource_OC1);
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Toggle;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
   TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
   TIM_OC4Init(TIM4, &TIM_OCInitStructure);
   TIM_OC4PreloadConfig(TIM4, TIM_OCPreload_Disable);
-  
+
   GPIO_InitTypeDef GPIO_InitStructure;
 
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; 
@@ -128,7 +128,6 @@ void ADC_TimerConfig(void){
   GPIO_Init(GPIOB, &GPIO_InitStructure); 
 
   GPIO_PinAFConfig(GPIOB, GPIO_PinSource9, GPIO_AF_TIM4);
-  TIM_Cmd(TIM4, ENABLE);
   TIM4->CCR4 = 0x1000;
 }
 
@@ -181,6 +180,7 @@ void initLights(void){
   gpio.GPIO_Mode = GPIO_Mode_OUT;
   gpio.GPIO_Pin  = ALL_LIGHTS;
   GPIO_Init(LIGHT_PORT, &gpio);
+  GPIO_SetBits(LIGHT_PORT, GREEN_PIN |  RED_PIN | BLUE_PIN);
 }
 
 void initSensors(void){
@@ -190,6 +190,7 @@ void initSensors(void){
   RCC_Configuration();
   GPIO_Configuration();
   ADC_Configuration();
+  _colorSensors.isCalibrating = 0;
 }
 
 void startADC(void){
@@ -271,7 +272,8 @@ void ADC_IRQHandler(void){
     sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
   _colorSensors.done++;
-  if(_colorSensors.done == COLOR_SENSOR_ITERS){
+  if((!_colorSensors.isCalibrating)
+      && _colorSensors.done == COLOR_SENSOR_ITERS){
     nextColor();
   } else {
     ADC_SoftwareStartConv(ADC1);
@@ -303,50 +305,71 @@ void measureColor(ColorSensors cs, Color c){
   startADC(); 
 }
 
-void calibrateColor(ColorSensors cs, Color c){ 
-  int i = 0, j = 0; 
+void calibrateColors(ColorSensors cs){ 
+  int i = 0, j = 0, k = 0; 
+  Color c = 0; 
   volatile uint16_t *results; 
-
   float senMeans[NUM_SENSORS];
-  for(i = 0; i < NUM_SENSORS; i++){
-    senMeans[i] = 0.f;
-  }
-  GPIO_SetBits(LIGHT_PORT, ALL_LIGHTS);
-  switch(c){
-    case RED:
-      GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
-      currIdx = RED_IDX;
-      break;
-    case GREEN:
-      GPIO_ResetBits(LIGHT_PORT, GREEN_PIN); 
-      currIdx = GREEN_IDX;
-      break;
-    case BLUE: 
-      GPIO_ResetBits(LIGHT_PORT, BLUE_PIN); 
-      currIdx = BLUE_IDX;
-      break;
-    case NONE: 
-    default: 
-      currIdx = NONE_IDX;
-      break;
-  }
-  currColor = c;
-  delay(150);
-  for(i = 0; i < COLOR_SENSOR_CALIB_ITERS; i++){
-    startADC(); 
-    while(cs->done < COLOR_SENSOR_ITERS); 
-    results = cs->getResult(); 
-    for(j = 0; j < NUM_SENSORS; j++){
-      senMeans[j] += results[j]; 
+  float ambMeans[NUM_SENSORS] = { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+  _colorSensors.isCalibrating = 1; 
+  USART_puts("Start Calibrating: \n");
+  for(k = 0; k < NUM_COLORS; k++){
+    for(i = 0; i < NUM_SENSORS; i++){
+      senMeans[i] = 0.f;
+    }
+    GPIO_SetBits(LIGHT_PORT, ALL_LIGHTS);
+    switch(k){
+      case 1:
+        c = RED;
+        GPIO_ResetBits(LIGHT_PORT, RED_PIN); 
+        currIdx = RED_IDX;
+        USART_puts("Red:\t"); 
+        break;
+      case 2:
+        c = GREEN;
+        GPIO_ResetBits(LIGHT_PORT, GREEN_PIN); 
+        currIdx = GREEN_IDX;
+        USART_puts("Green:\t"); 
+        break;
+      case 3: 
+        c = BLUE;
+        GPIO_ResetBits(LIGHT_PORT, BLUE_PIN); 
+        currIdx = BLUE_IDX;
+        USART_puts("Blue:\t"); 
+        break;
+      default: 
+        c = NONE;
+        currIdx = NONE_IDX;
+        break;
+    }
+    currColor = c;
+    delay(100);
+    for(i = 0; i < COLOR_SENSOR_CALIB_ITERS; i++){
+      startADC(); 
+      ADC_SoftwareStartConv(ADC1); 
+      while(cs->done < COLOR_SENSOR_ITERS); 
+      results = cs->getResult(); 
+      for(j = 0; j < NUM_SENSORS; j++){
+        senMeans[j] += results[j]; 
+      }
+    }
+    if(k == 0){
+      for(j = 0; j < NUM_SENSORS; j++){
+        ambMeans[j] = senMeans[j];
+      }
+    }else{
+      for(j = 0; j < NUM_SENSORS; j++){
+        senMeans[j] -= ambMeans[j];
+        senMeans[j] /= COLOR_SENSOR_CALIB_ITERS; 
+        USART_putFloat(senMeans[j]);
+        USART_puts(",\t"); 
+      }
+      USART_puts("\n");
     }
   }
-  USART_puts("Means: "); 
-  for(j = 0; j < NUM_SENSORS; j++){
-    senMeans[j] /= COLOR_SENSOR_CALIB_ITERS; 
-    USART_putFloat(senMeans[j]);
-    USART_puts(",\t"); 
-  }
-  USART_puts("\n\r");
+  GPIO_SetBits(LIGHT_PORT, ALL_LIGHTS);
+  _colorSensors.isCalibrating = 0; 
+  USART_puts("Done Calibrating\n");
 }
 
 volatile uint16_t* getResult(void){
@@ -372,9 +395,10 @@ ColorSensors createColorSensors(void){
   initLights(); 
   initSensors(); 
 
-  cs->measureColor  = measureColor;
-  cs->getResult     = getResult; 
-  cs->startColor    = startColor; 
+  cs->measureColor    = measureColor;
+  cs->getResult       = getResult; 
+  cs->startColor      = startColor; 
+  cs->calibrateColors = calibrateColors; 
 
   centroids[0] = cent_sen1;
   centroids[1] = cent_sen2;
