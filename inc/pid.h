@@ -27,4 +27,9 @@ typedef struct pid {
 
 Pid createPID(PID_Gains a, PID_Gains p, PID_Gains v, Motors m);
 
+typedef struct {
+	int	l,
+			r;
+} thresholds_t,*thresholdsPtr;
+
 #endif // _PID_H_

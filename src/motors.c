@@ -181,11 +181,8 @@ int getRightCount(void){
 }
 
 void setSpeeds(Motors self, float l, float r){
-  long L_PWM = 0;
-  long R_PWM = 0;
-  
-//  TIM3->CCR3 = 0; 
-//  TIM3->CCR4 = 0; 
+  l = self->PWM_Min_L + (long)(l); 
+  r = self->PWM_Min_R + (long)(r); 
   
   if ( l < 0 ){
     l = -l;
@@ -203,11 +200,9 @@ void setSpeeds(Motors self, float l, float r){
     GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
-
-  L_PWM = self->PWM_Min_L + (long)(l * PWM_SCALER); 
-  R_PWM = self->PWM_Min_R + (long)(r * PWM_SCALER); 
-  TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
-  TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
+  
+  TIM3->CCR3 = (int) (r < PWM_MAX ? r : PWM_MAX); 
+  TIM3->CCR4 = (int) (l < PWM_MAX ? l : PWM_MAX); 
 }; 
 
 void setOffset(Motors self, int offset_L, int offset_R){
@@ -268,8 +263,8 @@ void doMotorPID(Motors self){
 	
 	deltaT = currentTime - previousTime;
 	
-	leftVelErr = self->leftTargetSpeed - (ENC_TO_D(currentLeftTicks-prevLeftTicks))/(deltaT);
-	rightVelErr = self->rightTargetSpeed - (ENC_TO_D(currentRightTicks-prevRightTicks))/(deltaT);
+	leftVelErr = self->leftTargetSpeed - (ENC_TO_D_L(currentLeftTicks-prevLeftTicks))/(deltaT);
+	rightVelErr = self->rightTargetSpeed - (ENC_TO_D_R(currentRightTicks-prevRightTicks))/(deltaT);
 	
 	calcErr(leftVelErr,&eLm,0.f);
 	calcErr(rightVelErr,&eRm,0.f);

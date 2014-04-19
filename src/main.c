@@ -12,8 +12,42 @@ Motors motors;
 Localizer localizer;
 
 state_t _targStates[] = {
-                         {0.f,   24.f,    PI/2,      0.f}
-}; 
+                         {24.f,   0.f,    0.f,      0.f},
+                         {24.f,   0.f,    PI/2.0f,  0.f},
+                         {24.f,   24.f,   PI/2.0f,  0.f},
+                         {24.f,   24.f,   PI,       0.f},
+                         {0.0f,   24.f,   PI,       0.f},
+                         {0.0f,   24.f,  3*PI/2.0f, 0.f},
+                         {0.0f,   12.0f, 3*PI/2.0f, 0.f},
+                         {0.0f,   12.0f,  0.0f,     0.f},
+                         {12.0f,  12.0f,  0.0f,    0.f}
+												};
+												
+thresholds_t thresholdSettings[] = 	{
+													{	 0,		0},		//RIGHT +X
+													{3000,	3000},		//UP	  +Y
+													{	 0,		0},		//LEFT  -X
+													{-4000, -4000}			//DOWN  -Y
+												};
+												
+thresholds_t speedSettings[] = 		{
+													{8200,9000},			//RIGHT	+X
+													{10500,10200},			//UP		+Y
+													{9000,6400},			//LEFT	-X
+													{0,0},					//DOWN	-Y
+													{0,0},					//LEFT 1
+													{0,0},					//LEFT 2
+													{0,0},					//LEFT 3
+													{0,0},					//LEFT 4
+													{0,0},					//RIGHT 1
+													{0,0},					//RIGHT 2
+													{0,0},					//RIGHT 3
+													{0,0}						//RIGHT 4
+												};
+
+static enum { POSX, POSY, NEGX, NEGY } motionTypeFlag; 
+
+
 int numStates = sizeof(_targStates)/sizeof(state_t);
 int currentState = 0; 
 State targState;
@@ -30,7 +64,7 @@ static void loop(void);
 long time;
 void start(void){
   localizer->restart(localizer);
-  currentState = 0; 
+  currentState = 1; 
   targState = &_targStates[currentState];
   running = 1;
   time = getCurrentTime();
@@ -38,7 +72,9 @@ void start(void){
 
 void halt(void){
   running = 0;
-  motors->setSpeeds(motors, 0,0);
+  motors->setSpeeds(motors,thresholdSettings[motionTypeFlag].l,
+  									thresholdSettings[motionTypeFlag].r
+  						 );
 }
 
 int main(void) {
@@ -113,21 +149,14 @@ void doUpdateState(void){
   __enable_irq();
 }
 
-int checkStateDone(void){
-  return ( (fabsf(targState->x - localizer->state->x) < 0.7f)
-//      && ( fabsf(targState->y - localizer->state->y) < 0.2f)
-      && ( fabsf(targState->theta - localizer->state->theta) < 0.5f) );
-}
-
 void loop(void) {
   static int i = 0; 
   doLog();
   doUpdateState();
-  if(localizer->state->x < targState->x){
-    motors->setSpeeds(motors,10,10);
-    delay(100);
+  if(localizer->state->theta < targState->theta){
+    motors->setSpeeds(motors,0,0);
   }else{
-    motors->setSpeeds(motors, 0x0, 0x0);
+    motors->setSpeeds(motors, thresholdSettings[1].l, thresholdSettings[1].r);
     delay(1000);
   }
   delay(1000);
