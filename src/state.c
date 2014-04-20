@@ -6,6 +6,9 @@
 #include "common.h"
 #include "utils.h"
 #include "state.h"
+#include "math.h"
+#include "main.h"
+#include "usart.h"
 
 MotorSpeeds *speeds;
 Localizer localizer;
@@ -23,11 +26,11 @@ state_t _targStates[] = {
 												};
 												
  MotorSpeeds speedSettings[] = 		{
-													{8200,9000},			//RIGHT	+X
-													{10500,10200},			//UP		+Y
-													{9000,6400},			//LEFT	-X
+													{8200,9000},		//RIGHT	+X
+													{10500,10200},	//UP		+Y
+													{9000,6400},		//LEFT	-X
 													{0,0},					//DOWN	-Y
-													{0,0},					//LEFT 1
+													{-10000,13000},	//LEFT 1
 													{0,0},					//LEFT 2
 													{0,0},					//LEFT 3
 													{0,0},					//LEFT 4
@@ -45,34 +48,38 @@ Orientation orientationFlag, nextOrientationFlag;
 
 int isTurning;
 int motionComplete; 
+static int started;
 
 void findOutState(void) {
 	float theta = atan2f(sinf(localizer->_state->theta),cosf(localizer->_state->theta));
 	
-	if((theta>=-PI/4 && theta<=0) || (theta<Pi/4 && theta>=0)
+	if((theta>=-PI/4 && theta<=0) || (theta<PI/4 && theta>=0))
   	orientationFlag = POSX;
-	if(theta>=PI/4 && theta<3*Pi/4)
+	if(theta>=PI/4 && theta<3*PI/4)
 	  orientationFlag = POSY;
 	if((theta>=3*PI/4 && theta<=PI) || (theta<-3*PI/4 && theta>=-PI) )
   	orientationFlag = NEGX;
 	if(theta<-PI/4 && theta>=-3*PI/4 )
 	  orientationFlag = POSX;
+  USART_puts("Found state: ");
+  USART_putInt(orientationFlag);
+  USART_puts("\n");
 }
 
-void updateStateParameters(void)
-
-void startMotorsAndLocalizer(void) {
+void startState(void) {
 	localizer->restart(localizer);
 	findOutState();
-	motors->setSpeeds(motors,speeds.l,speeds.r);
+  targState->x = localizer->state->x;
+  targState->y = localizer->state->y;
+  targState->theta = localizer->state->theta;
 }
 
-void loopLocalizerAndFeedMotors(void) {
-	localizer->update;
-	calRequiredSpeeds();
-	motors->setSpeeds(motors,speeds.l,speeds.r);
+void markStarted(void){
+  started = 0; 
 }
-
+int isStarted(void){
+  return started;
+}
 /*
   switch(orientationFlag){
     case POSX:
@@ -86,21 +93,26 @@ void loopLocalizerAndFeedMotors(void) {
   }
 */
 void goForwardBy(float dist){
+  USART_puts("Go forward\n");
   isTurning = 0;
   motionComplete = 0; 
   nextOrientationFlag = orientationFlag; 
   switch(orientationFlag){
     case POSX:
       targState->x += dist; 
+      speeds = &speedSettings[0];
       break;
     case POSY:
       targState->y += dist; 
+      speeds = &speedSettings[1];
       break;
     case NEGX:
       targState->x -= dist; 
+      speeds = &speedSettings[2];
       break;
     case NEGY:
       targState->y -= dist; 
+      speeds = &speedSettings[3];
       break;
   }
 }
@@ -111,17 +123,59 @@ void turnLeft90(void){
   switch(orientationFlag){
     case POSX:
       nextOrientationFlag = POSY;
+      speeds = &speedSettings[4];
+      targState->theta = PI/2;
       break;
     case POSY:
       nextOrientationFlag = NEGX;
+      speeds = &speedSettings[5];
+      targState->theta = PI;
       break;
     case NEGX:
       nextOrientationFlag = NEGY;
+      speeds = &speedSettings[6];
+      targState->theta = -PI/2;
       break;
     case NEGY:
       nextOrientationFlag = POSX;
+      speeds = &speedSettings[7];
+      targState->theta = 0;
       break;
   }
+}
+
+int isMotionComplete(void){
+  if(isTurning){
+    switch(orientationFlag){
+      case POSX:
+        return (targState->x <= localizer->state->x);
+          
+      case POSY:
+        return (targState->y <= localizer->state->y);
+
+      case NEGX:
+        return (targState->x >= localizer->state->x);
+
+      case NEGY:
+        return (targState->y >= localizer->state->y);
+
+    }
+  } else {
+    switch(orientationFlag){
+      case POSX:
+        return (targState->theta >= localizer->state->theta);
+          
+      case POSY:
+        return (0 <= localizer->state->theta || localizer->state->theta  < -PI/2);
+
+      case NEGX:
+        return (targState->theta <= localizer->state->theta);
+
+      case NEGY:
+        return (targState->y <= localizer->state->theta);
+    }
+  }
+  return 0;
 }
 
 void doMotion(void){
@@ -129,16 +183,20 @@ void doMotion(void){
   if(motionComplete)
     return;
   else if(isMotionComplete()){
-    finishMotion(); 
     motionComplete = 1;
+    motors->setOffset(motors,9300);
+    motors->setOffset(motors,7500);
+    motors->setOffset(motors,5500);
+    motors->setOffset(motors,PWM_MIN);
     return;
   }
 
   if(isTurning){
-    motors->setSpeeds(motors, speeds->l, speeds->r);
-  } else {
+    motors->setOffset(motors,9000);
     theta = localizer->state->theta; 
     motors->setSpeeds(motors, cosf(theta)*speeds->l, cosf(theta)*speeds->r);
+  } else {
+    motors->setSpeeds(motors, speeds->l, speeds->r);
   }
 }
 

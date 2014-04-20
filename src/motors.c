@@ -45,10 +45,6 @@
 #define RIGHT_COUNT() ENCR_TIMER->CNT
 
 // MOTOR CONTROL 
-#define PWM_PERIOD 	0x8000
-#define PWM_MAX 		0x4000
-#define PWM_MIN     4000
-#define PWM_SCALER 	1
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
 #define DIR_PIN_FR GPIO_Pin_12
@@ -206,8 +202,12 @@ void setSpeeds(Motors self, float l, float r){
   TIM3->CCR4 = (int) (l < PWM_MAX ? l : PWM_MAX); 
 }; 
 
-void setOffset(Motors self, float theta){
-  self->PWM_Min = PWM_MIN * sinf(theta);
+void setOffset(Motors self, int base){
+  self->PWM_Base = base; 
+}
+
+void updateOffset(Motors self, float theta){
+  self->PWM_Min = self->PWM_Base * sinf(theta);
 }
 
 void setMotorTargSpeeds(Motors self, float leftTargSpeed, float rightTargSpeed){
@@ -285,7 +285,9 @@ Motors createMotors(void){
 	
   m->leftTargetSpeed = 0;
   m->rightTargetSpeed = 0;
-  
+
+  m->PWM_Base = PWM_MIN;
+
   m->p = 0;
   m->s = 0;
   m->d = 0;
@@ -296,6 +298,7 @@ Motors createMotors(void){
 
   m->setSpeeds            = setSpeeds; 
   m->setOffset            = setOffset;
+  m->updateOffset         = updateOffset;
   m->setMotorPIDGains     = setMotorPIDGains;
   m->doMotorPID           = doMotorPID;
   m->setMotorTargSpeeds   = setMotorTargSpeeds;

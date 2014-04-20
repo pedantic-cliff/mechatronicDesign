@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "main.h"
 #include "math.h"
+#include "state.h"
 
 #define MAX_STRLEN 64 // this is the maximum string length of our string in characters
 #define BAUD_RATE 30000     // Somehow this corresponds to 4800!!
@@ -265,16 +266,12 @@ void parseParams(void){
       break; 
     case 'f':
       val1 = extractFloat(&received_string[2]); 
-      targState->x = localizer->state->x + val1 * cosf(localizer->state->theta);
-      targState->y = localizer->state->y + val1 * sinf(localizer->state->theta);
+      goForwardBy(val1);
       break;
     case 'r':
-      val1 = extractFloat(&received_string[2]);
-      targState->theta = localizer->state->theta - PI/2; 
       break;
     case 'l': 
-      val1 = extractFloat(&received_string[2]);
-      targState->theta = localizer->state->theta + PI/2; 
+      turnLeft90();
       break; 
     case 'g': 
       angleGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
@@ -293,8 +290,8 @@ void parseParams(void){
       motorGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       motors->setMotorPIDGains(motors, motorGains); 
 
-      speeds.l = extractFloat(&received_string[2 + 4*(i++)]);
-      speeds.r = extractFloat(&received_string[2 + 4*(i++)]);
+      speeds->l = extractFloat(&received_string[2 + 4*(i++)]);
+      speeds->r = extractFloat(&received_string[2 + 4*(i++)]);
 
 /*
       USART_puts("Got [adm].[psd]: ");

@@ -4,10 +4,16 @@
 
 typedef struct motors *Motors; 
 
+#define PWM_MIN     4000
+#define PWM_PERIOD 	0x8000
+#define PWM_MAX 		0x4000
+#define PWM_SCALER 	1
+
 typedef struct motors{
   float leftTargetSpeed;
   float rightTargetSpeed;
   long PWM_Min;
+  long PWM_Base; 
   
   float p,s,d;
   
@@ -17,6 +23,7 @@ typedef struct motors{
 
   void (*setSpeeds)(Motors self, float left, float right); 
   void (*setOffset)(Motors self, float angle); 
+  void (*updateOffset)(Motors self, int value); 
   void (*setMotorPIDGains)(Motors self, PID_Gains gains);
   void (*doMotorPID)(Motors self);
   void (*setMotorTargSpeeds)(Motors self, float leftTargSpeed, float rightTargSpeed);

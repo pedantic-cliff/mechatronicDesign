@@ -12,6 +12,7 @@ extern MotorSpeeds *speeds;
 
 void markStarted(void);
 int isStarted(void);
+void startState(void);
 
 void goForwardBy(float dist);
 void turnLeft90(void);

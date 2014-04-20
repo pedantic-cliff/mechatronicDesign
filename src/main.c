@@ -21,12 +21,17 @@ PID_Gains angleGains  = { 35.f, 0.00f, 0.0f },
 static void init(void);
 static void loop(void);
 
+void doUpdateState(void){
+  __disable_irq();
+  localizer->cacheState(localizer);
+  __enable_irq();
+}
+
 long time;
 void start(void){
-  localizer->reset();  
-  currentState = 1; 
-  targState = &_targStates[currentState];
+  startState();
   running = 1;
+  USART_puts("Start!\n");
   time = getCurrentTime();
 }
 
@@ -44,12 +49,13 @@ int main(void) {
   delay(1000); 
   markStarted();
   do {
-    motors->setSpeeds(motors,0,0);
-    if(running)
+    doUpdateState();
+    if(running){
       loop();
-    else
-      delay(500);
-      
+    }
+    else{
+    }
+    delay(500);
   } while (1);
 }
 
@@ -66,13 +72,6 @@ static void init() {
   pid = createPID(distGains, bearGains,angleGains, motors); 
   initSysTick(); 
   USART_puts("Init finished\n");
-}
-
-int doColor(Color c){
-  colorSensors->measureColor(colorSensors,c); 
-  while(colorSensors->done < COLOR_SENSOR_ITERS); 
-  volatile uint16_t* res = colorSensors->getResult(); 
-  return res[0];
 }
 
 void doLog(void){
@@ -95,36 +94,8 @@ void doLog(void){
   USART_puts("\n");
 }
 
-void doCalibrateColors(){
-  USART_puts("NONE:\t\t");
-  colorSensors->calibrateColor(colorSensors, NONE);
-  USART_puts("RED:\t\t");
-  colorSensors->calibrateColor(colorSensors, RED);
-  USART_puts("GREEN:\t\t");
-  colorSensors->calibrateColor(colorSensors, GREEN);
-  USART_puts("BLUE:\t\t");
-  colorSensors->calibrateColor(colorSensors, BLUE);
-  USART_puts("\r\n\r\n");
-}
-
-void doUpdateState(void){
-  __disable_irq();
-  localizer->cacheState(localizer);
-  __enable_irq();
-}
-
 void loop(void) {
   static int i = 0; 
-  doUpdateState();
-  if(localizer->state->theta < targState->theta){
-    motors->setSpeeds(motors,speeds.l*cosf(localizer->state->theta)
-                            ,speeds.r*cosf(localizer->state->theta));
-    delay(100);
-  }else{
-    motionTypeFlag = POSY;
-    motors->setSpeeds(motors,0,0);
-    delay(2000);
-  }
   doLog();
   if(i++ & 0x1)
     enableLEDs(BLUE);
@@ -135,8 +106,11 @@ void loop(void) {
 void tick_loop(void){
   static int loopCount = 0;
   localizer->update(localizer);
-  motors->setOffset(motors, localizer->_state->theta);
-  /*if(loopCount == 0){
+  motors->updateOffset(motors, localizer->_state->theta);
+  if(running){
+    doMotion(); 
+  /*
+  if(loopCount == 0){
     localizer->update(localizer);
     pid->loop(pid, targState, localizer->_state);
     loopCount = 10; 
@@ -144,4 +118,9 @@ void tick_loop(void){
   motors->doMotorPID(motors); 
   loopCount--;
   */
+  }
+  else{
+    motors->setOffset(motors, PWM_MIN);
+    motors->setSpeeds(motors, 0,0);
+  }
 }
