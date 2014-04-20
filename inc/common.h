@@ -5,7 +5,7 @@
 
 #define ENC_TO_D_L(X) ( (X)  * ( (PI * 3.754f) / 8400.f ))
 #define ENC_TO_D_R(X) ( (X)  * ( (PI * 3.464f) / 8400.f ))
-#define WHEEL_BASE_WIDTH (7.5f)
+#define WHEEL_BASE_WIDTH (8.0f)
 
 #define fixAngle(theta) (atan2f(sinf(theta),cosf(theta)))
 

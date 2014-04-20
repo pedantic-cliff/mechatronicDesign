@@ -26,9 +26,9 @@ state_t _targStates[] = {
 												};
 												
  MotorSpeeds speedSettings[] = 		{
-													{8200,9000},		//RIGHT	+X
-													{10500,10200},	//UP		+Y
-													{9000,6400},		//LEFT	-X
+													{8200,  9000},  //RIGHT	+X
+													{10500, 10200},	//UP		+Y
+													{8700,  9000},	//LEFT	-X
 													{0,0},					//DOWN	-Y
 													{-10000,13000},	//LEFT 1
 													{0,0},					//LEFT 2
@@ -41,6 +41,7 @@ state_t _targStates[] = {
 												};
 
 int numStates = sizeof(_targStates)/sizeof(state_t);
+state_t _state_storage; 
 State targState;
 
 typedef enum { POSX=0, POSY=1, NEGX=2, NEGY=3 } Orientation;
@@ -61,14 +62,12 @@ void findOutState(void) {
   	orientationFlag = NEGX;
 	if(theta<-PI/4 && theta>=-3*PI/4 )
 	  orientationFlag = POSX;
-  USART_puts("Found state: ");
-  USART_putInt(orientationFlag);
-  USART_puts("\n");
 }
 
 void startState(void) {
 	localizer->restart(localizer);
 	findOutState();
+  targState = &_state_storage;
   targState->x = localizer->state->x;
   targState->y = localizer->state->y;
   targState->theta = localizer->state->theta;
@@ -96,6 +95,7 @@ void goForwardBy(float dist){
   isTurning = 0;
   motionComplete = 0; 
   nextOrientationFlag = orientationFlag; 
+  findOutState();
   USART_puts("Go forward: ");
   switch(orientationFlag){
     case POSX:
@@ -108,14 +108,23 @@ void goForwardBy(float dist){
     case POSY:
       targState->y = localizer->state->y + dist; 
       speeds = &speedSettings[1];
+      USART_putInt(localizer->state->y);
+      USART_puts("->");
+      USART_putInt(targState->y);
       break;
     case NEGX:
       targState->x = localizer->state->x - dist; 
       speeds = &speedSettings[2];
+      USART_putInt(localizer->state->x);
+      USART_puts("->");
+      USART_putInt(targState->x);
       break;
     case NEGY:
       targState->y = localizer->state->y - dist; 
       speeds = &speedSettings[3];
+      USART_putInt(localizer->state->y);
+      USART_puts("->");
+      USART_putInt(targState->y);
       break;
   }
   USART_puts("\n");
@@ -123,6 +132,7 @@ void goForwardBy(float dist){
 
 void turnLeft90(void){
   motionComplete = 0; 
+  findOutState();
   USART_puts("Turn Left\n");
   isTurning = 1;
   switch(orientationFlag){
@@ -185,14 +195,21 @@ int isMotionComplete(void){
 
 void doMotion(void){
   float theta; 
-  if(motionComplete)
+  if(motionComplete){
+    motors->setSpeeds(motors,0,0);
     return;
+  }
   else if(isMotionComplete()){
     motionComplete = 1;
-    motors->setOffset(motors,9300);
-    motors->setOffset(motors,7500);
-    motors->setOffset(motors,5500);
-    motors->setOffset(motors,PWM_MIN);
+    orientationFlag = nextOrientationFlag;
+    nextOrientationFlag = orientationFlag;
+    motors->setSpeeds(motors,0,0);
+    if(isTurning){
+      motors->setOffset(motors,9300);
+      motors->setOffset(motors,7500);
+      motors->setOffset(motors,5500);
+      motors->setOffset(motors,PWM_MIN);
+    }
     return;
   }
 

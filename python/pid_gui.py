@@ -32,6 +32,7 @@ class Port:
       cnt += self.serial.write(bytes(buf))
     else:
       cnt += self.serial.write(bytes(struct.pack('b',0)));
+    print cnt
     return cnt
 
   def read(self,size = 1): 
@@ -222,9 +223,7 @@ class Application(Frame):
     """Moves the robot forward by a certain distance""" 
     global p
     fwd_value=self.data_fwd.get()
-    print fwd_value
-    fwd_value= list(map(lambda x: float(x), fwd_value))
-    p.write('f',fwd_value);
+    p.write('f',float(fwd_value));
 
   def right(self):
     """Turns the robot right""" 

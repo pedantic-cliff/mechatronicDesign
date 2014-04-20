@@ -266,9 +266,6 @@ void parseParams(void){
       break; 
     case 'f':
       val1 = extractFloat(&received_string[2]); 
-      USART_puts("GOT: ");
-      USART_putFloat(val1);
-      USART_puts("\n");
 
       goForwardBy(val1);
       break;
