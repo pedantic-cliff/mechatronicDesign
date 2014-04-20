@@ -150,7 +150,7 @@ void turnLeft90(void){
 }
 
 int isMotionComplete(void){
-  if(isTurning){
+  if(!isTurning){											//Added a not(!) here. Logic was reverse
     switch(orientationFlag){
       case POSX:
         return (targState->x <= localizer->state->x);
