@@ -38,7 +38,7 @@ class Port:
     return str(self.serial.read(size))
 
 global p
-p = Port("/dev/ttyUSB1")
+p = Port("/dev/ttyUSB0")
 
 def updateSerialLog():
   i = 0

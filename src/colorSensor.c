@@ -362,7 +362,7 @@ void calibrateColors(ColorSensors cs){
         senMeans[j] -= ambMeans[j];
         senMeans[j] /= COLOR_SENSOR_CALIB_ITERS; 
         USART_putFloat(senMeans[j]);
-        USART_puts(",\t"); 
+        USART_puts("\t"); 
       }
       USART_puts("\n");
     }

@@ -9,7 +9,7 @@
 #define NUM_COLORS  4
 #define NUM_SENSORS 6
 #define COLOR_SENSOR_ITERS 25
-#define COLOR_SENSOR_CALIB_ITERS 250
+#define COLOR_SENSOR_CALIB_ITERS 2500
 
 #define NONE_IDX    0
 #define RED_IDX     1
