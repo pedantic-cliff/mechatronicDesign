@@ -258,13 +258,16 @@ void parseParams(void){
   int i = 0; 
   float val1, val2; 
   switch(command){
+    case 'c': 
+      setCalibrateColor();
+      break;
     case 's': 
       start();
       break; 
     case 'h':
       halt();
       break; 
-    case 'f':
+      case 'f':
       val1 = extractFloat(&received_string[2]); 
 
       goForwardBy(val1);

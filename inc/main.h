@@ -12,6 +12,7 @@
 void halt(void);
 void start(void);
 void tick_loop(void);
+void setCalibrateColor(void);
 
 extern volatile int running;
 extern ColorSensors colorSensors; 
@@ -21,6 +22,7 @@ extern Motors motors;
 extern Localizer localizer;
 
 extern State targState;
+extern int calibrateColor; 
 
 extern Pid pid; 
 extern PID_Gains angleGains,

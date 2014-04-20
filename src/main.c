@@ -10,8 +10,6 @@ ColorSensors colorSensors;
 Accel accel; 
 Motors motors; 
 
-int currentState = 0; 
-
 Pid pid; 
 PID_Gains angleGains  = { 35.f, 0.00f, 0.0f },
           distGains   = { 40.f, 0.00f, 0.0f },
@@ -42,6 +40,9 @@ void halt(void){
 void doLog();
 void doUpdate();
 
+void doColorCalibrate(void){
+  colorSensors->calibrateColors(colorSensors); 
+}
 int main(void) {
   initSysTick(); 
   delay(500); // Give the hardware time to warm up on cold start
@@ -50,13 +51,22 @@ int main(void) {
   markStarted();
   do {
     doUpdateState();
-    if(running){
+    if(calibrateColor){
+      doColorCalibrate();
+      calibrateColor = 0; 
+    }
+
+    if(running)
       loop();
     }
     else{
     }
     delay(500);
   } while (1);
+}
+
+void setCalibrateColor(void){
+  calibrateColor = 1; 
 }
 
 static void init() {
@@ -97,6 +107,7 @@ void doLog(void){
 void loop(void) {
   static int i = 0; 
   doLog();
+
   if(i++ & 0x1)
     enableLEDs(BLUE);
   else 
