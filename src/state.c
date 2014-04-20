@@ -39,6 +39,13 @@ state_t _targStates[] = {
 													{0,0},					//RIGHT 3
 													{0,0}						//RIGHT 4
 												};
+												
+MotorSpeeds encBiases[] = {
+										{1,1},		//+X
+										{1,1},		//+Y
+										{1,1},		//-X
+										{1,1}			//-Y
+								  };
 
 int numStates = sizeof(_targStates)/sizeof(state_t);
 state_t _state_storage; 
