@@ -20,10 +20,14 @@ typedef struct localizer{
   // References localizing sensors
   Motors m; 
   Accel  acc;
+  
+  float encBiasL;
+  float encBiasR;
 
   void (*update)(Localizer self);
   void (*cacheState)(Localizer self);
   void (*restart)(Localizer self);
+  void (*setEncBias)(Localizer self,float leftBias,float rightBias);
   sensorPos (*findSensorLocations)(Localizer self);
 
 } localizer_t;

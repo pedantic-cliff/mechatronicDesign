@@ -20,7 +20,7 @@
 #define s6x ( 4)
 #define s6y ( 4)
 
-#define CLEAN_ANGLE(X) ( atan2f(cos(Y
+#define CLEAN_ANGLE(Y) (atan2f(sinf(Y),cosf(Y)))
 
 static float compliFilter = 1.f;						//More implies more weight to accel
 static struct localizer _storage; 
@@ -44,8 +44,8 @@ static void update(Localizer self){
       newR = self->m->getRightCount();
   
   // Encoder differences										//Inverse Kinematics
-  dSL = ENC_TO_D_L(newL - self->enc->L);
-  dSR = ENC_TO_D_R(newR - self->enc->R);
+  dSL = (ENC_TO_D_L(newL - self->enc->L))*(self->encBiasL);
+  dSR = (ENC_TO_D_R(newR - self->enc->R))*(self->encBiasR);
 
   // Translate to position updates
   dS      = (dSL + dSR) / 2.f;  
@@ -119,6 +119,11 @@ sensorPos findSensorLocations(Localizer self){
   return senPositions;
 }
 
+void setEncBias(Localizer self,float leftBias,float rightBias) {
+	self->encBiasL = leftBias;
+	self->encBiasR = rightBias;
+}
+
 Localizer createLocalizer(Motors m, Accel acc){
   Localizer l = &_storage;
 
@@ -137,7 +142,7 @@ Localizer createLocalizer(Motors m, Accel acc){
   l->update     = update; 
   l->restart    = restart; 
   l->cacheState = cacheState;
-  
+  l->setEncBias = setEncBias;
   // Initialize state
   l->restart(l);
 
