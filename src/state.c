@@ -93,32 +93,37 @@ int isStarted(void){
   }
 */
 void goForwardBy(float dist){
-  USART_puts("Go forward\n");
   isTurning = 0;
   motionComplete = 0; 
   nextOrientationFlag = orientationFlag; 
+  USART_puts("Go forward: ");
   switch(orientationFlag){
     case POSX:
-      targState->x += dist; 
+      targState->x = localizer->state->x + dist; 
       speeds = &speedSettings[0];
+      USART_putInt(localizer->state->x);
+      USART_puts("->");
+      USART_putInt(targState->x);
       break;
     case POSY:
-      targState->y += dist; 
+      targState->y = localizer->state->y + dist; 
       speeds = &speedSettings[1];
       break;
     case NEGX:
-      targState->x -= dist; 
+      targState->x = localizer->state->x - dist; 
       speeds = &speedSettings[2];
       break;
     case NEGY:
-      targState->y -= dist; 
+      targState->y = localizer->state->y - dist; 
       speeds = &speedSettings[3];
       break;
   }
+  USART_puts("\n");
 }
 
 void turnLeft90(void){
   motionComplete = 0; 
+  USART_puts("Turn Left\n");
   isTurning = 1;
   switch(orientationFlag){
     case POSX:
