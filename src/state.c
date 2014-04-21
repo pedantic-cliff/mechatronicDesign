@@ -41,12 +41,11 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {1.f,1.f},		//+X
-  {1.f,1.f},		//+Y
-  {1.1739f,1.1739f},		//-X
-  {1.f,1.f}			//-Y
+  {1.f,1.f},		      //+X
+  {1.f,1.f},		      //+Y
+  {1.1739f,1.1739f},	//-X
+  {1.f,1.f}			      //-Y
 };
-
 int numStates = sizeof(_targStates)/sizeof(state_t);
 state_t _state_storage; 
 State targState;
@@ -276,12 +275,28 @@ float calculateError(void) {
   return 0.f;
 }
 
+float calAngError(void) {
+	switch(orientationFlag){
+      case POSX:
+        return fixAngle(0 - localizer->state->theta);
+          
+      case POSY:
+        return fixAngle(PI/2 - localizer->state->theta);
+
+      case NEGX:
+        return fixAngle(PI - localizer->state->theta);
+
+      case NEGY:
+        return fixAngle(-PI/2 - localizer->state->theta);
+    }
+    return 0;
+}
+
 void doMotion(void){
-  float theta; 
-  float err;
+  float errA, theta, err;
   int i = 0; 
   if(motionComplete){
-    motors->setSpeeds(motors,0,0);
+    motors->haltMotors(motors);
     return;
   }
   else if(isMotionComplete()){
@@ -298,6 +313,7 @@ void doMotion(void){
   }
   
   err = calculateError();
+  errA = calAngError();
 
   if(isTurning){
     motors->setOffset(motors,9000);
@@ -307,10 +323,10 @@ void doMotion(void){
     else 
       motors->setSpeeds(motors, sinf(theta)*speeds->l, sinf(theta)*speeds->r);
   } else {
-    if(err > 2.f)
-      motors->setSpeeds(motors, speeds->l, speeds->r);
+    if(err>2.f)
+      motors->setSpeeds(motors, speeds->l - 0.1*err, speeds->r + 0.1*err);
     else
-      motors->setSpeeds(motors, speeds->l*(err/2.f), speeds->r*(err/2.f));
+      motors->setSpeeds(motors, speeds->l*err/2.f - 0.1*errA, speeds->r*err/2.f + 0.1*errA);
   }
 }
 
