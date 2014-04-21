@@ -253,6 +253,23 @@ float calculateError(void) {
   }
 }
 
+float calAngError(void) {
+	switch(orientationFlag){
+      case POSX:
+        return fixAngle(0 - localizer->state->theta);
+          
+      case POSY:
+        return fixAngle(PI/2 - localizer->state->theta);
+
+      case NEGX:
+        return fixAngle(PI - localizer->state->theta);
+
+      case NEGY:
+        return fixAngle(-PI/2 - localizer->state->theta);
+    }
+    return 0;
+}
+
 void doMotion(void){
   float theta; 
   if(motionComplete){
@@ -278,10 +295,12 @@ void doMotion(void){
     theta = localizer->state->theta; 
     motors->setSpeeds(motors, cosf(theta)*speeds->l, cosf(theta)*speeds->r);
   } else {
+    float err = calAngError();
+    
     if(calculateError()>8)
-    motors->setSpeeds(motors, speeds->l, speeds->r);
+    motors->setSpeeds(motors, speeds->l - 0.1*err, speeds->r + 0.1*err);
     else
-    motors->setSpeeds(motors, speeds->l*(calculateError()/8), speeds->r*(calculateError()/8));
+    motors->setSpeeds(motors, speeds->l*(calculateError()/8 - 0.1*err), speeds->r*(calculateError()/8) + 0.1*err);
   }
 }
 
