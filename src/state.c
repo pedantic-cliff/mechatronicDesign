@@ -43,7 +43,7 @@ state_t _targStates[] = {
 MotorSpeeds encBiases[] = {
 										{1.f,1.f},		//+X
 										{1.f,1.f},		//+Y
-										{1.1739f,1.1739f},		//-X
+										{1.f,1.f},		//-X
 										{1.f,1.f}			//-Y
 								  };
 
@@ -248,7 +248,7 @@ float calculateError(void) {
         return fixAngle(targState->theta - localizer->state->theta);
 
       case NEGY:
-        return fixAngle(targState->theta - localizer->state->thetas);
+        return fixAngle(targState->theta - localizer->state->theta);
     }
   }
 }
@@ -256,7 +256,7 @@ float calculateError(void) {
 void doMotion(void){
   float theta; 
   if(motionComplete){
-    motors->setSpeeds(motors,0,0);
+    motors->haltMotors(motors);
     return;
   }
   else if(isMotionComplete()){
@@ -278,10 +278,10 @@ void doMotion(void){
     theta = localizer->state->theta; 
     motors->setSpeeds(motors, cosf(theta)*speeds->l, cosf(theta)*speeds->r);
   } else {
-    if(calculateError()>4)
+    if(calculateError()>8)
     motors->setSpeeds(motors, speeds->l, speeds->r);
     else
-    motors->setSpeeds(motors, speeds->l*(calculateError()/4), speeds->r*(calculateError()/4));
+    motors->setSpeeds(motors, speeds->l*(calculateError()/8), speeds->r*(calculateError()/8));
   }
 }
 
