@@ -28,7 +28,7 @@ state_t _targStates[] = {
  MotorSpeeds speedSettings[] = 		{
 													{8200,  9000},  //RIGHT	+X
 													{10500, 10200},	//UP		+Y
-													{8700,  9000},	//LEFT	-X
+													{9000,  9100},	//LEFT	-X
 													{0,0},					//DOWN	-Y
 													{-10000,13000},	//LEFT 1
 													{0,0},					//LEFT 2
@@ -41,10 +41,10 @@ state_t _targStates[] = {
 												};
 												
 MotorSpeeds encBiases[] = {
-										{1,1},		//+X
-										{1,1},		//+Y
-										{1,1},		//-X
-										{1,1}			//-Y
+										{1.f,1.f},		//+X
+										{1.f,1.f},		//+Y
+										{1.1739f,1.1739f},		//-X
+										{1.f,1.f}			//-Y
 								  };
 
 int numStates = sizeof(_targStates)/sizeof(state_t);
@@ -106,32 +106,52 @@ void goForwardBy(float dist){
   USART_puts("Go forward: ");
   switch(orientationFlag){
     case POSX:
-      targState->x = localizer->state->x + dist; 
+      targState->x = localizer->state->x + dist;
+      localizer->setEncBias(localizer,encBiases[0].l,encBiases[0].r);
       speeds = &speedSettings[0];
       USART_putInt(localizer->state->x);
       USART_puts("->");
       USART_putInt(targState->x);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasL);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasR);
       break;
     case POSY:
-      targState->y = localizer->state->y + dist; 
+      targState->y = localizer->state->y + dist;
+      localizer->setEncBias(localizer,encBiases[1].l,encBiases[1].r); 
       speeds = &speedSettings[1];
       USART_putInt(localizer->state->y);
       USART_puts("->");
       USART_putInt(targState->y);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasL);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasR);
       break;
     case NEGX:
-      targState->x = localizer->state->x - dist; 
+      targState->x = localizer->state->x - dist;
+      localizer->setEncBias(localizer,encBiases[2].l,encBiases[2].r);
       speeds = &speedSettings[2];
       USART_putInt(localizer->state->x);
       USART_puts("->");
       USART_putInt(targState->x);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasL);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasR);
       break;
     case NEGY:
-      targState->y = localizer->state->y - dist; 
+      targState->y = localizer->state->y - dist;
+      localizer->setEncBias(localizer,encBiases[3].l,encBiases[3].r);
       speeds = &speedSettings[3];
       USART_putInt(localizer->state->y);
       USART_puts("->");
       USART_putInt(targState->y);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasL);
+      USART_puts(" ");
+      USART_putFloat(localizer->encBiasR);
       break;
   }
   USART_puts("\n");
@@ -185,19 +205,52 @@ int isMotionComplete(void){
   } else {
     switch(orientationFlag){
       case POSX:
-        return (targState->theta >= localizer->state->theta);
+        return (targState->theta - localizer->state->theta);
           
       case POSY:
-        return (0 <= localizer->state->theta || localizer->state->theta  < -PI/2);
+        return (targState->theta - localizer->state->theta);
 
       case NEGX:
-        return (targState->theta <= localizer->state->theta);
+        return (targState->theta - localizer->state->theta);
 
       case NEGY:
-        return (targState->y <= localizer->state->theta);
+        return (targState->theta - localizer->state->theta);
     }
   }
   return 0;
+}
+
+float calculateError(void) {
+	if(!isTurning){											//Added a not(!) here. Logic was reverse
+    switch(orientationFlag){
+      case POSX:
+        return (targState->x - localizer->state->x);
+          
+      case POSY:
+        return (targState->y - localizer->state->y);
+
+      case NEGX:
+        return -(targState->x - localizer->state->x);
+
+      case NEGY:
+        return -(targState->y - localizer->state->y);
+
+    }
+  } else {
+    switch(orientationFlag){
+      case POSX:
+        return fixAngle(targState->theta - localizer->state->theta);
+          
+      case POSY:
+        return fixAngle(targState->theta - localizer->state->theta);
+
+      case NEGX:
+        return fixAngle(targState->theta - localizer->state->theta);
+
+      case NEGY:
+        return fixAngle(targState->theta - localizer->state->thetas);
+    }
+  }
 }
 
 void doMotion(void){
@@ -225,7 +278,10 @@ void doMotion(void){
     theta = localizer->state->theta; 
     motors->setSpeeds(motors, cosf(theta)*speeds->l, cosf(theta)*speeds->r);
   } else {
+    if(calculateError()>4)
     motors->setSpeeds(motors, speeds->l, speeds->r);
+    else
+    motors->setSpeeds(motors, speeds->l*(calculateError()/4), speeds->r*(calculateError()/4));
   }
 }
 
