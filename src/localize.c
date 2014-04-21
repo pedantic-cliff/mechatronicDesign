@@ -44,8 +44,8 @@ static void update(Localizer self){
       newR = self->m->getRightCount();
   
   // Encoder differences										//Inverse Kinematics
-  dSL = (ENC_TO_D_L(newL - self->enc->L))*(self->encBiasL);
-  dSR = (ENC_TO_D_R(newR - self->enc->R))*(self->encBiasR);
+  dSL = (ENC_TO_D_L(newL - self->enc->L));//*(self->encBiasL);
+  dSR = (ENC_TO_D_R(newR - self->enc->R));//*(self->encBiasR);
 
   // Translate to position updates
   dS      = (dSL + dSR) / 2.f;  

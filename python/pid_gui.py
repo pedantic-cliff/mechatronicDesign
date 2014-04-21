@@ -38,8 +38,12 @@ class Port:
   def read(self,size = 1): 
     return str(self.serial.read(size))
 
+  def available(self):
+    return self.serial.readable()
+
+
 global p
-p = Port("/dev/ttyUSB0")
+p = Port("/dev/ttyUSB1")
 
 def updateSerialLog():
   i = 0
@@ -47,8 +51,9 @@ def updateSerialLog():
     i+=1
     time.sleep(0.05)
     global p
-    output.insert(END, p.read(10))
-    output.yview(END)
+    while (p.available()):
+      output.insert(END, p.read(10))
+      output.yview(END)
 
 class Application(Frame):
   """ A GUI application"""

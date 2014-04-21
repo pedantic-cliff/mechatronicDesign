@@ -27,7 +27,7 @@ state_t _targStates[] = {
 												
  MotorSpeeds speedSettings[] = 		{
 													{8200,  9000},  //RIGHT	+X
-													{10500, 10200},	//UP		+Y
+													{10500, 11000},	//UP		+Y
 													{8700,  9000},	//LEFT	-X
 													{0,0},					//DOWN	-Y
 													{-10000,13000},	//LEFT 1
@@ -68,7 +68,7 @@ void findOutState(void) {
 	if((theta>=3*PI/4 && theta<=PI) || (theta<-3*PI/4 && theta>=-PI) )
   	orientationFlag = NEGX;
 	if(theta<-PI/4 && theta>=-3*PI/4 )
-	  orientationFlag = POSX;
+	  orientationFlag = NEGY;
 }
 
 void startState(void) {
@@ -104,6 +104,8 @@ void goForwardBy(float dist){
   nextOrientationFlag = orientationFlag; 
   findOutState();
   USART_puts("Go forward: ");
+  USART_putInt(orientationFlag);
+  USART_puts(": ");
   switch(orientationFlag){
     case POSX:
       targState->x = localizer->state->x + dist; 
@@ -140,7 +142,9 @@ void goForwardBy(float dist){
 void turnLeft90(void){
   motionComplete = 0; 
   findOutState();
-  USART_puts("Turn Left\n");
+  USART_puts("Turn Left: ");
+  USART_putInt(orientationFlag);
+  USART_puts(": ");
   isTurning = 1;
   switch(orientationFlag){
     case POSX:
@@ -164,6 +168,10 @@ void turnLeft90(void){
       targState->theta = 0;
       break;
   }
+  USART_putFloat(localizer->state->theta);
+  USART_puts("->");
+  USART_putFloat(targState->theta);
+  USART_puts("\n");
 }
 
 int isMotionComplete(void){
@@ -185,10 +193,10 @@ int isMotionComplete(void){
   } else {
     switch(orientationFlag){
       case POSX:
-        return (targState->theta >= localizer->state->theta);
+        return (targState->theta <= localizer->state->theta);
           
       case POSY:
-        return (0 <= localizer->state->theta || localizer->state->theta  < -PI/2);
+        return (0 >= localizer->state->theta);
 
       case NEGX:
         return (targState->theta <= localizer->state->theta);
@@ -202,6 +210,7 @@ int isMotionComplete(void){
 
 void doMotion(void){
   float theta; 
+  int i = 0; 
   if(motionComplete){
     motors->setSpeeds(motors,0,0);
     return;
@@ -210,20 +219,20 @@ void doMotion(void){
     motionComplete = 1;
     orientationFlag = nextOrientationFlag;
     nextOrientationFlag = orientationFlag;
+    //motors->haltMotors(motors);
+    delay_blocking(100);
+    motors->setOffset(motors,PWM_MIN);
     motors->setSpeeds(motors,0,0);
-    if(isTurning){
-      motors->setOffset(motors,9300);
-      motors->setOffset(motors,7500);
-      motors->setOffset(motors,5500);
-      motors->setOffset(motors,PWM_MIN);
-    }
+
+    USART_puts("Done Motion\n");
     return;
   }
 
   if(isTurning){
     motors->setOffset(motors,9000);
-    theta = localizer->state->theta; 
-    motors->setSpeeds(motors, cosf(theta)*speeds->l, cosf(theta)*speeds->r);
+    theta = targState->theta - localizer->state->theta; 
+    theta = PI/2;
+    motors->setSpeeds(motors, sinf(theta)*speeds->l, sinf(theta)*speeds->r);
   } else {
     motors->setSpeeds(motors, speeds->l, speeds->r);
   }

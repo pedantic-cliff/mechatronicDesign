@@ -109,7 +109,7 @@ float getCurrentTime(void){
 }
 
 void SysTick_Handler(void){
-  currentTime += 400; 
+  currentTime += 800; 
   enableLEDs(RED);
   if(running){
     tick_loop();
@@ -124,4 +124,9 @@ void delay(uint32_t ms) {
   }
 }
 
-
+void delay_blocking(uint32_t count){
+  count *= 1000; 
+  while(count--){
+    __NOP();
+  }
+}

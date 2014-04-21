@@ -28,6 +28,7 @@ void disableLEDs(Color c);
 void initSysTick(void);
 float getCurrentTime(void); 
 void delay(uint32_t ms); 
+void delay_blocking(uint32_t count); 
 
 #endif //_UTILS_H_
 
