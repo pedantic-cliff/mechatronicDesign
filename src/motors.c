@@ -280,6 +280,17 @@ void resetMotorPID(Motors self){
 	self->setSpeeds(self,0,0);
 }
 
+void haltMotors(Motors self){
+  
+  GPIO_SetBits(DIR_PORT, DIR_PIN_RL);
+  GPIO_SetBits(DIR_PORT, DIR_PIN_FL);
+  GPIO_SetBits(DIR_PORT, DIR_PIN_RR);
+  GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
+  
+  TIM3->CCR3 = PWM_PERIOD; 
+  TIM3->CCR4 = PWM_PERIOD;  
+}
+
 Motors createMotors(void){
   Motors m = &_storage; 
 	
@@ -299,6 +310,7 @@ Motors createMotors(void){
   m->setSpeeds            = setSpeeds; 
   m->setOffset            = setOffset;
   m->updateOffset         = updateOffset;
+  m->haltMotors           = haltMotors;
   m->setMotorPIDGains     = setMotorPIDGains;
   m->doMotorPID           = doMotorPID;
   m->setMotorTargSpeeds   = setMotorTargSpeeds;

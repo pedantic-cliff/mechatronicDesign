@@ -9,7 +9,7 @@
 #define NUM_COLORS  4
 #define NUM_SENSORS 6
 #define COLOR_SENSOR_ITERS 25
-#define COLOR_SENSOR_CALIB_ITERS 250
+#define COLOR_SENSOR_CALIB_ITERS 2500
 
 #define NONE_IDX    0
 #define RED_IDX     1
@@ -32,13 +32,14 @@ typedef struct lightSensor_t{
 
 typedef struct colorSensors_t *ColorSensors; 
 typedef struct colorSensors_t {
+  int isCalibrating; 
   LightSensor sensors[NUM_SENSORS]; 
 
   void (*measureColor) (ColorSensors sensors, Color color); 
   void (*startColor) (Color color); 
   void (*start) (void);
   void (*halt) (void);
-  void (*calibrateColor) (ColorSensors sensors, Color color); 
+  void (*calibrateColors) (ColorSensors sensors); 
   
   volatile uint16_t* (*getResult) (void); 
   volatile int done; 
