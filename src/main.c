@@ -5,7 +5,7 @@
 #include "state.h"
 
 volatile int running = 0;
-
+int calibrateColor = 0; 
 ColorSensors colorSensors; 
 Accel accel; 
 Motors motors; 
@@ -56,10 +56,8 @@ int main(void) {
       calibrateColor = 0; 
     }
 
-    if(running)
+    if(running){
       loop();
-    }
-    else{
     }
     delay(500);
   } while (1);

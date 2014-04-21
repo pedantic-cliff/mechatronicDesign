@@ -22,8 +22,9 @@ typedef struct motors{
   void (*resetCounts)(void); 
 
   void (*setSpeeds)(Motors self, float left, float right); 
-  void (*setOffset)(Motors self, float angle); 
-  void (*updateOffset)(Motors self, int value); 
+  void (*setOffset)(Motors self, int value); 
+  void (*haltMotors)(Motors self);
+  void (*updateOffset)(Motors self, float theta); 
   void (*setMotorPIDGains)(Motors self, PID_Gains gains);
   void (*doMotorPID)(Motors self);
   void (*setMotorTargSpeeds)(Motors self, float leftTargSpeed, float rightTargSpeed);
