@@ -9,5 +9,6 @@ void USART_puts(volatile char * str);
 void USART_putInt(int value); 
 void USART_putFloat(float value); 
 void USART_sendByte(char byte); 
+void USART_write(volatile char *, int);
 
 #endif //_USART_H_

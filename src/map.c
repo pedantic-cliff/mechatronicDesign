@@ -37,7 +37,8 @@ int guessCell(int x, int y){
 }
 
 void sendGuesses(void){
-  int x, y; 
+  int x, y, i;
+  volatile char buff[84];
   sendBuff.numMeas = 0; 
   sendBuff.numDefect = 0; 
 
@@ -55,14 +56,16 @@ void sendGuesses(void){
         sendBuff.numDefect++; 
     }
   }
-  USART_sendByte(sendBuff.numMeas);
-  USART_sendByte(sendBuff.numDefect);
+  buff[0] = sendBuff.numMeas;
+  buff[1] = sendBuff.numDefect;
+  i = 2;
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
-      USART_sendByte(sendBuff.cells[y][x]); 
+      buff[i++] = sendBuff.cells[y][x]; 
     }
   }
-  USART_sendByte(0xFF);
+  buff[83] = 0;
+  USART_write(buff, 83);
 }
 
 void applyConfidence(int x, int y, pConfidences pConf){

@@ -26,10 +26,10 @@ state_t _targStates[] = {
 };
 
 MotorSpeeds speedSettings[] = 		{
-  {8200,  9000},  //RIGHT	+X
+  {9500,  8200},  //RIGHT	+X
   {10500, 10200},	//UP		+Y
   {9000,  9100},	//LEFT	-X
-  {0,0},					//DOWN	-Y
+  {-12700,15500},	//DOWN	-Y
   {-10000,13000},	//LEFT 1
   {0,0},					//LEFT 2
   {0,0},					//LEFT 3
@@ -104,26 +104,28 @@ void goForwardBy(float dist){
   motionComplete = 0; 
   nextOrientationFlag = orientationFlag; 
   findOutState();
-  USART_puts("Go forward: ");
+  /*USART_puts("Go forward: ");
   USART_putInt(orientationFlag);
-  USART_puts(": ");
+  USART_puts(": ");*/
   switch(orientationFlag){
     case POSX:
       targState->x = localizer->state->x + dist;
       localizer->setEncBias(localizer,encBiases[0].l,encBiases[0].r);
       speeds = &speedSettings[0];
+      /*
       USART_putInt(localizer->state->x);
       USART_puts("->");
       USART_putInt(targState->x);
       USART_puts(" ");
       USART_putFloat(localizer->encBiasL);
       USART_puts(" ");
-      USART_putFloat(localizer->encBiasR);
+      USART_putFloat(localizer->encBiasR);*/
       break;
     case POSY:
       targState->y = localizer->state->y + dist;
       localizer->setEncBias(localizer,encBiases[1].l,encBiases[1].r); 
       speeds = &speedSettings[1];
+      /*
       USART_putInt(localizer->state->y);
       USART_puts("->");
       USART_putInt(targState->y);
@@ -131,11 +133,13 @@ void goForwardBy(float dist){
       USART_putFloat(localizer->encBiasL);
       USART_puts(" ");
       USART_putFloat(localizer->encBiasR);
+      */
       break;
     case NEGX:
       targState->x = localizer->state->x - dist;
       localizer->setEncBias(localizer,encBiases[2].l,encBiases[2].r);
       speeds = &speedSettings[2];
+      /*
       USART_putInt(localizer->state->x);
       USART_puts("->");
       USART_putInt(targState->x);
@@ -143,11 +147,13 @@ void goForwardBy(float dist){
       USART_putFloat(localizer->encBiasL);
       USART_puts(" ");
       USART_putFloat(localizer->encBiasR);
+      */
       break;
     case NEGY:
       targState->y = localizer->state->y - dist;
       localizer->setEncBias(localizer,encBiases[3].l,encBiases[3].r);
       speeds = &speedSettings[3];
+      /*
       USART_putInt(localizer->state->y);
       USART_puts("->");
       USART_putInt(targState->y);
@@ -155,17 +161,20 @@ void goForwardBy(float dist){
       USART_putFloat(localizer->encBiasL);
       USART_puts(" ");
       USART_putFloat(localizer->encBiasR);
+      */
       break;
   }
-  USART_puts("\n");
+//  USART_puts("\n");
 }
 
 void turnLeft90(void){
   motionComplete = 0; 
   findOutState();
+  /*
   USART_puts("Turn Left: ");
   USART_putInt(orientationFlag);
   USART_puts(": ");
+  */
   isTurning = 1;
   switch(orientationFlag){
     case POSX:
@@ -189,10 +198,12 @@ void turnLeft90(void){
       targState->theta = 0;
       break;
   }
+  /*
   USART_putFloat(localizer->state->theta);
   USART_puts("->");
   USART_putFloat(targState->theta);
   USART_puts("\n");
+  */
 }
 
 int isMotionComplete(void){
@@ -282,7 +293,7 @@ void doMotion(void){
     motors->setOffset(motors,PWM_MIN);
     motors->setSpeeds(motors,0,0);
 
-    USART_puts("Done Motion\n");
+    //USART_puts("Done Motion\n");
     return;
   }
   

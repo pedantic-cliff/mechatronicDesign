@@ -200,6 +200,7 @@ void startADC(void){
     ADC1ConvertedValue[i] = 0;
     sensors[i].measurements[currIdx] = 0;
   }
+  ADC_UpdateTimerPeriod(TIMER_DELAY);
 } 
 
 void startColor(Color c){
@@ -261,7 +262,6 @@ void nextColor(void){
       startColor(NONE);
       break;
   }
-  ADC_UpdateTimerPeriod(TIMER_DELAY);
 }
 
 void ADC_IRQHandler(void){

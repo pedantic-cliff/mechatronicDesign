@@ -116,6 +116,15 @@ void USART_puts(volatile char *s){
   }
 }
 
+void USART_write(volatile char *s, int len){
+  while(len > 0){  
+    while( !(USART1->SR & 0x00000040) );
+    USART_SendData(USART1, *s);
+    s++;
+    len--;
+  }
+}
+
 void USART_putInt(int input){
   int len = 0; 
   int c = 0; 
@@ -256,8 +265,15 @@ float extractFloat(volatile char *buf){
 
 void parseParams(void){
   int i = 0; 
+  char buff[3];
   float val1, val2; 
   switch(command){
+    case 0xff:
+      buff[0] = commandLen;
+      buff[1] = 1;
+      USART_write(buff,2);
+      start();
+      break;
     case 'c': 
       setCalibrateColor();
       break;
@@ -351,7 +367,9 @@ void USART1_IRQHandler(void){
       commandLen = t; 
     }
     
-    if(received_index - 2 == commandLen){
+    if(command == 0xFF && received_index == 3){
+      parseParams();
+    }else if(received_index - 2 == commandLen){
       parseParams(); 
     }
 
