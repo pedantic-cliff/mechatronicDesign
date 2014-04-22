@@ -82,11 +82,11 @@ void applyConfidence(int x, int y, pConfidences pConf){
   USART_puts(", ");
   USART_putInt(y);
   USART_puts(": ");
-  USART_putFloat(conf->metal);
+  USART_putFloat(confs->metal);
   USART_puts(", ");
-  USART_putFloat(conf->yellow);
+  USART_putFloat(confs->yellow);
   USART_puts(", ");
-  USART_putFloat(conf->boundary);
+  USART_putFloat(confs->boundary);
   USART_puts("\n");
 
 }
