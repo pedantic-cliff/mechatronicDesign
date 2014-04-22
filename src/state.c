@@ -28,11 +28,11 @@ state_t _targStates[] = {
 
 MotorSpeeds speedSettings[] = 		{
   {9500,  8200},  //RIGHT	+X
-  {10500, 10500},	//UP		+Y
+  {10500, 10875},	//UP		+Y
   {9000,  9100},	//LEFT	-X
   {0,     0},	//DOWN	-Y
   {-12000,14500},	//LEFT 1
-  {-12000,14500},					//LEFT 2
+  {-12000,14500},	//LEFT 2
   {0,0},					//LEFT 3
   {0,0},					//LEFT 4
   {0,0},					//RIGHT 1
@@ -42,10 +42,10 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {1.f,1.f},		      //+X
-  {1.f,1.f},		      //+Y
-  {1.1739f,1.1739f},	//-X
-  {1.f,1.f}			      //-Y
+  {1.f,1.f},		        //+X
+  {0.865f,0.865f},  //+Y
+  {1.f,1.f},	          //-X
+  {1.f,1.f}			        //-Y
 };
 int numStates = sizeof(_targStates)/sizeof(state_t);
 state_t _state_storage; 
@@ -104,7 +104,7 @@ void goForwardBy(float dist){
   motionComplete = 0; 
   nextOrientationFlag = orientationFlag; 
   findOutState();
-  
+
   USART_puts("Go forward: ");
   USART_putInt(orientationFlag);
   USART_puts(": ");
@@ -118,11 +118,7 @@ void goForwardBy(float dist){
       USART_putInt(localizer->state->x);
       USART_puts("->");
       USART_putInt(targState->x);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasL);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasR);
-
+      
       break;
     case POSY:
       targState->y = localizer->state->y + dist;
@@ -132,10 +128,6 @@ void goForwardBy(float dist){
       USART_putInt(localizer->state->y);
       USART_puts("->");
       USART_putInt(targState->y);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasL);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasR);
       
       break;
     case NEGX:
@@ -146,10 +138,6 @@ void goForwardBy(float dist){
       USART_putInt(localizer->state->x);
       USART_puts("->");
       USART_putInt(targState->x);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasL);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasR);
       
       break;
     case NEGY:
@@ -160,13 +148,14 @@ void goForwardBy(float dist){
       USART_putInt(localizer->state->y);
       USART_puts("->");
       USART_putInt(targState->y);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasL);
-      USART_puts(" ");
-      USART_putFloat(localizer->encBiasR);
       
       break;
   }
+  USART_puts(" ");
+  USART_putFloat(localizer->encBiasL);
+  USART_puts(" ");
+  USART_putFloat(localizer->encBiasR);
+
   USART_puts("\n");
 }
 

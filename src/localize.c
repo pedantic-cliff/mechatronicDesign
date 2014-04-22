@@ -44,8 +44,8 @@ static void update(Localizer self){
       newR = self->m->getRightCount();
   
   // Encoder differences										//Inverse Kinematics
-  dSL = (ENC_TO_D_L(newL - self->enc->L));//*(self->encBiasL);
-  dSR = (ENC_TO_D_R(newR - self->enc->R));//*(self->encBiasR);
+  dSL = (ENC_TO_D_L(newL - self->enc->L))*(self->encBiasL);
+  dSR = (ENC_TO_D_R(newR - self->enc->R))*(self->encBiasR);
 
   // Translate to position updates
   dS      = (dSL + dSR) / 2.f;  
@@ -131,6 +131,9 @@ Localizer createLocalizer(Motors m, Accel acc){
   l->state = &_state;
   // Private state inside ISR
   l->_state = &_statePriv;
+
+  l->encBiasL = 1.f;
+  l->encBiasR = 1.f;
 
   l->enc    = &_enc;
   l->enc->L = m->getLeftCount(); 

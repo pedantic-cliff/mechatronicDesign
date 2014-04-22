@@ -23,6 +23,7 @@ extern Localizer localizer;
 
 extern State targState;
 extern int calibrateColor; 
+extern int sendMap; 
 
 extern Pid pid; 
 extern PID_Gains angleGains,

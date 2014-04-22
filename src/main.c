@@ -6,6 +6,7 @@
 
 volatile int running = 0;
 int calibrateColor = 0; 
+int sendMap = 0;
 ColorSensors colorSensors; 
 Accel accel; 
 Motors motors; 
@@ -106,6 +107,9 @@ void doLog(void){
 void loop(void) {
   static int i = 1; 
   doLog();
+
+  if(i % 30)
+    sendGuesses();
 
   if(i++ & 0x1)
     enableLEDs(BLUE);

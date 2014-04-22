@@ -107,13 +107,14 @@ void init_USART(void){
  * 		   declared as volatile char --> otherwise the compiler will spit out warnings
  * */
 void USART_puts(volatile char *s){
-
+#ifdef DEBUG
   while(*s){
     // wait until data register is empty
     while( !(USART1->SR & 0x00000040) );
     USART_SendData(USART1, *s);
     s++;
   }
+#endif
 }
 
 void USART_write(volatile char *s, int len){
@@ -272,6 +273,7 @@ void parseParams(void){
       buff[0] = commandLen;
       buff[1] = 1;
       USART_write(buff,2);
+      sendMap = 1; 
       start();
       break;
     case 'c': 
