@@ -242,6 +242,20 @@ void finish(){
     guessColor(&conf, red,green,blue, centroids[s]);
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
   }
+  USART_puts("Got: ");
+  USART_putFloat(red);
+  USART_puts("\t");
+  USART_putFloat(green);
+  USART_puts("\t");
+  USART_putFloat(blue);
+  USART_puts("\n");
+  USART_puts("Confidence: ");
+  USART_putFloat(conf.boundary);
+  USART_puts("\t\t");
+  USART_putFloat(conf.metal);
+  USART_puts("\t\t");
+  USART_putFloat(conf.yellow);
+  USART_puts("\n");
 }
 
 void nextColor(void){
@@ -383,7 +397,7 @@ volatile uint16_t* getResult(void){
 float calcCentDiff(int r, int g, int b, struct centroid *cent){
   float score = (cent->r - r)*(cent->r - r) 
     + (cent->g - g)*(cent->g - g) 
-    + (cent->b - b)*(cent->b - b);
+    + 5.0f*(cent->b - b)*(cent->b - b);
   return score;
 }
 

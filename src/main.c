@@ -51,7 +51,7 @@ int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  //start();
+  start();
   markStarted();
   do {
     doUpdateState();
@@ -110,8 +110,9 @@ void loop(void) {
   static int i = 1; 
   //doLog();
 
-  if(i % 30)
-    sendGuesses();
+  if(i % 30){
+    //sendGuesses();
+  }
 
   if(i++ & 0x1)
     enableLEDs(BLUE);
