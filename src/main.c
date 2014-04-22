@@ -111,7 +111,7 @@ void loop(void) {
   doLog();
 
   if(i % 30){
-    sendGuesses();
+    //sendGuesses();
   }
 
   if(i++ & 0x1)
