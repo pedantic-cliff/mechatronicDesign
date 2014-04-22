@@ -32,7 +32,7 @@ MotorSpeeds speedSettings[] = 		{
   {9000,  9100},	//LEFT	-X
   {0,     0},	//DOWN	-Y
   {-12000,14500},	//LEFT 1
-  {-12000,14500},	//LEFT 2
+  {-12700,15000},	//LEFT 2
   {0,0},					//LEFT 3
   {0,0},					//LEFT 4
   {0,0},					//RIGHT 1
@@ -298,8 +298,8 @@ void doMotion(void){
     motionComplete = 1;
     orientationFlag = nextOrientationFlag;
     nextOrientationFlag = orientationFlag;
-    //motors->haltMotors(motors);
-    delay_blocking(100);
+    motors->haltMotors(motors);
+    //delay_blocking(100);
     motors->setOffset(motors,PWM_MIN);
     motors->setSpeeds(motors,0,0);
 

@@ -109,7 +109,7 @@ float getCurrentTime(void){
 }
 
 void SysTick_Handler(void){
-  currentTime += 800; 
+  currentTime += 400; 
   enableLEDs(RED);
   if(running){
     tick_loop();
