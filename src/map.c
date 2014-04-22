@@ -61,7 +61,8 @@ void sendGuesses(void){
   i = 2;
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
-      buff[i++] = sendBuff.cells[y][x]; 
+      buff[i] = sendBuff.cells[y][x]; 
+      i++;
     }
   }
   buff[83] = 0;
