@@ -108,8 +108,8 @@ void loop(void) {
   static int i = 1; 
   doLog();
 
-  if(i % 30)
-    sendGuesses();
+  //if(i % 30)
+    //sendGuesses();
 
   if(i++ & 0x1)
     enableLEDs(BLUE);

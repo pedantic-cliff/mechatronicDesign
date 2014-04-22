@@ -70,6 +70,17 @@ void sendGuesses(void){
 
 void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
+  USART_puts("Grid: ");
+  USART_putInt(x);
+  USART_puts(", ");
+  USART_putInt(y);
+  USART_puts(": ");
+  USART_putFloat(pConf->metal);
+  USART_puts(", ");
+  USART_putFloat(pConf->yellow);
+  USART_puts(", ");
+  USART_putFloat(pConf->boundary);
+  USART_puts("\n");
   pConfidences confs = &grid[y][x].conf;
   confs->metal += pConf->metal; 
   confs->yellow += pConf->yellow; 
@@ -106,6 +117,6 @@ void createGrid(void){
       grid[i][j].count = 0; 
     }
   }
-  fakeData();
+  //fakeData();
 }
 
