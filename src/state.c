@@ -12,7 +12,7 @@
 
 MotorSpeeds *speeds;
 Localizer localizer;
-float AGain = 5000; 
+float AGain = 7500; 
 
 state_t _targStates[] = {
   {24.f,   0.f,    0.f,      0.f},
@@ -289,12 +289,15 @@ void doMotion(void){
   err = calculateError();
   errA = calAngError();
 
-  if(motionComplete){
+  if(motionComplete)
+  {
     //motors->haltMotors(motors);
     motors->setSpeeds(motors, -6*AGain * errA, +6*AGain *errA);
     return;
   }
-  else if(isMotionComplete()){
+  
+  else if(isMotionComplete())
+  {
     motionComplete = 1;
     orientationFlag = nextOrientationFlag;
     nextOrientationFlag = orientationFlag;
@@ -307,28 +310,30 @@ void doMotion(void){
     return;
   }
   
-  if(isTurning){
-    motors->setOffset(motors,9000);
-    theta = targState->theta - localizer->state->theta; 
-    if(err < PI/6.f)
-      motors->setSpeeds(motors, sinf(theta)*speeds->l * err / (PI/6.f), sinf(theta)*speeds->r * err / (PI/6.f));
-    else 
-      motors->setSpeeds(motors, sinf(theta)*speeds->l, sinf(theta)*speeds->r);
-  } else {
-    if(err>2.f)
-      motors->setSpeeds(motors, speeds->l - AGain*errA, speeds->r + AGain*errA);
-    else
-      switch(orientationFlag){
-        case POSY:
-          motors->setSpeeds(motors, speeds->l*err/2.f - AGain*errA + 9000, speeds->r*err/2.f + AGain*errA + 9000);
-          break;
-        case NEGY:
-          motors->setSpeeds(motors, speeds->l*err/2.f - AGain*errA, speeds->r*err/2.f + AGain*errA);
-          break;
-        default:
-          motors->setSpeeds(motors, speeds->l*err/2.f - AGain*errA, speeds->r*err/2.f + AGain*errA);
-      }
-  }
+  if(isTurning)
+  {
+    	motors->setOffset(motors,9000);
+    	theta = targState->theta - localizer->state->theta; 
+    	if(err < PI/6.f)
+      	motors->setSpeeds(motors, sinf(theta)*speeds->l * err / (PI/6.f), sinf(theta)*speeds->r * err / (PI/6.f));
+    	else 
+      	motors->setSpeeds(motors, sinf(theta)*speeds->l, sinf(theta)*speeds->r);
+  } 
+  else 
+  {
+		if(err>2.f)
+      	motors->setSpeeds(motors, speeds->l - AGain*errA, speeds->r + AGain*errA);
+    	else
+      	switch(orientationFlag)
+      	{
+        		case POSY:
+          		motors->setSpeeds(motors, speeds->l*err/2.f - AGain*errA + 9000, speeds->r*err/2.f + AGain*errA + 9000);
+          		break;
+        		case NEGY:
+          		motors->setSpeeds(motors, speeds->l*err/2.f - AGain*errA, speeds->r*err/2.f + AGain*errA);
+          		break;
+        		default:
+          		motors->setSpeeds(motors, speeds->l*err/2.f - AGain*errA, speeds->r*err/2.f + AGain*errA);
+      	}
+	}
 }
-
-
