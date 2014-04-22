@@ -10,9 +10,9 @@ char buff1[4];
 char buff2[84];
 int portFd; 
 
-void main(void){
+void main(int argc, char *argv[]){
   int count = 0;
-  portFd = open("/dev/ttyACM0",  O_RDWR | O_NOCTTY | O_NDELAY);
+  portFd = open("/dev/ttyUSB0",  O_RDWR | O_NOCTTY | O_NDELAY);
   if(portFd == -1){
     printf("Whoops, couldn't open the port!\n");
     return ;

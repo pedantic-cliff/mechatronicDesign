@@ -33,7 +33,7 @@ typedef struct lightSensor_t{
 typedef struct colorSensors_t *ColorSensors; 
 typedef struct colorSensors_t {
   int isCalibrating; 
-  LightSensor sensors[NUM_SENSORS]; 
+  LightSensor sensors; 
 
   void (*measureColor) (ColorSensors sensors, Color color); 
   void (*startColor) (Color color); 

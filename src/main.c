@@ -37,6 +37,7 @@ void start(void){
 
 void halt(void){
   running = 0;
+  colorSensors->halt();
 }
 
 void doLog();
@@ -50,6 +51,7 @@ int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
+  //start();
   markStarted();
   do {
     doUpdateState();
@@ -106,10 +108,10 @@ void doLog(void){
 
 void loop(void) {
   static int i = 1; 
-  doLog();
+  //doLog();
 
-  //if(i % 30)
-    //sendGuesses();
+  if(i % 30)
+    sendGuesses();
 
   if(i++ & 0x1)
     enableLEDs(BLUE);
@@ -122,7 +124,7 @@ void tick_loop(void){
   localizer->update(localizer);
   motors->updateOffset(motors, localizer->_state->theta);
   if(running){
-    doMotion(); 
+  //  doMotion(); 
   /*
   if(loopCount == 0){
     localizer->update(localizer);

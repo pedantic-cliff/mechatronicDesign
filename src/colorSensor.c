@@ -24,7 +24,7 @@
 // Order goes edge+black, metal, yellow
 static struct centroid *centroids[6]; 
 __IO uint16_t ADC1ConvertedValue[NUM_SENSORS];
-
+volatile static int color_running = 0; 
 volatile Color currColor; 
 volatile int currIdx;
 volatile int done;
@@ -194,7 +194,8 @@ void initSensors(void){
 }
 
 void startADC(void){
-  int i = 0;
+  int i = 0;  
+  color_running = 1;
   _colorSensors.done = 0;
   for(; i < NUM_SENSORS; i++){
     ADC1ConvertedValue[i] = 0;
@@ -233,11 +234,11 @@ void finish(){
   confidences_t conf;
   sensorPos poses = localizer->findSensorLocations(localizer);
   for(s = 0; s < NUM_SENSORS; s++){
-    ambient = _colorSensors.sensors[s]->measurements[NONE_IDX];
-    red     = _colorSensors.sensors[s]->measurements[RED_IDX] - ambient;
-    green   = _colorSensors.sensors[s]->measurements[GREEN_IDX] - ambient;
-    blue    = _colorSensors.sensors[s]->measurements[BLUE_IDX] - ambient;
-
+    ambient = _colorSensors.sensors[s].measurements[NONE_IDX];
+    red     = (_colorSensors.sensors[s].measurements[RED_IDX] - ambient) / COLOR_SENSOR_ITERS;
+    green   = (_colorSensors.sensors[s].measurements[GREEN_IDX] - ambient) / COLOR_SENSOR_ITERS;
+    blue    = (_colorSensors.sensors[s].measurements[BLUE_IDX] - ambient) / COLOR_SENSOR_ITERS;
+    
     guessColor(&conf, red,green,blue, centroids[s]);
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
   }
@@ -245,6 +246,8 @@ void finish(){
 
 void nextColor(void){
   disableLEDs(GREEN);
+  if(!color_running)
+    return;
   switch(colorState){
     case RED:
       startColor(GREEN);
@@ -253,6 +256,7 @@ void nextColor(void){
       startColor(BLUE);
       break;
     case BLUE: 
+      finish();
       startColor(NONE);
       break;
     case NONE: 
@@ -269,7 +273,7 @@ void ADC_IRQHandler(void){
   ADC_TimerStop();
   enableLEDs(GREEN);
   for(i = 0; i < NUM_SENSORS; i++){
-    sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
+    _colorSensors.sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
   _colorSensors.done++;
   if((!_colorSensors.isCalibrating)
@@ -384,21 +388,28 @@ float calcCentDiff(int r, int g, int b, struct centroid *cent){
 }
 
 void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent){
-  c->boundary = calcCentDiff(r,g,b,&cent[0]); 
-  c->metal    = calcCentDiff(r,g,b,&cent[1]); 
-  c->yellow   = calcCentDiff(r,g,b,&cent[2]); 
+  float e = calcCentDiff(r,g,b,&cent[0]),
+        m = calcCentDiff(r,g,b,&cent[1]),
+        y = calcCentDiff(r,g,b,&cent[2]);
+  float sum = e + m + y; 
+  c->boundary = e/sum;
+  c->metal    = m/sum;
+  c->yellow   = y/sum;
 }
 
 void startColorSensor(void){
-
 }
 void haltColorSensor(void){
+  color_running = 0; 
+  ADC_TimerStop();
+  delay_blocking(1000);
   GPIO_SetBits(LIGHT_PORT, ALL_LIGHTS);
 }
 
 ColorSensors createColorSensors(void){
-  ColorSensors cs = &_colorSensors; 
+  ColorSensors cs = &_colorSensors;
 
+  cs->sensors = sensors;
   initLights(); 
   initSensors(); 
 
