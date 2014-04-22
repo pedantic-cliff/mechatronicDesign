@@ -12,7 +12,8 @@ int portFd;
 
 void main(int argc, char *argv[]){
   int count = 0;
-  portFd = open("/dev/ttyUSB0",  O_RDWR | O_NOCTTY | O_NDELAY);
+  printf("Open %s\n", argv[1]);
+  portFd = open(argv[1],  O_RDWR | O_NOCTTY | O_NDELAY);
   if(portFd == -1){
     printf("Whoops, couldn't open the port!\n");
     return ;

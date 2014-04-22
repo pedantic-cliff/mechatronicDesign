@@ -392,9 +392,9 @@ void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent){
         m = calcCentDiff(r,g,b,&cent[1]),
         y = calcCentDiff(r,g,b,&cent[2]);
   float sum = e + m + y; 
-  c->boundary = e/sum;
-  c->metal    = m/sum;
-  c->yellow   = y/sum;
+  c->boundary = e;
+  c->metal    = m;
+  c->yellow   = y;
 }
 
 void startColorSensor(void){
