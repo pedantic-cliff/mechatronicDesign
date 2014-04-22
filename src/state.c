@@ -12,7 +12,7 @@
 
 MotorSpeeds *speeds;
 Localizer localizer;
-float AGain = 7500; 
+float AGain = 5500; 
 
 state_t _targStates[] = {
   {24.f,   0.f,    0.f,      0.f},
@@ -28,13 +28,13 @@ state_t _targStates[] = {
 
 MotorSpeeds speedSettings[] = 		{
   {9500,  8200},  //RIGHT	+X
-  {10500, 10875},	//UP		+Y
+  {10500, 9875},	//UP		+Y
   {9000,  9100},	//LEFT	-X
-  {0,     0},	//DOWN	-Y
+  {4000,  4500},		//DOWN	-Y
   {-12000,14500},	//LEFT 1
-  {-12700,15000},	//LEFT 2
-  {0,0},					//LEFT 3
-  {0,0},					//LEFT 4
+  {-13300,15500},	//LEFT 2
+  {-14500,12500},					//LEFT 3
+  {-12000,14500},					//LEFT 4
   {0,0},					//RIGHT 1
   {0,0},					//RIGHT 2
   {0,0},					//RIGHT 3
@@ -45,7 +45,7 @@ MotorSpeeds encBiases[] = {
   {1.f,1.f},		        //+X
   {0.865f,0.865f},  //+Y
   {1.f,1.f},	          //-X
-  {1.f,1.f}			        //-Y
+  {0.925f,0.925f}			        //-Y
 };
 int numStates = sizeof(_targStates)/sizeof(state_t);
 state_t _state_storage; 
@@ -283,7 +283,7 @@ float calAngError(void) {
 
 void doMotion(void){
   float errA, theta, err;
-  int i = 0; 
+  //int i = 0; 
   
   findOutState();
   err = calculateError();
@@ -303,7 +303,7 @@ void doMotion(void){
     nextOrientationFlag = orientationFlag;
     motors->haltMotors(motors);
     //delay_blocking(100);
-    motors->setOffset(motors,PWM_MIN);
+    motors->setOffset(motors,PWM_MIN_L,PWM_MIN_R);
     motors->setSpeeds(motors,0,0);
 
     USART_puts("Done Motion\n");
@@ -312,7 +312,7 @@ void doMotion(void){
   
   if(isTurning)
   {
-    	motors->setOffset(motors,9000);
+    	motors->setOffset(motors,9000,9000);
     	theta = targState->theta - localizer->state->theta; 
     	if(err < PI/6.f)
       	motors->setSpeeds(motors, sinf(theta)*speeds->l * err / (PI/6.f), sinf(theta)*speeds->r * err / (PI/6.f));

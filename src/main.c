@@ -137,7 +137,7 @@ void tick_loop(void){
   */
   }
   else{
-    motors->setOffset(motors, PWM_MIN);
+    motors->setOffset(motors, PWM_MIN_L, PWM_MIN_R);
     motors->setSpeeds(motors, 0,0);
   }
 }

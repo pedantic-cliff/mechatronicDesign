@@ -178,8 +178,8 @@ int getRightCount(void){
 }
 
 void setSpeeds(Motors self, float l, float r){
-  l = self->PWM_Min + (long)(l); 
-  r = self->PWM_Min + (long)(r); 
+  l = self->PWM_Min_L + (long)(l); 
+  r = self->PWM_Min_R + (long)(r); 
   
   if ( l < 0 ){
     l = -l;
@@ -202,12 +202,14 @@ void setSpeeds(Motors self, float l, float r){
   TIM3->CCR4 = (int) (l < PWM_MAX ? l : PWM_MAX); 
 }; 
 
-void setOffset(Motors self, int base){
-  self->PWM_Base = base; 
+void setOffset(Motors self, int base_L, int base_R){
+  self->PWM_Base_L = base_L;
+  self->PWM_Base_R = base_R; 
 }
 
 void updateOffset(Motors self, float theta){
-  self->PWM_Min = self->PWM_Base * sinf(theta);
+  self->PWM_Min_L = self->PWM_Base_L * sinf(theta);
+  self->PWM_Min_R = self->PWM_Base_R * sinf(theta);
 }
 
 void setMotorTargSpeeds(Motors self, float leftTargSpeed, float rightTargSpeed){
@@ -297,7 +299,8 @@ Motors createMotors(void){
   m->leftTargetSpeed = 0;
   m->rightTargetSpeed = 0;
 
-  m->PWM_Base = PWM_MIN;
+  m->PWM_Base_L = PWM_MIN_L;
+  m->PWM_Base_R = PWM_MIN_R;
 
   m->p = 0;
   m->s = 0;
