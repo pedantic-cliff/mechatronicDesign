@@ -3,8 +3,8 @@
 
 #define PI (3.1415926535897932384626f)
 
-#define ENC_TO_D_L(X) ( (X)  * ( (PI * 3.754f) / 8400.f ))
-#define ENC_TO_D_R(X) ( (X)  * ( (PI * 3.464f) / 8400.f ))
+#define ENC_TO_D_L(X) ( (X)  * ( (PI * 4.021475f) / 8400.f ))
+#define ENC_TO_D_R(X) ( (X)  * ( (PI * 4.021475f) / 8400.f ))
 #define WHEEL_BASE_WIDTH (8.0f)
 
 #define fixAngle(theta) (atan2f(sinf(theta),cosf(theta)))

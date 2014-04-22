@@ -9,6 +9,7 @@ typedef struct {
   float r; 
 } MotorSpeeds; 
 extern MotorSpeeds *speeds;
+extern float AGain;
 
 void markStarted(void);
 int isStarted(void);

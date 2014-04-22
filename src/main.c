@@ -29,7 +29,7 @@ long time;
 void start(void){
   startState();
   running = 1;
-//  USART_puts("Start!\n");
+  USART_puts("Start!\n");
   time = getCurrentTime();
   colorSensors->startColor(NONE);
 }
@@ -80,7 +80,7 @@ static void init() {
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
   initSysTick(); 
-//  USART_puts("Init finished\n");
+  USART_puts("Init finished\n");
 }
 
 void doLog(void){
@@ -105,13 +105,7 @@ void doLog(void){
 
 void loop(void) {
   static int i = 1; 
- // doLog();
-  if(i % 20 == 0)
-    sendGuesses();
-  if(i % 100 == 0)
-    turnLeft90();
-  else if(i % 25 == 0)
-    goForwardBy(4);
+  doLog();
 
   if(i++ & 0x1)
     enableLEDs(BLUE);

@@ -294,12 +294,12 @@ void parseParams(void){
       turnLeft90();
       break; 
     case 'g': 
-      angleGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
-      angleGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
-      angleGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       bearGains.Kp = angleGains.Kp; 
       bearGains.Ks = angleGains.Ks; 
       bearGains.Kd = angleGains.Kd; 
@@ -313,7 +313,8 @@ void parseParams(void){
       speeds->l = extractFloat(&received_string[2 + 4*(i++)]);
       speeds->r = extractFloat(&received_string[2 + 4*(i++)]);
 
-/*
+      AGain = angleGains.Kp;
+
       USART_puts("Got [adm].[psd]: ");
       USART_putFloat(angleGains.Kp);
       USART_puts("\t");
@@ -338,7 +339,7 @@ void parseParams(void){
       USART_puts("\t");
       USART_putFloat(val2);
       USART_puts("\n");
-*/
+
       break;
   }
   command = 'n'; 
