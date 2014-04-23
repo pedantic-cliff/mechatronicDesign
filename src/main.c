@@ -59,7 +59,8 @@ int main(void) {
   delay_blocking(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  goForwardBy(10);
+  //goForwardBy(16);
+  turnLeft90();
   start();
   delay(3000); 
   do {
@@ -69,7 +70,6 @@ int main(void) {
       calibrateColor = 0; 
     }
     if(isMotionComplete()){
-      goForwardBy(5);
     }
     if(running){
       loop();

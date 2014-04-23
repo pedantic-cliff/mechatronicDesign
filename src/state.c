@@ -42,10 +42,10 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {1.f,1.f},		        //+X
+  {1.f,1.f},		    //+X
   {0.865f,0.865f},  //+Y
-  {1.f,1.f},	          //-X
-  {0.925f,0.925f}			        //-Y
+  {1.f,1.f},	      //-X
+  {0.925f,0.925f}		//-Y
 };
 int numStates = sizeof(_targStates)/sizeof(state_t);
 state_t _state_storage; 
@@ -123,6 +123,7 @@ void turnLeft90(void){
   findOutState();
   USART_puts("Turn Left: ");
   USART_putInt(orientationFlag);
+  USART_puts(": ");
   isTurning = 1;
   switch(orientationFlag){
     case POSX:
@@ -146,6 +147,7 @@ void turnLeft90(void){
       targState->theta = 0;
       break;
   }
+  USART_putFloat(targState->theta);
   USART_puts("\n");
 }
 
