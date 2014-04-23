@@ -6,6 +6,7 @@
 
 volatile int running = 0;
 volatile int ready   = 0;
+int motionDone = 0; 
 
 int calibrateColor = 0; 
 int sendMap = 0;
@@ -59,8 +60,7 @@ int main(void) {
   delay_blocking(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  //goForwardBy(16);
-  turnLeft90();
+  goForwardBy(16);
   start();
   delay(3000); 
   do {
@@ -69,7 +69,10 @@ int main(void) {
       doColorCalibrate();
       calibrateColor = 0; 
     }
-    if(isMotionComplete()){
+    if(isMotionComplete() && !motionDone){
+      motionDone = 1; 
+      USART_puts("\n\nDone!\n\n");
+      turnLeft90();
     }
     if(running){
       loop();

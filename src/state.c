@@ -85,13 +85,10 @@ void startState(void) {
 
 void goForwardBy(float dist){
   isTurning = 0;
-  motionComplete = 0; 
   nextOrientationFlag = orientationFlag; 
   findOutState();
 
-  USART_puts("Go forward: ");
-  USART_putInt(orientationFlag);
-
+  __disable_irq();
   switch(orientationFlag){
     case POSX:
       targState->x = localizer->state->x + dist;
@@ -115,15 +112,13 @@ void goForwardBy(float dist){
       break;
   }
 
-  USART_puts("\n");
+  motionComplete = 0; 
+  __enable_irq();
 }
 
 void turnLeft90(void){
-  motionComplete = 0; 
   findOutState();
-  USART_puts("Turn Left: ");
-  USART_putInt(orientationFlag);
-  USART_puts(": ");
+  __disable_irq();
   isTurning = 1;
   switch(orientationFlag){
     case POSX:
@@ -147,8 +142,8 @@ void turnLeft90(void){
       targState->theta = 0;
       break;
   }
-  USART_putFloat(targState->theta);
-  USART_puts("\n");
+  motionComplete = 0; 
+  __enable_irq();
 }
 
 int isMotionComplete(void){
