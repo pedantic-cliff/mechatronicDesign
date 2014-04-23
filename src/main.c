@@ -51,8 +51,10 @@ int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  //start();
+  start();
+  delay(2000);
   markStarted();
+  goForwardBy(12.f);
   do {
     doUpdateState();
     if(calibrateColor){
