@@ -48,7 +48,6 @@ void sendGuesses(void){
   volatile char buff[84];
   sendBuff.numMeas = 0; 
   sendBuff.numDefect = 0; 
-  USART_puts("Send Guesses\n");
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
       if(grid[y][x].count > 0){
@@ -58,7 +57,6 @@ void sendGuesses(void){
         continue;
       }
       
-      USART_puts("Guess\n");
       sendBuff.cells[y][x] = guessCell(x,y); 
       if(sendBuff.cells[y][x])
         sendBuff.numDefect++; 
@@ -79,7 +77,12 @@ void sendGuesses(void){
 
 void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
-  if ( x < 0 || x >= RMAX || y < 0 || y >= RMAX)
+  USART_puts("(");
+  USART_putInt(x);
+  USART_puts(",");
+  USART_putInt(y);
+  USART_puts(")\n");
+  if ( x < 0 || x > RMAX || y < 0 || y > RMAX)
     return;
 
   grid[y][x].count++;

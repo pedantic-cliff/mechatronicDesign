@@ -14,13 +14,13 @@ typedef struct {
 
 operation Commands[] = { 
   { NOP,      0.f,   1000 },
-  { FORWARD, 22.f,  1000 },  // Right 
+  { FORWARD, 21.75f, 1000 },  // Right 
   { LEFT,     5.f,   1000 },
-  { FORWARD, 21.75f,   1000 },  // Up
+  { FORWARD, 21.5f,  1000 },  // Up
   { LEFT,     5.f,   1000 },  
   { FORWARD, 24.f,   1000 },  // Left
   { LEFT,     0.f,   3000 },
-  { FORWARD, 7.0f,    500 },  // Down
+  { FORWARD,  9.25f,  500 },  // Down
   { LEFT,     0.f,   2000 },
   { FORWARD, 12.f,   1000 },  // Right
   { NOP,      0.f,   1000 },
@@ -97,6 +97,10 @@ void startCommand(int index){
   }
 }
 void endCommand(int index){
+  __disable_irq();
+  motors->haltMotors(motors);
+  sendGuesses();
+  __enable_irq();
   delay(Commands[index].delay);
 }
 
@@ -106,7 +110,9 @@ int main(void) {
   init();
   delay(1000); 
   startCommand(currentCommandIndex);
+#ifdef DEBUG
   start();
+#endif 
   do {
     doUpdateState();
     if(calibrateColor){

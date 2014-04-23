@@ -116,12 +116,14 @@ void USART_puts(volatile char *s){
 }
 
 void USART_write(volatile char *s, int len){
+#ifndef DEBUG
   while(len > 0){  
     while( !(USART1->SR & 0x00000040) );
     USART_SendData(USART1, *s);
     s++;
     len--;
   }
+#endif
 }
 
 void USART_putInt(int input){
