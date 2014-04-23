@@ -3,6 +3,7 @@
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_rcc.h>
 #include <math.h>
+#include "utils.h"
 
 #define CTRL_REG1 0x20
 #define OUT_X     0x29
@@ -14,7 +15,7 @@ void sendData(uint8_t addr, uint8_t data);
 uint8_t getData (uint8_t addr); 
 
 // Internal Storage for the one Accel object
-struct accel _storage; 
+static struct accel _storage; 
 
 uint8_t accel_getX(void){
   return getData(OUT_X);
@@ -27,10 +28,11 @@ uint8_t accel_getZ(void){
 }
 
 float accel_getAngle(){ 
+  int i = 0; 
   int8_t x, y; 
   x = accel_getX(); 
   y = accel_getY();
-  return 180.*atan2f(y,x)/3.14159; 
+  return atan2f(y,x); 
 }
 
 void initSPI(void){

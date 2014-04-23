@@ -5,12 +5,9 @@
 #include "stm32f4xx_adc.h"
 #include "utils.h"
 
-#define LIGHT_PORT  GPIOE
-#define RED_PIN     GPIO_Pin_10
-#define GREEN_PIN   GPIO_Pin_11
-#define BLUE_PIN    GPIO_Pin_12
-#define ALL_LIGHTS ( RED_PIN | GREEN_PIN | BLUE_PIN )
 #define NUM_COLORS  4
+#define COLOR_SENSOR_ITERS 8
+#define COLOR_SENSOR_CALIB_ITERS 250
 
 #define NONE_IDX    0
 #define RED_IDX     1
@@ -23,7 +20,6 @@
 #define NONE_VALID(sensor) (!!(sensor->validColors & NONE))
 
 #define NUM_SENSORS 6
-#define SENSOR_PORT GPIOD
 
 #define ADC1_DR_ADDRESS ((uint32_t)0x40012000 + 0x000 + 0x4C)
 
@@ -37,9 +33,11 @@ typedef struct lightSensor_t{
 typedef struct colorSensors_t *ColorSensors; 
 typedef struct colorSensors_t {
   LightSensor sensors[NUM_SENSORS]; 
-  void (*init)  (ColorSensors sensors);
 
   void (*measureColor) (ColorSensors sensors, Color color); 
+  void (*calibrateColor) (ColorSensors sensors, Color color); 
+  void (*guessColor) (int r, int g, int b); 
+  
   volatile uint16_t* (*getResult) (void); 
   volatile int done; 
 } colorSensor;

@@ -9,8 +9,8 @@
 typedef enum { 
   NONE   = 0x01, 
   RED    = 0x02, 
-  BLUE   = 0x04,
-  GREEN  = 0x08, 
+  GREEN  = 0x04, 
+  BLUE   = 0x08,
   ORANGE = 0x10
 } Color; 
 

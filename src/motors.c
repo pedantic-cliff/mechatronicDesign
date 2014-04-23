@@ -4,50 +4,54 @@
 #include "stm32f4xx_gpio.h"
 #include "misc.h"
 #include "motors.h"
+#include "usart.h"
 
 // Left Motor Channels 
-#define ENCLA_PIN GPIO_Pin_0
-#define ENCLA_GPIO_PORT GPIOA
-#define ENCLA_GPIO_CLK RCC_AHB1Periph_GPIOA
-#define ENCLA_SOURCE GPIO_PinSource0
-#define ENCLA_AF GPIO_AF_TIM5 
+#define ENCRA_PIN GPIO_Pin_0
+#define ENCRA_GPIO_PORT GPIOA
+#define ENCRA_GPIO_CLK RCC_AHB1Periph_GPIOA
+#define ENCRA_SOURCE GPIO_PinSource0
+#define ENCRA_AF GPIO_AF_TIM5 
 
-#define ENCLB_PIN GPIO_Pin_1
-#define ENCLB_GPIO_PORT GPIOA
-#define ENCLB_GPIO_CLK RCC_AHB1Periph_GPIOA
-#define ENCLB_SOURCE GPIO_PinSource1
-#define ENCLB_AF GPIO_AF_TIM5
+#define ENCRB_PIN GPIO_Pin_1
+#define ENCRB_GPIO_PORT GPIOA
+#define ENCRB_GPIO_CLK RCC_AHB1Periph_GPIOA
+#define ENCRB_SOURCE GPIO_PinSource1
+#define ENCRB_AF GPIO_AF_TIM5
 
-#define ENCL_TIMER TIM5 
-#define ENCL_TIMER_CLK RCC_APB1Periph_TIM5
+#define ENCR_TIMER TIM5 
+#define ENCR_TIMER_CLK RCC_APB1Periph_TIM5
 
 // Right Motor Channels 
-#define ENCRA_PIN GPIO_Pin_15
-#define ENCRA_GPIO_PORT GPIOA 
-#define ENCRA_GPIO_CLK RCC_AHB1Periph_GPIOA
-#define ENCRA_SOURCE GPIO_PinSource15
-#define ENCRA_AF GPIO_AF_TIM2
+#define ENCLA_PIN GPIO_Pin_15
+#define ENCLA_GPIO_PORT GPIOA 
+#define ENCLA_GPIO_CLK RCC_AHB1Periph_GPIOA
+#define ENCLA_SOURCE GPIO_PinSource15
+#define ENCLA_AF GPIO_AF_TIM2
 
-#define ENCRB_PIN GPIO_Pin_3
-#define ENCRB_GPIO_PORT GPIOB
-#define ENCRB_GPIO_CLK RCC_AHB1Periph_GPIOB
-#define ENCRB_SOURCE GPIO_PinSource3
-#define ENCRB_AF GPIO_AF_TIM2
+#define ENCLB_PIN GPIO_Pin_3
+#define ENCLB_GPIO_PORT GPIOB
+#define ENCLB_GPIO_CLK RCC_AHB1Periph_GPIOB
+#define ENCLB_SOURCE GPIO_PinSource3
+#define ENCLB_AF GPIO_AF_TIM2
 
-#define ENCR_TIMER TIM2
-#define ENCR_TIMER_CLK RCC_APB1Periph_TIM2
+#define ENCL_TIMER TIM2
+#define ENCL_TIMER_CLK RCC_APB1Periph_TIM2
 
 // Helpers
 #define LEFT_COUNT() ENCL_TIMER->CNT 
 #define RIGHT_COUNT() ENCR_TIMER->CNT
 
 // MOTOR CONTROL 
+#define PWM_PERIOD 	0x8000
+#define PWM_MAX 		0x4000
+#define PWM_SCALER 	700
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
-#define DIR_PIN_RL GPIO_Pin_10
-#define DIR_PIN_FL GPIO_Pin_11
 #define DIR_PIN_FR GPIO_Pin_12
 #define DIR_PIN_RR GPIO_Pin_13
+#define DIR_PIN_RL GPIO_Pin_14
+#define DIR_PIN_FL GPIO_Pin_15
 
 // Private storage
 static motors_t _storage;
@@ -126,7 +130,7 @@ void initPWM(void){
   /* Compute the prescaler value */
   PrescalerValue = (uint16_t) ((SystemCoreClock /2) / 28000000) - 1;
   /* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = 0xFFFF;
+  TIM_TimeBaseStructure.TIM_Period = PWM_PERIOD;
   TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Down;
@@ -168,15 +172,19 @@ void encodersReset(void){
 }
 
 int getLeftCount(void){
-  return (LEFT_COUNT());
+  return -(LEFT_COUNT());
 }
 int getRightCount(void){
   return (RIGHT_COUNT());
 }
 
-void setSpeeds(float l, float r){
-  TIM3->CCR3 = 0; 
-  TIM3->CCR4 = 0; 
+void setSpeeds(Motors self, float l, float r){
+  long L_PWM = 0;
+  long R_PWM = 0;
+  
+//  TIM3->CCR3 = 0; 
+//  TIM3->CCR4 = 0; 
+  
   if ( l < 0 ){
     l = -l;
     GPIO_SetBits(DIR_PORT, DIR_PIN_RL);
@@ -193,18 +201,30 @@ void setSpeeds(float l, float r){
     GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
-  TIM3->CCR3 = (int) l; 
-  TIM3->CCR4 = (int) r;
+
+  L_PWM = self->PWM_Min_L + (long)(l * PWM_SCALER); 
+  R_PWM = self->PWM_Min_R + (long)(r * PWM_SCALER); 
+  TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
+  TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
 }; 
+
+void setOffset(Motors self, int offset_L, int offset_R){
+  self->PWM_Min_L = offset_L; 
+  self->PWM_Min_R = offset_R; 
+}
 
 Motors createMotors(void){
   Motors m = &_storage; 
+
+  m->PWM_Min_L = 0xA80;
+  m->PWM_Min_R = 0x800;
 
   m->getLeftCount   = getLeftCount;
   m->getRightCount  = getRightCount;
   m->resetCounts    = encodersReset;
 
   m->setSpeeds      = setSpeeds; 
+  m->setOffset      = setOffset;
 
   initEncoders();
   initPWM(); 

@@ -5,6 +5,7 @@
 #include "stm32f4xx_syscfg.h"
 #include "stm32f4xx_exti.h"
 #include "misc.h"
+#include "main.h"
 
 /******* Init USER_BUTTON on the project board *********/
 void initButton(void) {
@@ -93,16 +94,24 @@ void disableLEDs(Color c){
 static long currentTime; 
 void initSysTick(void){
   currentTime = 0; 
-  SysTick_Config(SystemCoreClock / 1000);
+  SysTick_Config(SystemCoreClock / 10000);
   NVIC_SetPriority(SysTick_IRQn, 1); 
 }
 
 long getCurrentTime(void){ 
-  return currentTime; 
+  long time; 
+  __disable_irq();
+  time = currentTime; 
+  __enable_irq();
+  return time / 1000; 
 }
 
 void SysTick_Handler(void){
-  currentTime++; 
+  currentTime += 200; 
+  enableLEDs(RED);
+  if(running)
+    tick_loop();
+  disableLEDs(RED);
 }
 
 void delay(uint32_t ms) {
