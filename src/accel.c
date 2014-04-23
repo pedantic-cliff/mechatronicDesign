@@ -15,7 +15,7 @@ void sendData(uint8_t addr, uint8_t data);
 uint8_t getData (uint8_t addr); 
 
 // Internal Storage for the one Accel object
-static struct accel _storage; 
+static struct accel accel_storage; 
 
 uint8_t accel_getX(void){
   return getData(OUT_X);
@@ -28,11 +28,10 @@ uint8_t accel_getZ(void){
 }
 
 float accel_getAngle(){ 
-  int i = 0; 
   int8_t x, y; 
   x = accel_getX(); 
   y = accel_getY();
-  return atan2f(y,x); 
+  return atan2f(y,-x) + 0.014934f; 
 }
 
 void initSPI(void){
@@ -116,7 +115,7 @@ uint8_t getData(uint8_t address){
 }
 
 Accel initAccel(void){
-  Accel a = (Accel)&_storage;
+  Accel a = (Accel)&accel_storage;
   initSPI();
   sendData(CTRL_REG1, 0x67); // POWER_ON | Zen | Yen | Xen 
 

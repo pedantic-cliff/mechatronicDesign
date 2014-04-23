@@ -5,7 +5,9 @@
 #include "misc.h"
 #include "motors.h"
 #include "usart.h"
-
+#include "common.h"
+#include "utils.h"
+#include "math.h"
 // Left Motor Channels 
 #define ENCRA_PIN GPIO_Pin_0
 #define ENCRA_GPIO_PORT GPIOA
@@ -43,9 +45,6 @@
 #define RIGHT_COUNT() ENCR_TIMER->CNT
 
 // MOTOR CONTROL 
-#define PWM_PERIOD 	0x8000
-#define PWM_MAX 		0x4000
-#define PWM_SCALER 	700
 #define PWM_TIMER TIM3
 #define DIR_PORT GPIOE
 #define DIR_PIN_FR GPIO_Pin_12
@@ -179,11 +178,8 @@ int getRightCount(void){
 }
 
 void setSpeeds(Motors self, float l, float r){
-  long L_PWM = 0;
-  long R_PWM = 0;
-  
-//  TIM3->CCR3 = 0; 
-//  TIM3->CCR4 = 0; 
+  l = self->PWM_Min_L + (long)(l); 
+  r = self->PWM_Min_R + (long)(r); 
   
   if ( l < 0 ){
     l = -l;
@@ -201,30 +197,126 @@ void setSpeeds(Motors self, float l, float r){
     GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
     GPIO_ResetBits(DIR_PORT, DIR_PIN_RR);
   }
-
-  L_PWM = self->PWM_Min_L + (long)(l * PWM_SCALER); 
-  R_PWM = self->PWM_Min_R + (long)(r * PWM_SCALER); 
-  TIM3->CCR3 = (int) (R_PWM < PWM_MAX ? R_PWM : PWM_MAX); 
-  TIM3->CCR4 = (int) (L_PWM < PWM_MAX ? L_PWM : PWM_MAX); 
+  
+  TIM3->CCR3 = (int) (r < PWM_MAX ? r : PWM_MAX); 
+  TIM3->CCR4 = (int) (l < PWM_MAX ? l : PWM_MAX); 
 }; 
 
-void setOffset(Motors self, int offset_L, int offset_R){
-  self->PWM_Min_L = offset_L; 
-  self->PWM_Min_R = offset_R; 
+void setOffset(Motors self, int base_L, int base_R){
+  self->PWM_Base_L = base_L;
+  self->PWM_Base_R = base_R; 
+}
+
+void updateOffset(Motors self, float theta){
+  self->PWM_Min_L = self->PWM_Base_L * sinf(theta);
+  self->PWM_Min_R = self->PWM_Base_R * sinf(theta);
+}
+
+void setMotorTargSpeeds(Motors self, float leftTargSpeed, float rightTargSpeed){
+	self->leftTargetSpeed = leftTargSpeed;
+	self->rightTargetSpeed = rightTargSpeed;
+}
+
+void setMotorPIDGains(Motors self, PID_Gains gains){
+	self->p = gains.Kp;
+	self->s = gains.Ks;
+	self->d = gains.Kd;
+}
+
+
+static pidError_t eLm = {0.f, 0.f, 0.f, 1};
+static pidError_t eRm = {0.f, 0.f, 0.f, 1};
+
+void resetMotorPIDErrors(void){
+	eLm.p = 0.f;eLm.s = 0.f;eLm.d = 0.f;eLm.first = 1.f;
+  eRm.p = 0.f;eRm.s = 0.f;eRm.d = 0.f;eRm.first = 1.f;
+}
+
+static int firstMotorPID = 1;
+static float initialMotorTime = 0.f;
+
+static long currentLeftTicks = 0;
+static long currentRightTicks = 0;
+static long prevLeftTicks = 0;
+static long prevRightTicks = 0;
+
+static float currentTime = 0.f;
+static float previousTime = 0.f;
+
+void doMotorPID(Motors self){
+	if(firstMotorPID){
+		firstMotorPID = 0;
+		initialMotorTime = getCurrentTime()/1000.f;
+		currentTime = getCurrentTime()/1000.f - initialMotorTime;
+		currentLeftTicks = self->getLeftCount();
+		currentRightTicks = self->getRightCount();
+		self->setSpeeds(self,self->leftTargetSpeed,self->rightTargetSpeed);
+		return;
+	}
+	
+	previousTime = currentTime;
+	currentTime = getCurrentTime()/1000 - initialMotorTime;
+	prevLeftTicks = currentLeftTicks;
+	prevRightTicks = currentRightTicks;
+	currentLeftTicks = self->getLeftCount();
+	currentRightTicks = self->getRightCount();
+	
+	float leftVelErr,rightVelErr,deltaT,leftFbkVel,rightFbkVel;
+	
+	deltaT = currentTime - previousTime;
+	
+	leftVelErr = self->leftTargetSpeed - (ENC_TO_D_L(currentLeftTicks-prevLeftTicks))/(deltaT);
+	rightVelErr = self->rightTargetSpeed - (ENC_TO_D_R(currentRightTicks-prevRightTicks))/(deltaT);
+	
+	calcErr(leftVelErr,&eLm,0.f);
+	calcErr(rightVelErr,&eRm,0.f);
+	
+	leftFbkVel = eLm.p*self->p + eLm.s*self->s + eLm.d*self->d;
+	rightFbkVel = eRm.p*self->p + eRm.s*self->s + eRm.d*self->d;
+	
+	self->setSpeeds(self,self->leftTargetSpeed+leftFbkVel,self->rightTargetSpeed+rightFbkVel);
+}
+
+void resetMotorPID(Motors self){
+	firstMotorPID = 1;
+	self->setSpeeds(self,0,0);
+}
+
+void haltMotors(Motors self){
+  
+  GPIO_ResetBits(DIR_PORT, DIR_PIN_RL | DIR_PIN_FL | DIR_PIN_RR | DIR_PIN_FR);
+  
+  TIM3->CCR3 = PWM_MAX; 
+  TIM3->CCR4 = PWM_MAX;  
 }
 
 Motors createMotors(void){
   Motors m = &_storage; 
+	
+  m->leftTargetSpeed = 0;
+  m->rightTargetSpeed = 0;
 
-  m->PWM_Min_L = 0xA80;
-  m->PWM_Min_R = 0x800;
+  m->PWM_Base_L = PWM_MIN_L;
+  m->PWM_Base_R = PWM_MIN_R;
 
+  m->p = 0;
+  m->s = 0;
+  m->d = 0;
+  	
   m->getLeftCount   = getLeftCount;
   m->getRightCount  = getRightCount;
   m->resetCounts    = encodersReset;
 
-  m->setSpeeds      = setSpeeds; 
-  m->setOffset      = setOffset;
+  m->setSpeeds            = setSpeeds; 
+  m->setOffset            = setOffset;
+  m->updateOffset         = updateOffset;
+  m->haltMotors           = haltMotors;
+  m->setMotorPIDGains     = setMotorPIDGains;
+  m->doMotorPID           = doMotorPID;
+  m->setMotorTargSpeeds   = setMotorTargSpeeds;
+  m->setMotorPIDGains     = setMotorPIDGains;
+  m->resetMotorPIDErrors  = resetMotorPIDErrors;
+  m->resetMotorPID        = resetMotorPID;
 
   initEncoders();
   initPWM(); 

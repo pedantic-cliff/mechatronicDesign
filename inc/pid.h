@@ -13,12 +13,6 @@ typedef struct {
   float theta; 
 } *Point; 
 
-typedef struct {
-  float Kp; 
-  float Ks; 
-  float Kd;
-} PID_Gains;
-
 typedef struct pid *Pid;
 typedef struct pid {
   PID_Gains xyDistGains; 
@@ -32,5 +26,10 @@ typedef struct pid {
 } Pid_t;
 
 Pid createPID(PID_Gains a, PID_Gains p, PID_Gains v, Motors m);
+
+typedef struct {
+	int	l,
+			r;
+} thresholds_t,*thresholdsPtr;
 
 #endif // _PID_H_

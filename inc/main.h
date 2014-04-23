@@ -7,12 +7,16 @@
 #include "localize.h"
 #include "motors.h"
 #include "pid.h"
+#include "map.h"
 
 void halt(void);
 void start(void);
 void tick_loop(void);
+void setCalibrateColor(void);
 
 extern volatile int running;
+extern volatile int ready;
+
 extern ColorSensors colorSensors; 
 extern Accel accel; 
 extern Motors motors; 
@@ -20,10 +24,13 @@ extern Motors motors;
 extern Localizer localizer;
 
 extern State targState;
+extern int calibrateColor; 
+extern int sendMap; 
 
 extern Pid pid; 
 extern PID_Gains angleGains,
                  distGains ,
+                 motorGains, 
                  bearGains ;
 
 

@@ -6,6 +6,7 @@
 #include "stm32f4xx_exti.h"
 #include "misc.h"
 #include "main.h"
+#include "state.h"
 
 /******* Init USER_BUTTON on the project board *********/
 void initButton(void) {
@@ -91,34 +92,41 @@ void disableLEDs(Color c){
 }
 
 /************ Timing ********************/
+// Current Loop Period is 400usec
 static long currentTime; 
 void initSysTick(void){
   currentTime = 0; 
-  SysTick_Config(SystemCoreClock / 10000);
+  SysTick_Config(SystemCoreClock /  5000);
   NVIC_SetPriority(SysTick_IRQn, 1); 
 }
 
-long getCurrentTime(void){ 
+float getCurrentTime(void){ 
   long time; 
   __disable_irq();
   time = currentTime; 
   __enable_irq();
-  return time / 1000; 
+  return time / 1000.f; 
 }
 
 void SysTick_Handler(void){
-  currentTime += 200; 
+  currentTime += 400; 
   enableLEDs(RED);
-  if(running)
+  if(ready){
     tick_loop();
+  }
   disableLEDs(RED);
 }
 
 void delay(uint32_t ms) {
-  ms *= 9270;
-  while(ms--) {
+  long start = getCurrentTime();
+  while(getCurrentTime() < start + ms) {
     __NOP();
   }
 }
 
-
+void delay_blocking(uint32_t count){
+  count *= 1000; 
+  while(count--){
+    __NOP();
+  }
+}

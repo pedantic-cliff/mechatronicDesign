@@ -6,6 +6,8 @@
 #include <stm32f4xx_conf.h> 
 #include "utils.h"
 #include "main.h"
+#include "math.h"
+#include "state.h"
 
 #define MAX_STRLEN 64 // this is the maximum string length of our string in characters
 #define BAUD_RATE 30000     // Somehow this corresponds to 4800!!
@@ -72,8 +74,6 @@ void init_USART(void){
   USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx; // we want to enable the transmitter and the receiver
   USART_Init(USART1, &USART_InitStruct);					// again all the properties are passed to the USART_Init function which takes care of all the bit setting
 
-  USART_SendData(USART2, 'U');
-
   /* Here the USART1 receive interrupt is enabled
    * and the interrupt controller is configured
    * to jump to the USART1_IRQHandler() function
@@ -105,13 +105,25 @@ void init_USART(void){
  * 		   declared as volatile char --> otherwise the compiler will spit out warnings
  * */
 void USART_puts(volatile char *s){
-
+#ifdef DEBUG
   while(*s){
     // wait until data register is empty
     while( !(USART1->SR & 0x00000040) );
     USART_SendData(USART1, *s);
     s++;
   }
+#endif
+}
+
+void USART_write(volatile char *s, int len){
+#ifndef DEBUG
+  while(len > 0){  
+    while( !(USART1->SR & 0x00000040) );
+    USART_SendData(USART1, *s);
+    s++;
+    len--;
+  }
+#endif
 }
 
 void USART_putInt(int input){
@@ -213,7 +225,8 @@ void USART_putInt(int input){
   USART_puts(buffer); 
 }
 
-void USART_sendByte(uint8_t byte){
+void USART_sendByte(char byte){
+  while( !(USART1->SR & 0x00000040) );
   USART_SendData(USART1, byte);
 }
 
@@ -253,24 +266,57 @@ float extractFloat(volatile char *buf){
 
 void parseParams(void){
   int i = 0; 
+  char buff[3];
+  float val1, val2; 
   switch(command){
+    case 0xff:
+      buff[0] = commandLen;
+      buff[1] = 1;
+      USART_write(buff,2);
+      sendMap = 1; 
+      start();
+      break;
+    case 'c': 
+      setCalibrateColor();
+      break;
     case 's': 
       start();
       break; 
     case 'h':
       halt();
       break; 
+    case 'f':
+      val1 = extractFloat(&received_string[2]); 
+
+      goForwardBy(val1);
+      break;
+    case 'r':
+      break;
+    case 'l': 
+      turnLeft90();
+      break; 
     case 'g': 
-      angleGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
-      angleGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
-      angleGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
       distGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      angleGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
       bearGains.Kp = angleGains.Kp; 
       bearGains.Ks = angleGains.Ks; 
       bearGains.Kd = angleGains.Kd; 
       pid->setGains(pid, distGains, bearGains, angleGains);
+
+      motorGains.Kp = extractFloat(&received_string[2 + 4*(i++)]); 
+      motorGains.Ks = extractFloat(&received_string[2 + 4*(i++)]); 
+      motorGains.Kd = extractFloat(&received_string[2 + 4*(i++)]); 
+      motors->setMotorPIDGains(motors, motorGains); 
+
+      speeds->l = extractFloat(&received_string[2 + 4*(i++)]);
+      speeds->r = extractFloat(&received_string[2 + 4*(i++)]);
+
+      AGain = angleGains.Kp;
+
       break;
   }
   command = 'n'; 
@@ -299,6 +345,11 @@ void USART1_IRQHandler(void){
       commandLen = t; 
     }
     
+    if(command == 0xFF && received_index == 3){
+      parseParams();
+      return;
+    }
+
     if(received_index - 2 == commandLen){
       parseParams(); 
     }
