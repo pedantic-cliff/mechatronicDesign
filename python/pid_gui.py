@@ -223,7 +223,7 @@ class Application(Frame):
     running=1
     t.start()
 
-    p.write('s')
+    #p.write('s')
     running = 1
   def reset(self):
     self.output.delete(0.0, END)

@@ -12,14 +12,14 @@
 
 MotorSpeeds *speeds;
 Localizer localizer;
-float AGain = 5500; 
+float AGain = 5000; 
 
 
 MotorSpeeds speedSettings[] = 		{
   {9500,  8200},  //RIGHT	+X
   {10500, 9875},  //UP		+Y
   {9000,  9100},  //LEFT	-X
-  {4000,  4500},  //DOWN	-Y
+  {6000,  6500},		//DOWN	-Y
   {-12000,14500}, //LEFT 1
   {-13300,15500}, //LEFT 2
   {-14500,12500},					//LEFT 3

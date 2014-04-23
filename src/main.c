@@ -13,7 +13,7 @@ typedef struct {
 } operation; 
 
 operation Commands[] = { 
-  { NOP,      0.f,    2000 },
+  { NOP,      0.f,    5000 },
   { FORWARD, 23.f,    500 },
   { LEFT,     0.f,    500 },
   { FORWARD, 20.f,    500 },
@@ -100,7 +100,6 @@ int main(void) {
   delay(1000); 
   startCommand(currentCommandIndex);
   start();
-  delay(3000); 
   do {
     doUpdateState();
     if(calibrateColor){
