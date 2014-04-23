@@ -395,6 +395,12 @@ void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent){
   c->boundary = e;
   c->metal    = m;
   c->yellow   = y;
+  if((e<m)&&(e<y))
+  USART_puts("EDGE\n");
+  if((m<e)&&(m<y))
+  USART_puts("METAL\n");
+  if((y<m)&&(y<e))
+  USART_puts("YELLOW\n");
 }
 
 void startColorSensor(void){
