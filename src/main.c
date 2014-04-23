@@ -5,6 +5,8 @@
 #include "state.h"
 
 volatile int running = 0;
+volatile int ready   = 0;
+
 int calibrateColor = 0; 
 int sendMap = 0;
 ColorSensors colorSensors; 
@@ -22,17 +24,24 @@ static void loop(void);
 
 void doUpdateState(void){
   __disable_irq();
+  
   localizer->cacheState(localizer);
+  
+  USART_puts("[");
+  USART_putFloat(localizer->state->x);
+  USART_puts(", ");
+  USART_putFloat(localizer->state->y);
+  USART_puts(", ");
+  USART_putFloat(localizer->state->theta);
+  USART_puts("]\n");
   __enable_irq();
 }
 
 long time;
 void start(void){
-  startState();
   running = 1;
   USART_puts("Start!\n");
-  time = getCurrentTime();
-  colorSensors->startColor(NONE);
+  //colorSensors->startColor(NONE);
 }
 
 void halt(void){
@@ -41,27 +50,27 @@ void halt(void){
 }
 
 void doLog();
-void doUpdate();
 
 void doColorCalibrate(void){
   colorSensors->calibrateColors(colorSensors); 
 }
 int main(void) {
   initSysTick(); 
-  delay(500); // Give the hardware time to warm up on cold start
+  delay_blocking(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  markStarted();
-  start();
-  delay(3000);
   goForwardBy(10);
+  start();
+  delay(3000); 
   do {
     doUpdateState();
     if(calibrateColor){
       doColorCalibrate();
       calibrateColor = 0; 
     }
-
+    if(isMotionComplete()){
+      goForwardBy(5);
+    }
     if(running){
       loop();
     }
@@ -74,18 +83,16 @@ void setCalibrateColor(void){
 }
 
 static void init() {
-  init_USART(); 
   initLEDs();
-  createGrid();
-  colorSensors = createColorSensors(); 
+  init_USART(); 
+  //createGrid();
+  //colorSensors = createColorSensors(); 
   accel   = initAccel(); 
   motors  = createMotors();
-  motors->setMotorPIDGains(motors,motorGains); 
-  delay(500);
+  delay_blocking(500);
   localizer = createLocalizer(motors, accel);
-  pid = createPID(distGains, bearGains,angleGains, motors); 
-  initSysTick(); 
-  running = 0; 
+  startState();
+  ready = 1; 
   USART_puts("Init finished\n");
 }
 
@@ -111,7 +118,7 @@ void doLog(void){
 
 void loop(void) {
   static int i = 1; 
-  doLog();
+  //doLog();
 
   if(i % 30){
     //sendGuesses();

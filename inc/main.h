@@ -15,6 +15,8 @@ void tick_loop(void);
 void setCalibrateColor(void);
 
 extern volatile int running;
+extern volatile int ready;
+
 extern ColorSensors colorSensors; 
 extern Accel accel; 
 extern Motors motors; 

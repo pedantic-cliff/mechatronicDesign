@@ -11,8 +11,6 @@ typedef struct {
 extern MotorSpeeds *speeds;
 extern float AGain;
 
-void markStarted(void);
-int isStarted(void);
 void startState(void);
 
 void goForwardBy(float dist);
