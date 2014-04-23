@@ -86,10 +86,10 @@ static void cacheState(Localizer self){
 }
 
 static void restart(Localizer self){
-  self->_state->x       = 6.f; 
-  self->_state->y       = 6.f;
+  self->_state->x       = -1.5f; 
+  self->_state->y       =  6.f;
   self->_state->theta   = self->acc->getAngle();
-  self->_state->vel     = 0.0f;
+  self->_state->vel     =  0.0f;
 
   self->cacheState(self);
 }

@@ -14,11 +14,11 @@ typedef struct {
 
 operation Commands[] = { 
   { NOP,      0.f,   1000 },
-  { FORWARD, 21.75f, 1000 },  // Right 
+  { FORWARD, 28.5f, 1000 },  // Right 
   { LEFT,     5.f,   1000 },
-  { FORWARD, 21.5f,  1000 },  // Up
+  { FORWARD, 22.0f,  1000 },  // Up
   { LEFT,     5.f,   1000 },  
-  { FORWARD, 24.f,   1000 },  // Left
+  { FORWARD, 23.5f,   1000 },  // Left
   { LEFT,     0.f,   3000 },
   { FORWARD,  9.25f,  500 },  // Down
   { LEFT,     0.f,   2000 },
@@ -85,9 +85,11 @@ void doColorCalibrate(void){
 void startCommand(int index){
   switch(Commands[index].command){
     case FORWARD:
+      colorSensors->startColor(NONE);
       goForwardBy(Commands[index].argument);
       break;
     case LEFT:
+      colorSensors->halt();
       turnLeft90();
       break;
     case NOP:
@@ -121,6 +123,8 @@ int main(void) {
       if (currentCommandIndex < numCommands){ 
         startCommand(currentCommandIndex);
         motionDone = 0;
+      }else{
+        finishGrid();
       }
     }
     if(running){

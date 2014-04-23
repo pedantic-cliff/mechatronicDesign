@@ -6,5 +6,6 @@ void applyConfidence(int r, int c, pConfidences conf);
 void sendGuesses(void);
 
 void createGrid(void);
+void finishGrid(void);
 
 #endif //_MAP_H_

@@ -29,10 +29,10 @@ int guessCell(int x, int y){
     minIdx = 1; 
     minVal = conf->yellow;
   }
-  if (minVal > conf->boundary){
+  /*if (minVal > conf->boundary){
     minIdx = 2; 
     minVal = conf->boundary;
-  }
+  }*/
   
   USART_puts("Conf: "); 
   USART_putFloat(Grid[y][x].conf.metal);
@@ -42,6 +42,19 @@ int guessCell(int x, int y){
   USART_putFloat(conf->boundary);
   USART_puts("\n");
   return minIdx;
+}
+
+void finishGrid(void){
+  int x, y;
+  for(y = 0; y < NROWS; y++){
+    for(x = 0; x < NCOLS; x++){
+      if(Grid[y][x].count == 0){
+        Grid[y][x].count++;
+        Grid[y][x].conf.yellow = 10.f;
+        Grid[y][x].conf.metal  = 0.f;
+      }
+    }
+  }
 }
 
 void sendGuesses(void){
@@ -80,7 +93,8 @@ void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
   if ( x < 0 || x > RMAX || y < 0 || y > RMAX)
     return;
-
+  if(pConf->boundary < pConf->yellow && pConf->boundary < pConf->metal)
+    return;
   Grid[y][x].count++;
   Grid[y][x].conf.metal     += pConf->metal;
   Grid[y][x].conf.yellow    += pConf->yellow;
