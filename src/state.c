@@ -14,25 +14,14 @@ MotorSpeeds *speeds;
 Localizer localizer;
 float AGain = 5500; 
 
-state_t _targStates[] = {
-  {24.f,   0.f,    0.f,      0.f},
-  {0.0f,   0.f,    PI/2.0f,  0.f},
-  {24.f,   24.f,   PI/2.0f,  0.f},
-  {24.f,   24.f,   PI,       0.f},
-  {0.0f,   24.f,   PI,       0.f},
-  {0.0f,   24.f,  3*PI/2.0f, 0.f},
-  {0.0f,   12.0f, 3*PI/2.0f, 0.f},
-  {0.0f,   12.0f,  0.0f,     0.f},
-  {12.0f,  12.0f,  0.0f,    0.f}
-};
 
 MotorSpeeds speedSettings[] = 		{
   {9500,  8200},  //RIGHT	+X
-  {10500, 9875},	//UP		+Y
-  {9000,  9100},	//LEFT	-X
-  {4000,  4500},		//DOWN	-Y
-  {-12000,14500},	//LEFT 1
-  {-13300,15500},	//LEFT 2
+  {10500, 9875},  //UP		+Y
+  {9000,  9100},  //LEFT	-X
+  {4000,  4500},  //DOWN	-Y
+  {-12000,14500}, //LEFT 1
+  {-13300,15500}, //LEFT 2
   {-14500,12500},					//LEFT 3
   {-12000,14500},					//LEFT 4
   {0,0},					//RIGHT 1
@@ -47,7 +36,6 @@ MotorSpeeds encBiases[] = {
   {1.f,1.f},	      //-X
   {0.925f,0.925f}		//-Y
 };
-int numStates = sizeof(_targStates)/sizeof(state_t);
 state_t _state_storage; 
 State targState;
 
