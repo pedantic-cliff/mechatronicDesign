@@ -42,10 +42,10 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {1.f,1.f},		        //+X
+  {1.f,1.f},		    //+X
   {0.865f,0.865f},  //+Y
-  {1.f,1.f},	          //-X
-  {0.925f,0.925f}			        //-Y
+  {1.f,1.f},	      //-X
+  {0.925f,0.925f}		//-Y
 };
 int numStates = sizeof(_targStates)/sizeof(state_t);
 state_t _state_storage; 
@@ -57,17 +57,19 @@ Orientation orientationFlag, nextOrientationFlag;
 float calculateError(void);
 int isTurning;
 int motionComplete; 
-static int started;
 
 void findOutState(void) {
   float theta = atan2f(sinf(localizer->_state->theta),cosf(localizer->_state->theta));
 
   if((theta>=-PI/4 && theta<=0) || (theta<PI/4 && theta>=0))
     orientationFlag = POSX;
+
   if(theta>=PI/4 && theta<3*PI/4)
     orientationFlag = POSY;
+  
   if((theta>=3*PI/4 && theta<=PI) || (theta<-3*PI/4 && theta>=-PI) )
     orientationFlag = NEGX;
+  
   if(theta<-PI/4 && theta>=-3*PI/4 )
     orientationFlag = NEGY;
 }
@@ -81,90 +83,42 @@ void startState(void) {
   targState->theta = localizer->state->theta;
 }
 
-void markStarted(void){
-  started = 0; 
-}
-int isStarted(void){
-  return started;
-}
-/*
-   switch(orientationFlag){
-   case POSX:
-   break;
-   case POSY:
-   break;
-   case NEGX:
-   break;
-   case NEGY:
-   break;
-   }
-   */
 void goForwardBy(float dist){
   isTurning = 0;
-  motionComplete = 0; 
   nextOrientationFlag = orientationFlag; 
   findOutState();
 
-  USART_puts("Go forward: ");
-  USART_putInt(orientationFlag);
-  USART_puts(": ");
-
+  __disable_irq();
   switch(orientationFlag){
     case POSX:
       targState->x = localizer->state->x + dist;
       localizer->setEncBias(localizer,encBiases[0].l,encBiases[0].r);
       speeds = &speedSettings[0];
-      
-      USART_putInt(localizer->state->x);
-      USART_puts("->");
-      USART_putInt(targState->x);
-      
       break;
     case POSY:
       targState->y = localizer->state->y + dist;
       localizer->setEncBias(localizer,encBiases[1].l,encBiases[1].r); 
       speeds = &speedSettings[1];
-      
-      USART_putInt(localizer->state->y);
-      USART_puts("->");
-      USART_putInt(targState->y);
-      
       break;
     case NEGX:
       targState->x = localizer->state->x - dist;
       localizer->setEncBias(localizer,encBiases[2].l,encBiases[2].r);
       speeds = &speedSettings[2];
-      
-      USART_putInt(localizer->state->x);
-      USART_puts("->");
-      USART_putInt(targState->x);
-      
       break;
     case NEGY:
       targState->y = localizer->state->y - dist;
       localizer->setEncBias(localizer,encBiases[3].l,encBiases[3].r);
       speeds = &speedSettings[3];
-      
-      USART_putInt(localizer->state->y);
-      USART_puts("->");
-      USART_putInt(targState->y);
-      
       break;
   }
-  USART_puts(" ");
-  USART_putFloat(localizer->encBiasL);
-  USART_puts(" ");
-  USART_putFloat(localizer->encBiasR);
 
-  USART_puts("\n");
+  motionComplete = 0; 
+  __enable_irq();
 }
 
 void turnLeft90(void){
-  motionComplete = 0; 
   findOutState();
-  USART_puts("Turn Left: ");
-  USART_putInt(orientationFlag);
-  USART_puts(": ");
+  __disable_irq();
   isTurning = 1;
   switch(orientationFlag){
     case POSX:
@@ -188,10 +142,8 @@ void turnLeft90(void){
       targState->theta = 0;
       break;
   }
-  USART_putFloat(localizer->state->theta);
-  USART_puts("->");
-  USART_putFloat(targState->theta);
-  USART_puts("\n");
+  motionComplete = 0; 
+  __enable_irq();
 }
 
 int isMotionComplete(void){
@@ -212,20 +164,6 @@ int isMotionComplete(void){
     }
   } else {
     return calculateError() < 0.01f;
-    /*
-    switch(orientationFlag){
-      case POSX:
-          return (targState->theta <= localizer->state->theta);
-
-      case POSY:
-        return (0 >= localizer->state->theta);
-
-      case NEGX:
-          return (targState->theta <= localizer->state->theta);
-
-      case NEGY:
-          return (targState->theta <= localizer->state->theta);
-    }*/
   }
   return 0;
 }
@@ -284,7 +222,7 @@ float calAngError(void) {
 void doMotion(void){
   float errA, theta, err;
   //int i = 0; 
-  
+
   findOutState();
   err = calculateError();
   errA = calAngError();
