@@ -99,9 +99,9 @@ sensorPos findSensorLocations(Localizer self){
 	
 	sensorPos senPositions;
 	
-	xRobot = self->_state->x;
-	yRobot = self->_state->y;
-	tRobot = self->_state->theta;
+	xRobot = self->state->x;
+	yRobot = self->state->y;
+	tRobot = self->state->theta;
 	
 	senPositions.s[0].row = (xRobot + s1x*cosf(tRobot) - s1y*sinf(tRobot))/4;
 	senPositions.s[0].col = (yRobot + s1x*sinf(tRobot) + s1y*cosf(tRobot))/4;

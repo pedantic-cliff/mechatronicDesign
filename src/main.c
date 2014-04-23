@@ -52,7 +52,7 @@ void doUpdateState(void){
   __disable_irq();
   
   localizer->cacheState(localizer);
-  
+  /*
   USART_puts("[");
   USART_putFloat(localizer->state->x);
   USART_puts(", ");
@@ -60,7 +60,7 @@ void doUpdateState(void){
   USART_puts(", ");
   USART_putFloat(localizer->state->theta);
   USART_puts("]\n");
-  
+  */
   __enable_irq();
 }
 
@@ -97,10 +97,6 @@ void startCommand(int index){
   }
 }
 void endCommand(int index){
-  __disable_irq();
-  motors->haltMotors(motors);
-  sendGuesses();
-  __enable_irq();
   delay(Commands[index].delay);
 }
 
@@ -177,7 +173,9 @@ void loop(void) {
   //doLog();
 
   if(i % 30){
-    //sendGuesses();
+    __disable_irq();
+    sendGuesses();
+    __enable_irq();
   }
 
   if(i++ & 0x1)

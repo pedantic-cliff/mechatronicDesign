@@ -12,8 +12,9 @@ typedef struct {
   unsigned int count;
 } cell_t;
 
-cell_t grid[NROWS][NCOLS];
-
+int foobar1[10000];
+cell_t Grid[NROWS][NCOLS];
+int foobar2[10000];
 struct { 
   char numMeas;
   char numDefect;
@@ -22,7 +23,7 @@ struct {
 
 int guessCell(int x, int y){
   int minIdx = 0; 
-  pConfidences conf = &grid[y][x].conf;
+  pConfidences conf = &Grid[y][x].conf;
   float minVal = conf->metal;
   if (minVal > conf->yellow){
     minIdx = 1; 
@@ -34,7 +35,7 @@ int guessCell(int x, int y){
   }
   
   USART_puts("Conf: "); 
-  USART_putFloat(grid[y][x].conf.metal);
+  USART_putFloat(Grid[y][x].conf.metal);
   USART_puts("\t\t");
   USART_putFloat(conf->yellow);
   USART_puts("\t\t");
@@ -50,7 +51,7 @@ void sendGuesses(void){
   sendBuff.numDefect = 0; 
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
-      if(grid[y][x].count > 0){
+      if(Grid[y][x].count > 0){
         sendBuff.numMeas++; 
       }else{
         sendBuff.cells[y][x] = 2; 
@@ -77,20 +78,14 @@ void sendGuesses(void){
 
 void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
-  USART_puts("(");
-  USART_putInt(x);
-  USART_puts(",");
-  USART_putInt(y);
-  USART_puts(")\n");
   if ( x < 0 || x > RMAX || y < 0 || y > RMAX)
     return;
 
-  grid[y][x].count++;
-  pConfidences confs = &grid[y][x].conf;
-  confs->metal += pConf->metal; 
-  confs->yellow += pConf->yellow; 
-  confs->boundary += pConf->boundary; 
-  
+  Grid[y][x].count++;
+  Grid[y][x].conf.metal     += pConf->metal;
+  Grid[y][x].conf.yellow    += pConf->yellow;
+  Grid[y][x].conf.boundary  += pConf->boundary;
+
   /*
   USART_puts("Grid: ");
   USART_putFloat(confs->metal) ;
@@ -106,11 +101,11 @@ void applyConfidence(int x, int y, pConfidences pConf){
 int fakes[] = { 0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1 };
 
 void _fakepoint(int x,int y,int val){
-  grid[y][x].count++;
+  Grid[y][x].count++;
   if(val) 
-    grid[y][x].conf.metal = 1.0f;
+    Grid[y][x].conf.metal = 1.0f;
   else
-    grid[y][x].conf.yellow = 1.0f;
+    Grid[y][x].conf.yellow = 1.0f;
 }
 void fakeData(void){
   int i,j,k=0;; 
@@ -126,11 +121,11 @@ void createGrid(void){
   pConfidences conf;
   for(i = 0; i < NROWS; i++){
     for(j = 0; j < NCOLS; j++){
-      conf = &grid[i][j].conf; 
+      conf = &(Grid[i][j].conf); 
       conf->metal    = 0.f;
       conf->yellow   = 0.f;
       conf->boundary = 0.f;
-      grid[i][j].count = 0; 
+      Grid[i][j].count = 0; 
     }
   }
   //fakeData();
