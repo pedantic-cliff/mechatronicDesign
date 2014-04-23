@@ -76,7 +76,7 @@ void applyConfidence(int x, int y, pConfidences pConf){
   confs->metal += pConf->metal; 
   confs->yellow += pConf->yellow; 
   confs->boundary += pConf->boundary; 
-  
+  /*
   USART_puts("Grid: ");
   USART_putInt(x);
   USART_puts(", ");
@@ -86,7 +86,7 @@ void applyConfidence(int x, int y, pConfidences pConf){
   USART_puts("<--");
   USART_putFloat(pConf->metal) ;
   USART_puts("\n");
-
+  */
 }
 
 int fakes[] = { 0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1 };

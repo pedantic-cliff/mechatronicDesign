@@ -51,8 +51,10 @@ int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  //start();
   markStarted();
+  start();
+  delay(3000);
+  goForwardBy(10);
   do {
     doUpdateState();
     if(calibrateColor){
@@ -83,6 +85,7 @@ static void init() {
   localizer = createLocalizer(motors, accel);
   pid = createPID(distGains, bearGains,angleGains, motors); 
   initSysTick(); 
+  running = 0; 
   USART_puts("Init finished\n");
 }
 

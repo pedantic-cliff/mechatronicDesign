@@ -241,6 +241,9 @@ void finish(){
     
     guessColor(&conf, red,green,blue, centroids[s]);
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
+    USART_puts("Metal Conf: ");
+    USART_putFloat(conf.metal);
+    USART_puts("\n");
   }
 }
 
