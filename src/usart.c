@@ -74,8 +74,6 @@ void init_USART(void){
   USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx; // we want to enable the transmitter and the receiver
   USART_Init(USART1, &USART_InitStruct);					// again all the properties are passed to the USART_Init function which takes care of all the bit setting
 
-  USART_SendData(USART2, 'U');
-
   /* Here the USART1 receive interrupt is enabled
    * and the interrupt controller is configured
    * to jump to the USART1_IRQHandler() function
@@ -285,7 +283,7 @@ void parseParams(void){
     case 'h':
       halt();
       break; 
-      case 'f':
+    case 'f':
       val1 = extractFloat(&received_string[2]); 
 
       goForwardBy(val1);
@@ -317,31 +315,6 @@ void parseParams(void){
 
       AGain = angleGains.Kp;
 
-      USART_puts("Got [adm].[psd]: ");
-      USART_putFloat(angleGains.Kp);
-      USART_puts("\t");
-      USART_putFloat(angleGains.Ks);
-      USART_puts("\t");
-      USART_putFloat(angleGains.Kd);
-      USART_puts("\n");
-      USART_putFloat(distGains.Kp);
-      USART_puts("\t");
-      USART_putFloat(distGains.Ks);
-      USART_puts("\t");
-      USART_putFloat(distGains.Kd);
-      USART_puts("\n");
-      USART_putFloat(motorGains.Kp);
-      USART_puts("\t");
-      USART_putFloat(motorGains.Ks);
-      USART_puts("\t");
-      USART_putFloat(motorGains.Kd);
-      USART_puts("\n");
-      USART_puts("Got offsets: "); 
-      USART_putFloat(val1);
-      USART_puts("\t");
-      USART_putFloat(val2);
-      USART_puts("\n");
-
       break;
   }
   command = 'n'; 
@@ -372,7 +345,10 @@ void USART1_IRQHandler(void){
     
     if(command == 0xFF && received_index == 3){
       parseParams();
-    }else if(received_index - 2 == commandLen){
+      return;
+    }
+
+    if(received_index - 2 == commandLen){
       parseParams(); 
     }
 

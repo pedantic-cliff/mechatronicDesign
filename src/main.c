@@ -51,7 +51,7 @@ int main(void) {
   delay(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  start();
+  //start();
   markStarted();
   do {
     doUpdateState();
