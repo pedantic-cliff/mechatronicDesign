@@ -284,13 +284,10 @@ void resetMotorPID(Motors self){
 
 void haltMotors(Motors self){
   
-  GPIO_SetBits(DIR_PORT, DIR_PIN_RL);
-  GPIO_SetBits(DIR_PORT, DIR_PIN_FL);
-  GPIO_SetBits(DIR_PORT, DIR_PIN_RR);
-  GPIO_SetBits(DIR_PORT, DIR_PIN_FR);
+  GPIO_ResetBits(DIR_PORT, DIR_PIN_RL | DIR_PIN_FL | DIR_PIN_RR | DIR_PIN_FR);
   
-  TIM3->CCR3 = PWM_PERIOD; 
-  TIM3->CCR4 = PWM_PERIOD;  
+  TIM3->CCR3 = PWM_MAX; 
+  TIM3->CCR4 = PWM_MAX;  
 }
 
 Motors createMotors(void){

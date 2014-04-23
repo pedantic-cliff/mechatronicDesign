@@ -13,17 +13,22 @@ typedef struct {
 } operation; 
 
 operation Commands[] = { 
-  { NOP,      0.f,    5000 },
-  { FORWARD, 23.f,    500 },
-  { LEFT,     0.f,    500 },
-  { FORWARD, 20.f,    500 },
-  { LEFT,     0.f,    500 },
-  { FORWARD, 23.f,    500 }
+  { NOP,      0.f,   1000 },
+  { FORWARD, 22.f,  1000 },  // Right 
+  { LEFT,     5.f,   1000 },
+  { FORWARD, 20.f,   1000 },  // Up
+  { LEFT,     5.f,   1000 },  
+  { FORWARD, 24.f,   1000 },  // Left
+  { LEFT,     0.f,   3000 },
+  { FORWARD, 7.0f,    500 },  // Down
+  { LEFT,     0.f,   2000 },
+  { FORWARD, 12.f,   1000 },  // Right
+  { NOP,      0.f,   1000 },
 };
 
 const int numCommands = sizeof(Commands)/sizeof(operation); 
 int currentCommandIndex = 0; 
-
+int timeout = 0; 
 volatile int running = 0;
 volatile int ready   = 0;
 int motionDone = 0; 
@@ -55,6 +60,7 @@ void doUpdateState(void){
   USART_puts(", ");
   USART_putFloat(localizer->state->theta);
   USART_puts("]\n");
+  
   __enable_irq();
 }
 
@@ -62,7 +68,7 @@ long time;
 void start(void){
   running = 1;
   USART_puts("Start!\n");
-  //colorSensors->startColor(NONE);
+  colorSensors->startColor(NONE);
 }
 
 void halt(void){
@@ -86,6 +92,7 @@ void startCommand(int index){
       break;
     case NOP:
     default: 
+      doStall();
       break;
   }
 }
@@ -99,14 +106,14 @@ int main(void) {
   init();
   delay(1000); 
   startCommand(currentCommandIndex);
-  start();
+  //start();
   do {
     doUpdateState();
     if(calibrateColor){
       doColorCalibrate();
       calibrateColor = 0; 
     }
-    if(isMotionComplete() && !motionDone){
+    if( (isMotionComplete() && !motionDone ) ){
       endCommand(currentCommandIndex++);
       motionDone = 1; 
       if (currentCommandIndex < numCommands){ 
@@ -128,8 +135,8 @@ void setCalibrateColor(void){
 static void init() {
   initLEDs();
   init_USART(); 
-  //createGrid();
-  //colorSensors = createColorSensors(); 
+  createGrid();
+  colorSensors = createColorSensors(); 
   accel   = initAccel(); 
   motors  = createMotors();
   delay_blocking(500);

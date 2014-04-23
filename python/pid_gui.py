@@ -43,7 +43,7 @@ class Port:
 
 
 global p
-p = Port("/dev/ttyUSB1")
+p = Port("/dev/ttyUSB0")
 
 def updateSerialLog():
   i = 0

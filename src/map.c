@@ -22,9 +22,8 @@ struct {
 
 int guessCell(int x, int y){
   int minIdx = 0; 
-  y = RMAX - y; 
   pConfidences conf = &grid[y][x].conf;
-  int minVal = conf->metal;
+  float minVal = conf->metal;
   if (minVal > conf->yellow){
     minIdx = 1; 
     minVal = conf->yellow;
@@ -33,6 +32,14 @@ int guessCell(int x, int y){
     minIdx = 2; 
     minVal = conf->boundary;
   }
+  
+  USART_puts("Conf: "); 
+  USART_putFloat(grid[y][x].conf.metal);
+  USART_puts("\t\t");
+  USART_putFloat(conf->yellow);
+  USART_puts("\t\t");
+  USART_putFloat(conf->boundary);
+  USART_puts("\n");
   return minIdx;
 }
 
@@ -41,16 +48,17 @@ void sendGuesses(void){
   volatile char buff[84];
   sendBuff.numMeas = 0; 
   sendBuff.numDefect = 0; 
-
+  USART_puts("Send Guesses\n");
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
-      if(grid[y][x].count > 0)
+      if(grid[y][x].count > 0){
         sendBuff.numMeas++; 
-      else{
+      }else{
         sendBuff.cells[y][x] = 2; 
         continue;
       }
       
+      USART_puts("Guess\n");
       sendBuff.cells[y][x] = guessCell(x,y); 
       if(sendBuff.cells[y][x])
         sendBuff.numDefect++; 
@@ -71,22 +79,25 @@ void sendGuesses(void){
 
 void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
-    grid[y][x].count++;
+  if ( x < 0 || x >= RMAX || y < 0 || y >= RMAX)
+    return;
+
+  grid[y][x].count++;
   pConfidences confs = &grid[y][x].conf;
   confs->metal += pConf->metal; 
   confs->yellow += pConf->yellow; 
   confs->boundary += pConf->boundary; 
+  
   /*
   USART_puts("Grid: ");
-  USART_putInt(x);
-  USART_puts(", ");
-  USART_putInt(y);
-  USART_puts(": ");
   USART_putFloat(confs->metal) ;
-  USART_puts("<--");
-  USART_putFloat(pConf->metal) ;
+  USART_puts("\t");
+  USART_putFloat(pConf->yellow) ;
+  USART_puts("\t");
+  USART_putFloat(pConf->boundary) ;
   USART_puts("\n");
   */
+  
 }
 
 int fakes[] = { 0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1 };

@@ -12,7 +12,7 @@ extern MotorSpeeds *speeds;
 extern float AGain;
 
 void startState(void);
-
+void doStall(void);
 void goForwardBy(float dist);
 void turnLeft90(void);
 void doMotion(void);

@@ -16,14 +16,14 @@ float AGain = 5000;
 
 
 MotorSpeeds speedSettings[] = 		{
-  {9500,  8200},  //RIGHT	+X
-  {10500, 9875},  //UP		+Y
-  {9000,  9100},  //LEFT	-X
-  {6000,  6500},		//DOWN	-Y
-  {-12000,14500}, //LEFT 1
+  {9500*0.90,  8200*0.90},  //RIGHT	+X
+  {8000*0.95,  7400*0.95},  //UP		+Y
+  {6750,  6800},  //LEFT	-X
+  {8000*0.90,  8500*0.90},	//DOWN	-Y
+  {-12000*0.9,14500*0.9}, //LEFT 1
   {-13300,15500}, //LEFT 2
-  {-14500,12500},					//LEFT 3
-  {-12000,14500},					//LEFT 4
+  {-14500,12500},	//LEFT 3
+  {-12000*0.75,14500*0.75},	//LEFT 4
   {0,0},					//RIGHT 1
   {0,0},					//RIGHT 2
   {0,0},					//RIGHT 3
@@ -45,7 +45,7 @@ Orientation orientationFlag, nextOrientationFlag;
 float calculateError(void);
 int isTurning;
 int motionComplete; 
-
+int isStalling; 
 void findOutState(void) {
   float theta = atan2f(sinf(localizer->_state->theta),cosf(localizer->_state->theta));
 
@@ -72,11 +72,12 @@ void startState(void) {
 }
 
 void goForwardBy(float dist){
-  isTurning = 0;
-  nextOrientationFlag = orientationFlag; 
   findOutState();
 
   __disable_irq();
+  nextOrientationFlag = orientationFlag; 
+  isTurning = 0;
+  isStalling = 0; 
   switch(orientationFlag){
     case POSX:
       targState->x = localizer->state->x + dist;
@@ -108,6 +109,7 @@ void turnLeft90(void){
   findOutState();
   __disable_irq();
   isTurning = 1;
+  isStalling = 0; 
   switch(orientationFlag){
     case POSX:
       nextOrientationFlag = POSY;
@@ -151,7 +153,7 @@ int isMotionComplete(void){
 
     }
   } else {
-    return calculateError() < 0.01f;
+    return calculateError() < 0.15f;
   }
   return 0;
 }
@@ -191,7 +193,8 @@ float calculateError(void) {
 }
 
 float calAngError(void) {
-	switch(orientationFlag){
+	if(!isTurning){
+    switch(orientationFlag){
       case POSX:
         return fixAngle(0 - localizer->state->theta);
           
@@ -204,12 +207,39 @@ float calAngError(void) {
       case NEGY:
         return fixAngle(-PI/2 - localizer->state->theta);
     }
+  }else{
+    switch(nextOrientationFlag){
+      case POSX:
+        return fixAngle(0 - localizer->state->theta);
+          
+      case POSY:
+        return fixAngle(PI/2 - localizer->state->theta);
+
+      case NEGX:
+        return fixAngle(PI - localizer->state->theta);
+
+      case NEGY:
+        return fixAngle(-PI/2 - localizer->state->theta);
+    }
+  }
     return 0;
+}
+
+void doStall(void){
+  __disable_irq();
+  isStalling = 1;
+  motors->haltMotors(motors);
+  __enable_irq();
 }
 
 void doMotion(void){
   float errA, theta, err;
   //int i = 0; 
+
+  if(isStalling){
+    motors->haltMotors(motors);
+    return;
+  }
 
   findOutState();
   err = calculateError();
@@ -227,8 +257,6 @@ void doMotion(void){
     motionComplete = 1;
     orientationFlag = nextOrientationFlag;
     nextOrientationFlag = orientationFlag;
-    motors->haltMotors(motors);
-    //delay_blocking(100);
     motors->setOffset(motors,PWM_MIN_L,PWM_MIN_R);
     motors->setSpeeds(motors,0,0);
 
@@ -241,9 +269,11 @@ void doMotion(void){
     	motors->setOffset(motors,9000,9000);
     	theta = targState->theta - localizer->state->theta; 
     	if(err < PI/6.f)
-      	motors->setSpeeds(motors, sinf(theta)*speeds->l * err / (PI/6.f), sinf(theta)*speeds->r * err / (PI/6.f));
+      	motors->setSpeeds(motors, sinf(theta)*speeds->l * err / (PI/6.f) - 0.05* AGain *errA, 
+                                  sinf(theta)*speeds->r * err / (PI/6.f) + 0.05* AGain *errA);
     	else 
-      	motors->setSpeeds(motors, sinf(theta)*speeds->l, sinf(theta)*speeds->r);
+      	motors->setSpeeds(motors, sinf(theta)*speeds->l - errA*0.1*AGain, 
+                                  sinf(theta)*speeds->r + errA*0.1*AGain);
   } 
   else 
   {
