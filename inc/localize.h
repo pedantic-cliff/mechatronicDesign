@@ -23,6 +23,7 @@ typedef struct localizer{
   
   float encBiasL;
   float encBiasR;
+  int isHorizontal;
 
   void (*update)(Localizer self);
   void (*cacheState)(Localizer self);

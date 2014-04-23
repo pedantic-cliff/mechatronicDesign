@@ -54,9 +54,14 @@ static void update(Localizer self){
   // Apply Rw = Rw + dRw
   self->_state->vel = dS;
 
+  if(self->isHorizontal == 1)
   self->_state->x += dS * cosf(self->_state->theta + dTheta/2);  
-  self->_state->y += dS * sinf(self->_state->theta + dTheta/2);  
-
+  else if(self->isHorizontal==0)
+  self->_state->y += dS * sinf(self->_state->theta + dTheta/2);
+  else{
+  self->_state->x += dS * cosf(self->_state->theta + dTheta/2);
+  self->_state->y += dS * sinf(self->_state->theta + dTheta/2);
+  }
   if (iters < 10){
     iters = 0; 
     // Get accel angle and do complimentary filter
@@ -138,7 +143,7 @@ Localizer createLocalizer(Motors m, Accel acc){
   l->enc    = &_enc;
   l->enc->L = m->getLeftCount(); 
   l->enc->R = m->getRightCount();
-
+  l->isHorizontal = 1;
   l->m    = m;
   l->acc  = acc;
   l->findSensorLocations = findSensorLocations;

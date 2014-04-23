@@ -31,9 +31,9 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {1.f,1.f},		    //+X
+  {0.956f,0.956f},		    //+X
   {0.865f,0.865f},  //+Y
-  {1.f,1.f},	      //-X
+  {0.956f,0.956f},	      //-X
   {0.925f,0.925f}		//-Y
 };
 state_t _state_storage; 
@@ -81,21 +81,26 @@ void goForwardBy(float dist){
   switch(orientationFlag){
     case POSX:
       targState->x = localizer->state->x + dist;
+      localizer->isHorizontal = 1;
       localizer->setEncBias(localizer,encBiases[0].l,encBiases[0].r);
       speeds = &speedSettings[0];
       break;
     case POSY:
       targState->y = localizer->state->y + dist;
+      localizer->state->x += 1;   //This is a hack to make up a persistent error
+      localizer->isHorizontal = 0;
       localizer->setEncBias(localizer,encBiases[1].l,encBiases[1].r); 
       speeds = &speedSettings[1];
       break;
     case NEGX:
       targState->x = localizer->state->x - dist;
+      localizer->isHorizontal = 1;
       localizer->setEncBias(localizer,encBiases[2].l,encBiases[2].r);
       speeds = &speedSettings[2];
       break;
     case NEGY:
       targState->y = localizer->state->y - dist;
+      localizer->isHorizontal = 0;
       localizer->setEncBias(localizer,encBiases[3].l,encBiases[3].r);
       speeds = &speedSettings[3];
       break;
@@ -113,21 +118,25 @@ void turnLeft90(void){
   switch(orientationFlag){
     case POSX:
       nextOrientationFlag = POSY;
+      localizer->isHorizontal = 2;
       speeds = &speedSettings[4];
       targState->theta = PI/2;
       break;
     case POSY:
       nextOrientationFlag = NEGX;
+      localizer->isHorizontal = 2;
       speeds = &speedSettings[5];
       targState->theta = PI;
       break;
     case NEGX:
       nextOrientationFlag = NEGY;
+      localizer->isHorizontal = 2;
       speeds = &speedSettings[6];
       targState->theta = -PI/2;
       break;
     case NEGY:
       nextOrientationFlag = POSX;
+      localizer->isHorizontal = 2;
       speeds = &speedSettings[7];
       targState->theta = 0;
       break;

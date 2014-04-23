@@ -16,7 +16,7 @@ operation Commands[] = {
   { NOP,      0.f,   1000 },
   { FORWARD, 22.f,  1000 },  // Right 
   { LEFT,     5.f,   1000 },
-  { FORWARD, 20.f,   1000 },  // Up
+  { FORWARD, 21.75f,   1000 },  // Up
   { LEFT,     5.f,   1000 },  
   { FORWARD, 24.f,   1000 },  // Left
   { LEFT,     0.f,   3000 },
@@ -106,7 +106,7 @@ int main(void) {
   init();
   delay(1000); 
   startCommand(currentCommandIndex);
-  //start();
+  start();
   do {
     doUpdateState();
     if(calibrateColor){
