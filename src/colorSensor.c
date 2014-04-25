@@ -240,6 +240,7 @@ void finish(){
     blue    = (_colorSensors.sensors[s].measurements[BLUE_IDX] - ambient) / COLOR_SENSOR_ITERS;
     
     guessColor(&conf, red,green,blue, centroids[s]);
+    conf.metal = s + 1; 
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
 
   }

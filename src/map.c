@@ -64,6 +64,9 @@ void sendGuesses(void){
   sendBuff.numDefect = 0; 
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
+      sendBuff.cells[y][x] = (int)Grid[y][x].conf.metal; 
+      Grid[y][x].conf.metal = 0; 
+      continue; 
       if(Grid[y][x].count > 0){
         sendBuff.numMeas++; 
       }else{
@@ -96,7 +99,7 @@ void applyConfidence(int x, int y, pConfidences pConf){
   if(pConf->boundary < pConf->yellow && pConf->boundary < pConf->metal)
     return;
   Grid[y][x].count++;
-  Grid[y][x].conf.metal     += pConf->metal;
+  Grid[y][x].conf.metal     = pConf->metal;
   Grid[y][x].conf.yellow    += pConf->yellow;
   Grid[y][x].conf.boundary  += pConf->boundary;
 
