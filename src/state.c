@@ -16,12 +16,12 @@ float AGain = 10000;
 
 
 MotorSpeeds speedSettings[] = 		{
-  {9500*0.90,  8200*0.95},  //RIGHT	+X
-  {8000*0.95,  7400*0.95},  //UP		+Y
-  {6750*1.1f,  6800*1.1f},  //LEFT	-X
-  {8000*0.90,  8500*0.90},	//DOWN	-Y
+  {9500*0.90,  8200*1.06},  //RIGHT	+X
+  {8000*0.80,  7400*0.95},  //UP		+Y
+  {6750*1.3f,  6800*1.1f},  //LEFT	-X
+  {8000*1.0,  8500*1.0},	//DOWN	-Y
   {-12000*0.9,14500*0.9},   //LEFT 1
-  {-12300*0.90,15500*0.90}, //LEFT 2
+  {-12300*1.0,15500*1.15}, //LEFT 2
   {-14500*0.85,12500*0.85},	//LEFT 3
   {-12000*0.70,14500*0.70},	//LEFT 4
   {0,0},					//RIGHT 1
@@ -31,9 +31,9 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {1.0f,1.0f},		    //+X
-  {0.865f,0.865f},  //+Y
-  {0.956f,0.956f},	      //-X
+  {1.0f,1.0f},		              //+X
+  {0.87f,0.87f},                //+Y
+  {0.956f,0.956f},	            //-X
   {0.925f*1.45f,0.925f*1.45f}		//-Y
 };
 state_t _state_storage; 
@@ -149,16 +149,16 @@ int isMotionComplete(void){
   if(!isTurning){											//Added a not(!) here. Logic was reverse
     switch(orientationFlag){
       case POSX:
-        return (targState->x - 0.5f <= localizer->state->x);
+        return (targState->x - 0.5f <= localizer->_state->x);
 
       case POSY:
-        return (targState->y - 0.25f <= localizer->state->y);
+        return (targState->y - 0.25f <= localizer->_state->y);
 
       case NEGX:
-        return (targState->x + 0.25f >= localizer->state->x);
+        return (targState->x + 0.25f >= localizer->_state->x);
 
       case NEGY:
-        return (targState->y + 0.5f >= localizer->state->y);
+        return (targState->y + 0.5f >= localizer->_state->y);
 
     }
   } else {
@@ -277,7 +277,7 @@ void doMotion(void){
   if(isTurning)
   {
     motors->setOffset(motors,9000,9000);
-    theta = fixAngle(targState->theta - localizer->state->theta); 
+    theta = fixAngle(targState->theta - localizer->_state->theta); 
     if(err < PI/6.f)
       motors->setSpeeds(motors, sinf(theta)*speeds->l * err / (PI/6.f) - 0.05* AGain *errA - 1000, 
           sinf(theta)*speeds->r * err / (PI/6.f) + 0.05* AGain *errA + 1000) ;
