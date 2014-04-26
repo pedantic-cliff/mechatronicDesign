@@ -110,7 +110,7 @@ sensorPos findSensorLocations(Localizer self){
 	senPositions.s[1].col = (yRobot + s2x*sinf(tRobot) + s2y*cosf(tRobot))/4;
 
 	senPositions.s[2].row = (xRobot + s3x*cosf(tRobot) - s3y*sinf(tRobot))/4;
-	senPositions.s[2].col = (yRobot + s3y*sinf(tRobot) + s3y*cosf(tRobot))/4;
+	senPositions.s[2].col = (yRobot + s3x*sinf(tRobot) + s3y*cosf(tRobot))/4;
 
 	senPositions.s[3].row = (xRobot + s4x*cosf(tRobot) - s4y*sinf(tRobot))/4;
 	senPositions.s[3].col = (yRobot + s4x*sinf(tRobot) + s4y*cosf(tRobot))/4;
