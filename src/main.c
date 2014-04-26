@@ -13,17 +13,21 @@ typedef struct {
 } operation; 
 
 operation Commands[] = { 
-  { NOP,      0.f,   1000 },
-  { FORWARD, 28.5f, 1000 },  // Right 
-  { LEFT,     5.f,   1000 },
+  { NOP,      0.f,  1000 },
+  { FORWARD,  6.0f, 1000  },  // Right 
+  { FORWARD, 10.0f, 1000  },  // Right 
+  { FORWARD, 22.0f, 1000  },  // Right 
+  { FORWARD, 26.0f, 1000  },  // Right 
+  { FORWARD, 30.0f, 1000  },  // Right 
+/*  { LEFT,     5.f,   1000 },
   { FORWARD, 22.0f,  1000 },  // Up
   { LEFT,     5.f,   1000 },  
-  { FORWARD, 23.5f,   1000 },  // Left
+  { FORWARD, 23.5f,  1000 },  // Left
   { LEFT,     0.f,   3000 },
   { FORWARD,  9.25f,  500 },  // Down
   { LEFT,     0.f,   2000 },
   { FORWARD, 12.f,   1000 },  // Right
-  { NOP,      0.f,   1000 },
+  { NOP,      0.f,   1000 }, */
 };
 
 const int numCommands = sizeof(Commands)/sizeof(operation); 
@@ -52,7 +56,7 @@ void doUpdateState(void){
   __disable_irq();
   
   localizer->cacheState(localizer);
-  /*
+  
   USART_puts("[");
   USART_putFloat(localizer->state->x);
   USART_puts(", ");
@@ -60,7 +64,7 @@ void doUpdateState(void){
   USART_puts(", ");
   USART_putFloat(localizer->state->theta);
   USART_puts("]\n");
-  */
+  
   __enable_irq();
 }
 

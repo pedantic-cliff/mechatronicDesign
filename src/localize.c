@@ -86,7 +86,7 @@ static void cacheState(Localizer self){
 }
 
 static void restart(Localizer self){
-  self->_state->x       = -1.5f; 
+  self->_state->x       = -2.0f; 
   self->_state->y       =  6.f;
   self->_state->theta   = self->acc->getAngle();
   self->_state->vel     =  0.0f;
@@ -98,7 +98,9 @@ sensorPos findSensorLocations(Localizer self){
 	float xRobot,yRobot,tRobot;
 	
 	sensorPos senPositions;
-	
+  __disable_irq();
+	self->cacheState(self);
+  __enable_irq();
 	xRobot = self->state->x;
 	yRobot = self->state->y;
 	tRobot = self->state->theta;

@@ -1,7 +1,7 @@
 #ifndef _USART_H_
 #define _USART_H_
 
-//#define DEBUG
+#define DEBUG
 
 // Uses Pins PB6 as Tx and PB7 as Rx
 #include <stm32f4xx_usart.h> // under Libraries/STM32F4xx_StdPeriph_Driver/inc and src
