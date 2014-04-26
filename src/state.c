@@ -12,7 +12,7 @@
 
 MotorSpeeds *speeds;
 Localizer localizer;
-float AGain = 20000; 
+float AGain = 10000; 
 
 
 MotorSpeeds speedSettings[] = 		{
@@ -31,7 +31,7 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {0.956f,0.956f},		    //+X
+  {1.0f,1.0f},		    //+X
   {0.865f,0.865f},  //+Y
   {0.956f,0.956f},	      //-X
   {0.925f*1.45f,0.925f*1.45f}		//-Y
@@ -149,7 +149,7 @@ int isMotionComplete(void){
   if(!isTurning){											//Added a not(!) here. Logic was reverse
     switch(orientationFlag){
       case POSX:
-        return (targState->x - 0.1f <= localizer->state->x);
+        return (targState->x - 0.5f <= localizer->state->x);
 
       case POSY:
         return (targState->y - 0.25f <= localizer->state->y);
@@ -158,11 +158,11 @@ int isMotionComplete(void){
         return (targState->x + 0.25f >= localizer->state->x);
 
       case NEGY:
-        return (targState->y + 0.1f >= localizer->state->y);
+        return (targState->y + 0.5f >= localizer->state->y);
 
     }
   } else {
-    return fabsf(calculateError()) < 0.50f;
+    return fabsf(calculateError()) < 0.15f;
   }
   return 0;
 }
