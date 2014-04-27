@@ -11,7 +11,8 @@ typedef struct {
   float  argument; 
   int    delay;  
 } operation; 
-#define PAUSE 400
+
+#define PAUSE 800
 operation Commands[] = { 
   { NOP,      0.f,   PAUSE },
   { FORWARD,  6.0f,  PAUSE },  // Right 
@@ -30,13 +31,14 @@ operation Commands[] = {
   { FORWARD, 14.f,   PAUSE },  // Left
   { FORWARD, 10.f,   PAUSE },  // Left
   { FORWARD,  6.f,   PAUSE },  // Left
-/*
-  { LEFT,     0.f,   3000 },
-  { FORWARD,  9.25f,  500 },  // Down
-  { LEFT,     0.f,   2000 },
-  { FORWARD, 12.f,   1000 },  // Right
-  { NOP,      0.f,   1000 }, 
-*/
+  { LEFT,     0.f, 2*PAUSE },
+  { FORWARD, 26.f,   PAUSE/2 },  // Down
+  { FORWARD, 22.f,   PAUSE },  // Down
+  { FORWARD, 18.f,   PAUSE },  // Down
+  { LEFT,     0.f,   PAUSE },
+  { FORWARD, 12.f,   PAUSE },  // Right
+  { FORWARD, 18.f,   PAUSE },  // Right
+  { NOP,      0.f,   1000}, 
 };
 
 const int numCommands = sizeof(Commands)/sizeof(operation); 
@@ -98,11 +100,9 @@ void doColorCalibrate(void){
 void startCommand(int index){
   switch(Commands[index].command){
     case FORWARD:
-      colorSensors->startColor(NONE);
       goForwardBy(Commands[index].argument);
       break;
     case LEFT:
-      colorSensors->halt();
       turnLeft90();
       break;
     case NOP:
@@ -112,7 +112,9 @@ void startCommand(int index){
   }
 }
 void endCommand(int index){
+  colorSensors->startColor(NONE);
   delay(Commands[index].delay);
+  colorSensors->halt();
 }
 
 int main(void) {
