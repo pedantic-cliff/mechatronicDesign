@@ -40,7 +40,7 @@ void main(int argc, char *argv[]){
     for(count = 0; count < 81; count++){
       if(count % 9 == 0)
         printf("\n");
-      printf("%d ", buff2[count + 2]); 
+      printf("%d\t", buff2[count + 2]); 
     }
     printf("\n\n\n");
   }

@@ -34,13 +34,6 @@ int guessCell(int x, int y){
     minVal = conf->boundary;
   }*/
   
-  USART_puts("Conf: "); 
-  USART_putFloat(Grid[y][x].conf.metal);
-  USART_puts("\t\t");
-  USART_putFloat(conf->yellow);
-  USART_puts("\t\t");
-  USART_putFloat(conf->boundary);
-  USART_puts("\n");
   return minIdx;
 }
 
@@ -64,17 +57,13 @@ void sendGuesses(void){
   sendBuff.numDefect = 0; 
   for(y = 0; y < NROWS; y++){
     for(x = 0; x < NCOLS; x++){
-      sendBuff.cells[y][x] = (int)Grid[y][x].conf.metal; 
-      Grid[y][x].conf.metal = 0; 
-      continue; 
       if(Grid[y][x].count > 0){
         sendBuff.numMeas++; 
       }else{
         sendBuff.cells[y][x] = 2; 
         continue;
       }
-      
-      sendBuff.cells[y][x] = guessCell(x,y); 
+      sendBuff.cells[y][x] = guessCell(x,y); //(Grid[y][x].conf.yellow);
       if(sendBuff.cells[y][x])
         sendBuff.numDefect++; 
     }

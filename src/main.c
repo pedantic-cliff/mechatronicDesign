@@ -12,7 +12,7 @@ typedef struct {
   int    delay;  
 } operation; 
 
-#define PAUSE 800
+#define PAUSE 5000
 operation Commands[] = { 
   { NOP,      0.f,   PAUSE },
   { FORWARD,  6.0f,  PAUSE },  // Right 
@@ -32,13 +32,14 @@ operation Commands[] = {
   { FORWARD, 10.f,   PAUSE },  // Left
   { FORWARD,  6.f,   PAUSE },  // Left
   { LEFT,     0.f, 2*PAUSE },
-  { FORWARD, 26.f,   PAUSE/2 },  // Down
+  { FORWARD, 26.f,   PAUSE },  // Down
   { FORWARD, 22.f,   PAUSE },  // Down
   { FORWARD, 18.f,   PAUSE },  // Down
   { LEFT,     0.f,   PAUSE },
-  { FORWARD, 12.f,   PAUSE },  // Right
   { FORWARD, 18.f,   PAUSE },  // Right
-  { NOP,      0.f,   1000}, 
+  { FORWARD, 22.f,   PAUSE },  // Right
+  { FORWARD, 22.f,   PAUSE },  // Right
+  { NOP,      0.f,   PAUSE}, 
 };
 
 const int numCommands = sizeof(Commands)/sizeof(operation); 
@@ -67,7 +68,7 @@ void doUpdateState(void){
   __disable_irq();
   
   localizer->cacheState(localizer);
-  
+#ifdef DEBUG
   USART_puts("[");
   USART_putFloat(localizer->state->x);
   USART_puts(", ");
@@ -75,7 +76,7 @@ void doUpdateState(void){
   USART_puts(", ");
   USART_putFloat(localizer->state->theta);
   USART_puts("]\n");
-  
+#endif
   __enable_irq();
 }
 
@@ -112,9 +113,21 @@ void startCommand(int index){
   }
 }
 void endCommand(int index){
-  colorSensors->startColor(NONE);
-  delay(Commands[index].delay);
-  colorSensors->halt();
+  switch(Commands[index].command){
+    case FORWARD:
+      colorSensors->startColor(NONE);
+      delay(Commands[index].delay);
+      colorSensors->halt();
+#ifndef DEBUG
+      __disable_irq();
+      sendGuesses();
+      __enable_irq();
+#endif 
+      break;
+    default:
+      delay(Commands[index].delay);
+  }
+
 }
 
 int main(void) {
@@ -190,12 +203,6 @@ void doLog(void){
 void loop(void) {
   static int i = 1; 
   //doLog();
-
-  if(i % 30){
-    __disable_irq();
-    sendGuesses();
-    __enable_irq();
-  }
 
   if(i++ & 0x1)
     enableLEDs(BLUE);
