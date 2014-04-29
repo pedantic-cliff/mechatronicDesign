@@ -85,8 +85,6 @@ void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
   if ( x < 0 || x > RMAX || y < 0 || y > RMAX)
     return;
-  if(pConf->boundary < pConf->yellow && pConf->boundary < pConf->metal)
-    return;
   Grid[y][x].count++;
   Grid[y][x].conf.metal     = pConf->metal;
   Grid[y][x].conf.yellow    += pConf->yellow;

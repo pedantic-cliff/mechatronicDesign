@@ -238,7 +238,9 @@ void finish(){
     red     = (_colorSensors.sensors[s].measurements[RED_IDX] - ambient) / COLOR_SENSOR_ITERS;
     green   = (_colorSensors.sensors[s].measurements[GREEN_IDX] - ambient) / COLOR_SENSOR_ITERS;
     blue    = (_colorSensors.sensors[s].measurements[BLUE_IDX] - ambient) / COLOR_SENSOR_ITERS;
-    
+    red   = (red   - sen_mins[s].r) / sen_maxs[s].r;
+    green = (green - sen_mins[s].g) / sen_maxs[s].g;
+    blue  = (blue  - sen_mins[s].b) / sen_maxs[s].b;
     guessColor(&conf, red,green,blue, centroids[s]);
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
   }
@@ -381,18 +383,16 @@ volatile uint16_t* getResult(void){
 }
 
 float calcCentDiff(int r, int g, int b, struct centroid *cent){
-  float score = //(cent->r - r)*(cent->r - r) 
-     (cent->g - g)*(cent->g - g) 
+  float score = (cent->r - r)*(cent->r - r) 
+     + (cent->g - g)*(cent->g - g) 
      + (cent->b - b)*(cent->b - b);
   return score;
 }
 
 void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent){
-  float e = calcCentDiff(r,g,b,&cent[0]),
-        m = calcCentDiff(r,g,b,&cent[1]),
-        y = calcCentDiff(r,g,b,&cent[2]);
-  float sum = m + y + e; 
-  c->boundary = e / sum;
+  float m = calcCentDiff(r,g,b,&cent[0]),
+        y = calcCentDiff(r,g,b,&cent[1]);
+  float sum = m + y; 
   c->metal    = m / sum;
   c->yellow   = y / sum;
 }
