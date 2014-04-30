@@ -122,7 +122,7 @@ void endCommand(int index){
       colorSensors->halt();
 #ifndef DEBUG
       __disable_irq();
-//      sendGuesses();
+      sendGuesses();
       __enable_irq();
 #endif 
       break;

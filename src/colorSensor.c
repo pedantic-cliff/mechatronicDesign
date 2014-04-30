@@ -34,7 +34,7 @@ struct colorSensors_t _colorSensors;
 
 Color colorState; 
 
-void guessColor(pConfidences c, int r, int b, int s);
+void guessColor(pConfidences c, float r, float b, int s);
 void initDMA(void){
   DMA_InitTypeDef       DMA_InitStructure;
 
@@ -263,7 +263,7 @@ void finish(){
     blue  = (blue  - sen_mins[s].b) / sen_maxs[s].b;
     guessColor(&conf, red,blue,s);
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
-//    logColor(s, poses, red, blue, &conf);
+    //    logColor(s, poses, red, blue, &conf);
   }
 }
 
@@ -410,7 +410,7 @@ float calcCentDiff(int r, int g, int b, struct centroid *cent){
   return score;
 }
 
-void guessColor(pConfidences c, int r, int b, int s){
+void guessColor(pConfidences c, float r, float  b, int s){
   float one = lineOne[s].m * r - b + lineOne[s].c,
         two = lineTwo[s].m * r - b + lineTwo[s].c;
   c->yellow = 0.f;
