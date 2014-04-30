@@ -11,7 +11,6 @@ union {
   char bytes[32]; 
   struct {
     float r;
-    float g; 
     float b; 
     char id;
     char sen; 
@@ -43,11 +42,11 @@ void main(int argc, char *argv[]){
 
   while(1){
     count = 0; 
-    while(count < 15){
-      count += read(portFd, buff.bytes + count, 15 - count);
+    while(count < 11){
+      count += read(portFd, buff.bytes + count, 11 - count);
     }
-    printf("%d\t%d\t%f\t%f\t%f\t%d\n", buff.vals.id, buff.vals.sen, buff.vals.r, 
-                                 buff.vals.g,  buff.vals.b, buff.vals.guess); 
+    printf("%d\t%d\t%f\t%f\t%d\n", buff.vals.id, buff.vals.sen, buff.vals.r, 
+                                       buff.vals.b, buff.vals.guess); 
   }
   close(portFd);
 }

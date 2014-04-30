@@ -69,6 +69,7 @@ void doUpdateState(void){
   
   localizer->cacheState(localizer);
 #ifdef DEBUG
+  /*
   USART_puts("[");
   USART_putFloat(localizer->state->x);
   USART_puts(", ");
@@ -76,6 +77,7 @@ void doUpdateState(void){
   USART_puts(", ");
   USART_putFloat(localizer->state->theta);
   USART_puts("]\n");
+  */
 #endif
   __enable_irq();
 }
@@ -120,7 +122,7 @@ void endCommand(int index){
       colorSensors->halt();
 #ifndef DEBUG
       __disable_irq();
-      sendGuesses();
+//      sendGuesses();
       __enable_irq();
 #endif 
       break;

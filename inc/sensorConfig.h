@@ -3,13 +3,17 @@
 
 typedef struct centroid{ 
   float r; 
-  float g; 
   float b;
 } centroid_t; 
 
+typedef struct {
+  float m; 
+  float c; 
+} line; 
+
 // Metal 
 // Yellow
-struct centroid cent_sen1[] = { { 0.0623f,  0.1179f,  0.9114f },
+/*struct centroid cent_sen1[] = { { 0.0623f,  0.1179f,  0.9114f },
                                 { 0.9936f,  0.9912f,  0.0221f } };
 
 struct centroid cent_sen2[] = { { 0.0523f,  0.8682f,  0.9491f },
@@ -26,19 +30,33 @@ struct centroid cent_sen5[] = { { 0.3125f,  0.4796f,  0.8659f },
 
 struct centroid cent_sen6[] = { { 0.5234f,  0.5307f,  0.8732f },
                                 { 0.7334f,  0.1630f,  0.1154f } };
+*/
+struct centroid sen_mins[]  = { { 339.92f, 74.48f  }, 
+                                { 260.40f, 134.16f }, 
+                                { 186.76f, 72.96f  }, 
+                                { 340.4f,  77.60f  }, 
+                                { 499.36f, 118.2f  }, 
+                                { 453.68f, 107.04f } }; 
 
-struct centroid sen_mins[]  = { { 448.97f,  114.91f,  98.660f }, 
-                                { 535.48f,  278.84f,  122.12f }, 
-                                { 504.17f,  214.47f,  85.123f }, 
-                                { 431.99f,  172.63f,  125.20f }, 
-                                { 582.69f,  283.86f,  120.17f }, 
-                                { 542.60f,  222.05f,  93.469f } }; 
+struct centroid sen_maxs[]  = { { 267.2f,  104.16f }, 
+                                { 410.8f,  132.76f }, 
+                                { 481.6f,  203.36f }, 
+                                { 358.32f, 194.40f }, 
+                                { 255.88f, 177.20f }, 
+                                { 313.76f, 201.12f } }; 
 
-struct centroid sen_maxs[]  = { { 189.56f,  92.268f,  58.878f }, 
-                                { 132.59f,  41.994f,  126.24f }, 
-                                { 50.830f,  70.850f,  174.88f }, 
-                                { 262.48f,  126.83f,  103.16f }, 
-                                { 119.64f,  49.074f,  139.54f }, 
-                                { 117.56f,  97.221f,  191.75f } }; 
+line lineOne[] = { { 1.0f,  -0.25f },
+                   { 1.4f,  -0.91f },
+                   { 1.08f, -0.38f },
+                   { 0.71f, -0.11f },
+                   { 0.75f, -0.15f },
+                   { 0.75f, -0.09f } };
+
+line lineTwo[] = { { 1.0f,  0.05f  },
+                   { 1.4f,  -0.49f },
+                   { 1.08f, -0.18f },
+                   { 0.71f, 0.09f  }, 
+                   { 0.75f, 0.05f  },
+                   { 0.75f, 0.19f  } };
 
 #endif 

@@ -24,17 +24,9 @@ struct {
 int guessCell(int x, int y){
   int minIdx = 0; 
   pConfidences conf = &Grid[y][x].conf;
-  float minVal = conf->metal;
-  if (minVal > conf->yellow){
-    minIdx = 1; 
-    minVal = conf->yellow;
-  }
-  /*if (minVal > conf->boundary){
-    minIdx = 2; 
-    minVal = conf->boundary;
-  }*/
-  
-  return minIdx;
+  if(conf->yellow > conf->metal)
+    return 1;
+  return 0; 
 }
 
 void finishGrid(void){
@@ -86,9 +78,8 @@ void applyConfidence(int x, int y, pConfidences pConf){
   if ( x < 0 || x > RMAX || y < 0 || y > RMAX)
     return;
   Grid[y][x].count++;
-  Grid[y][x].conf.metal     = pConf->metal;
+  Grid[y][x].conf.metal     += pConf->metal;
   Grid[y][x].conf.yellow    += pConf->yellow;
-  Grid[y][x].conf.boundary  += pConf->boundary;
 
   /*
   USART_puts("Grid: ");
