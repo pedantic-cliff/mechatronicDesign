@@ -12,25 +12,24 @@ typedef struct {
   int    delay;  
 } operation; 
 
-#define PAUSE 5000
+#define PAUSE 1000
 operation Commands[] = { 
   { NOP,      0.f,   PAUSE },
   { FORWARD,  6.0f,  PAUSE },  // Right 
   { FORWARD, 10.0f,  PAUSE },  // Right 
   { FORWARD, 22.0f,  PAUSE },  // Right 
   { FORWARD, 26.0f,  PAUSE },  // Right 
-  { FORWARD, 29.5f,  PAUSE },  // Right 
+  { FORWARD, 29.25f,  PAUSE },  // Right
   { LEFT,     5.f,   PAUSE },
   { FORWARD, 10.0f,  PAUSE },  // Up
   { FORWARD, 22.0f,  PAUSE },  // Up
   { FORWARD, 26.0f,  PAUSE },  // Up
-  { FORWARD, 30.0f,  PAUSE },  // Up
+  { FORWARD, 31.0f,  PAUSE },  // Up
   { LEFT,     5.f,   PAUSE },  
   { FORWARD, 26.f,   PAUSE },  // Left
-  { FORWARD, 26.f,   PAUSE },  // Left
-  { FORWARD, 14.f,   PAUSE },  // Left
+  { FORWARD, 13.5f,   PAUSE },  // Left
   { FORWARD, 10.f,   PAUSE },  // Left
-  { FORWARD,  6.f,   PAUSE },  // Left
+  { FORWARD,  6.5f,  PAUSE },  // Left
   { LEFT,     0.f, 2*PAUSE },
   { FORWARD, 26.f,   PAUSE },  // Down
   { FORWARD, 22.f,   PAUSE },  // Down
@@ -155,6 +154,9 @@ int main(void) {
         motionDone = 0;
       }else{
         finishGrid();
+        __disable_irq();
+        sendGuesses();
+        __enable_irq();
       }
     }
     if(running){

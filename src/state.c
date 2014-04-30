@@ -12,18 +12,18 @@
 
 MotorSpeeds *speeds;
 Localizer localizer;
-float AGain = 10000; 
+float AGain = 11000; 
 
 
 MotorSpeeds speedSettings[] = 		{
-  {9500*0.90,   8200*1.06},  //RIGHT	+X
+  {9500*0.91,   8200*1.10},  //RIGHT	+X
   {8000*0.80,   7400*0.95},  //UP		+Y
-  {6750*1.4f,   6800*1.2f},  //LEFT	-X
+  {6750*1.65f,   6800*1.35f},  //LEFT	-X
   {8000*1.0,    8500*1.0},	//DOWN	-Y
-  {-12000*0.9,  14500*0.85},   //LEFT 1
-  {-12300*1.06, 15500*1.15}, //LEFT 2
-  {-14500*0.90, 12500*0.85},	//LEFT 3
-  {-12000*0.70, 14500*0.75},	//LEFT 4
+  {-12000*0.91,  14500*0.93},   //LEFT 1
+  {-12300*1.28, 15500*1.5}, //LEFT 2
+  {-14500*1.05, 12500*1.3},	//LEFT 3
+  {-12000*0.85, 14500*0.9},	//LEFT 4
   {0,0},					//RIGHT 1
   {0,0},					//RIGHT 2
   {0,0},					//RIGHT 3
@@ -31,10 +31,10 @@ MotorSpeeds speedSettings[] = 		{
 };
 
 MotorSpeeds encBiases[] = {
-  {1.0f,1.0f},		              //+X
-  {0.87f,0.87f},                //+Y
-  {1.0,1.0f},	            //-X
-  {0.925f*1.45f,0.925f*1.45f}		//-Y
+  {0.99f,0.99f},		              //+X
+  {0.95f, 0.95f},//{0.97f,0.87f},                //+Y
+  {1.0, 1.0f},	            //-X
+  {1.3f,1.3f}//{0.925f*1.45f,0.925f*1.45f}		//-Y
 };
 state_t _state_storage; 
 State targState;
@@ -149,16 +149,16 @@ int isMotionComplete(void){
   if(!isTurning){											//Added a not(!) here. Logic was reverse
     switch(orientationFlag){
       case POSX:
-        return (targState->x - 0.5f <= localizer->_state->x);
+        return (targState->x - 0.6f <= localizer->_state->x);
 
       case POSY:
-        return (targState->y - 0.25f <= localizer->_state->y);
+        return (targState->y - 0.35f <= localizer->_state->y);
 
       case NEGX:
-        return (targState->x + 0.25f >= localizer->_state->x);
+        return (targState->x + 0.35f >= localizer->_state->x);
 
       case NEGY:
-        return (targState->y + 0.5f >= localizer->_state->y);
+        return (targState->y + 0.6f >= localizer->_state->y);
 
     }
   } else {
