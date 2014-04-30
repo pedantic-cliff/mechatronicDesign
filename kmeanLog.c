@@ -7,7 +7,17 @@
 #include <termios.h> /* POSIX terminal control definitions */
 
 char buff1[4]; 
-char buff2[84];
+union { 
+  char bytes[32]; 
+  struct {
+    float r;
+    float b; 
+    char id;
+    char sen; 
+    char guess;
+  } vals; 
+} buff;
+
 int portFd; 
 
 void main(int argc, char *argv[]){
@@ -32,17 +42,11 @@ void main(int argc, char *argv[]){
 
   while(1){
     count = 0; 
-    while(count < 83){
-      count += read(portFd, buff2 + count, 83 - count);
+    while(count < 11){
+      count += read(portFd, buff.bytes + count, 11 - count);
     }
-    printf("Got Header bytes: %d, %d\n", buff2[0], buff2[1]);
-    printf("Got Map: ");
-    for(count = 0; count < 81; count++){
-      if(count % 9 == 0)
-        printf("\n");
-      printf("%d\t", buff2[count + 2]); 
-    }
-    printf("\n\n\n");
+    printf("%d\t%d\t%f\t%f\t%d\n", buff.vals.id, buff.vals.sen, buff.vals.r, 
+                                       buff.vals.b, buff.vals.guess); 
   }
   close(portFd);
 }

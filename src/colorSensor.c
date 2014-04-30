@@ -34,7 +34,7 @@ struct colorSensors_t _colorSensors;
 
 Color colorState; 
 
-void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent);
+void guessColor(pConfidences c, float r, float b, int s);
 void initDMA(void){
   DMA_InitTypeDef       DMA_InitStructure;
 
@@ -228,6 +228,27 @@ void startColor(Color c){
   startADC();
 }
 
+void logColor(int s, sensorPos p, float r, float b, pConfidences conf){
+  union { 
+    char bytes[32]; 
+    struct {
+      float r;
+      float b; 
+      char id;
+      char sen; 
+      char guess;
+    } vals; 
+  } buff;
+
+  buff.vals.sen = s; 
+  buff.vals.id  = p.s[s].row * 9 + p.s[s].col; 
+  buff.vals.r = r; 
+  buff.vals.b = b; 
+  buff.vals.guess = conf->yellow;
+
+  USART_write(buff.bytes, 11);
+}
+
 void finish(){
   int s;
   float ambient, red, green, blue; 
@@ -238,10 +259,11 @@ void finish(){
     red     = (_colorSensors.sensors[s].measurements[RED_IDX] - ambient) / COLOR_SENSOR_ITERS;
     green   = (_colorSensors.sensors[s].measurements[GREEN_IDX] - ambient) / COLOR_SENSOR_ITERS;
     blue    = (_colorSensors.sensors[s].measurements[BLUE_IDX] - ambient) / COLOR_SENSOR_ITERS;
-    
-    guessColor(&conf, red,green,blue, centroids[s]);
+    red   = (red   - sen_mins[s].r) / sen_maxs[s].r;
+    blue  = (blue  - sen_mins[s].b) / sen_maxs[s].b;
+    guessColor(&conf, red,blue,s);
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
-
+    //    logColor(s, poses, red, blue, &conf);
   }
 }
 
@@ -251,7 +273,7 @@ void nextColor(void){
     return;
   switch(colorState){
     case RED:
-      startColor(GREEN);
+      startColor(BLUE);
       break;
     case GREEN:
       startColor(BLUE);
@@ -383,19 +405,25 @@ volatile uint16_t* getResult(void){
 
 float calcCentDiff(int r, int g, int b, struct centroid *cent){
   float score = (cent->r - r)*(cent->r - r) 
-    + (cent->g - g)*(cent->g - g) 
-    + (cent->b - b)*(cent->b - b);
+//     + (cent->g - g)*(cent->g - g) 
+     + (cent->b - b)*(cent->b - b);
   return score;
 }
 
-void guessColor(pConfidences c, int r, int g, int b, struct centroid *cent){
-  float e = calcCentDiff(r,g,b,&cent[0]),
-        m = calcCentDiff(r,g,b,&cent[1]),
-        y = calcCentDiff(r,g,b,&cent[2]);
-  float sum = e + m + y; 
-  c->boundary = e;
-  c->metal    = m;
-  c->yellow   = y;
+void guessColor(pConfidences c, float r, float  b, int s){
+  float one = lineOne[s].m * r - b + lineOne[s].c,
+        two = lineTwo[s].m * r - b + lineTwo[s].c;
+  c->yellow = 0.f;
+  c->metal  = 0.f;
+
+  if( one > 0.f ){
+    //Yellow
+    c->yellow = 1.f;  
+  }
+  else if ( two < 0.f ){
+    //Metal
+    c->metal = 1.f; 
+  }
 }
 
 void startColorSensor(void){
@@ -420,14 +448,14 @@ ColorSensors createColorSensors(void){
   cs->start         = startColorSensor;
   cs->halt          = haltColorSensor; 
   cs->calibrateColors = calibrateColors; 
-
+/*
   centroids[0] = cent_sen1;
   centroids[1] = cent_sen2;
   centroids[2] = cent_sen3;
   centroids[3] = cent_sen4;
   centroids[4] = cent_sen5;
   centroids[5] = cent_sen6;
-
+*/
   return cs;
 }
 

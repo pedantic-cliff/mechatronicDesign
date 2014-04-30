@@ -12,9 +12,8 @@ typedef struct {
   unsigned int count;
 } cell_t;
 
-int foobar1[10000];
 cell_t Grid[NROWS][NCOLS];
-int foobar2[10000];
+
 struct { 
   char numMeas;
   char numDefect;
@@ -24,24 +23,9 @@ struct {
 int guessCell(int x, int y){
   int minIdx = 0; 
   pConfidences conf = &Grid[y][x].conf;
-  float minVal = conf->metal;
-  if (minVal > conf->yellow){
-    minIdx = 1; 
-    minVal = conf->yellow;
-  }
-  /*if (minVal > conf->boundary){
-    minIdx = 2; 
-    minVal = conf->boundary;
-  }*/
-  
-  USART_puts("Conf: "); 
-  USART_putFloat(Grid[y][x].conf.metal);
-  USART_puts("\t\t");
-  USART_putFloat(conf->yellow);
-  USART_puts("\t\t");
-  USART_putFloat(conf->boundary);
-  USART_puts("\n");
-  return minIdx;
+  if(conf->yellow > conf->metal)
+    return 1;
+  return 0; 
 }
 
 void finishGrid(void){
@@ -50,8 +34,8 @@ void finishGrid(void){
     for(x = 0; x < NCOLS; x++){
       if(Grid[y][x].count == 0){
         Grid[y][x].count++;
-        Grid[y][x].conf.yellow = 10.f;
-        Grid[y][x].conf.metal  = 0.f;
+        Grid[y][x].conf.yellow = 0.f;
+        Grid[y][x].conf.metal  = 10.f;
       }
     }
   }
@@ -70,8 +54,7 @@ void sendGuesses(void){
         sendBuff.cells[y][x] = 2; 
         continue;
       }
-      
-      sendBuff.cells[y][x] = guessCell(x,y); 
+      sendBuff.cells[y][x] = guessCell(x,y); //(Grid[y][x].conf.yellow);
       if(sendBuff.cells[y][x])
         sendBuff.numDefect++; 
     }
@@ -93,12 +76,9 @@ void applyConfidence(int x, int y, pConfidences pConf){
   y = RMAX - y; 
   if ( x < 0 || x > RMAX || y < 0 || y > RMAX)
     return;
-  if(pConf->boundary < pConf->yellow && pConf->boundary < pConf->metal)
-    return;
   Grid[y][x].count++;
   Grid[y][x].conf.metal     += pConf->metal;
   Grid[y][x].conf.yellow    += pConf->yellow;
-  Grid[y][x].conf.boundary  += pConf->boundary;
 
   /*
   USART_puts("Grid: ");

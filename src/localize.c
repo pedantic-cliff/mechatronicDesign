@@ -98,7 +98,9 @@ sensorPos findSensorLocations(Localizer self){
 	float xRobot,yRobot,tRobot;
 	
 	sensorPos senPositions;
-	
+  __disable_irq();
+	self->cacheState(self);
+  __enable_irq();
 	xRobot = self->state->x;
 	yRobot = self->state->y;
 	tRobot = self->state->theta;

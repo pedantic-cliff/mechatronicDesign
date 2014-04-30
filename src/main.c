@@ -12,18 +12,33 @@ typedef struct {
   int    delay;  
 } operation; 
 
+#define PAUSE 1000
 operation Commands[] = { 
-  { NOP,      0.f,   1000 },
-  { FORWARD, 28.5f, 1000 },  // Right 
-  { LEFT,     5.f,   1000 },
-  { FORWARD, 22.0f,  1000 },  // Up
-  { LEFT,     5.f,   1000 },  
-  { FORWARD, 23.5f,   1000 },  // Left
-  { LEFT,     0.f,   3000 },
-  { FORWARD,  9.25f,  500 },  // Down
-  { LEFT,     0.f,   2000 },
-  { FORWARD, 12.f,   1000 },  // Right
-  { NOP,      0.f,   1000 },
+  { NOP,      0.f,   PAUSE },
+  { FORWARD,  6.0f,  PAUSE },  // Right 
+  { FORWARD, 10.0f,  PAUSE },  // Right 
+  { FORWARD, 22.0f,  PAUSE },  // Right 
+  { FORWARD, 26.0f,  PAUSE },  // Right 
+  { FORWARD, 29.25f,  PAUSE },  // Right
+  { LEFT,     5.f,   PAUSE },
+  { FORWARD, 10.0f,  PAUSE },  // Up
+  { FORWARD, 22.0f,  PAUSE },  // Up
+  { FORWARD, 26.0f,  PAUSE },  // Up
+  { FORWARD, 31.0f,  PAUSE },  // Up
+  { LEFT,     5.f,   PAUSE },  
+  { FORWARD, 26.f,   PAUSE },  // Left
+  { FORWARD, 13.5f,   PAUSE },  // Left
+  { FORWARD, 10.f,   PAUSE },  // Left
+  { FORWARD,  6.5f,  PAUSE },  // Left
+  { LEFT,     0.f, 2*PAUSE },
+  { FORWARD, 26.f,   PAUSE },  // Down
+  { FORWARD, 22.f,   PAUSE },  // Down
+  { FORWARD, 18.f,   PAUSE },  // Down
+  { LEFT,     0.f,   PAUSE },
+  { FORWARD, 18.f,   PAUSE },  // Right
+  { FORWARD, 22.f,   PAUSE },  // Right
+  { FORWARD, 22.f,   PAUSE },  // Right
+  { NOP,      0.f,   PAUSE}, 
 };
 
 const int numCommands = sizeof(Commands)/sizeof(operation); 
@@ -52,6 +67,7 @@ void doUpdateState(void){
   __disable_irq();
   
   localizer->cacheState(localizer);
+#ifdef DEBUG
   /*
   USART_puts("[");
   USART_putFloat(localizer->state->x);
@@ -61,6 +77,7 @@ void doUpdateState(void){
   USART_putFloat(localizer->state->theta);
   USART_puts("]\n");
   */
+#endif
   __enable_irq();
 }
 
@@ -85,11 +102,9 @@ void doColorCalibrate(void){
 void startCommand(int index){
   switch(Commands[index].command){
     case FORWARD:
-      colorSensors->startColor(NONE);
       goForwardBy(Commands[index].argument);
       break;
     case LEFT:
-      colorSensors->halt();
       turnLeft90();
       break;
     case NOP:
@@ -99,7 +114,21 @@ void startCommand(int index){
   }
 }
 void endCommand(int index){
-  delay(Commands[index].delay);
+  switch(Commands[index].command){
+    case FORWARD:
+      colorSensors->startColor(NONE);
+      delay(Commands[index].delay);
+      colorSensors->halt();
+#ifndef DEBUG
+      __disable_irq();
+      sendGuesses();
+      __enable_irq();
+#endif 
+      break;
+    default:
+      delay(Commands[index].delay);
+  }
+
 }
 
 int main(void) {
@@ -125,6 +154,9 @@ int main(void) {
         motionDone = 0;
       }else{
         finishGrid();
+        __disable_irq();
+        sendGuesses();
+        __enable_irq();
       }
     }
     if(running){
@@ -175,12 +207,6 @@ void doLog(void){
 void loop(void) {
   static int i = 1; 
   //doLog();
-
-  if(i % 30){
-    __disable_irq();
-    sendGuesses();
-    __enable_irq();
-  }
 
   if(i++ & 0x1)
     enableLEDs(BLUE);
