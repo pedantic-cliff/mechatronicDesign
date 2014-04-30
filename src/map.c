@@ -12,9 +12,8 @@ typedef struct {
   unsigned int count;
 } cell_t;
 
-int foobar1[10000];
 cell_t Grid[NROWS][NCOLS];
-int foobar2[10000];
+
 struct { 
   char numMeas;
   char numDefect;
@@ -35,8 +34,8 @@ void finishGrid(void){
     for(x = 0; x < NCOLS; x++){
       if(Grid[y][x].count == 0){
         Grid[y][x].count++;
-        Grid[y][x].conf.yellow = 10.f;
-        Grid[y][x].conf.metal  = 0.f;
+        Grid[y][x].conf.yellow = 0.f;
+        Grid[y][x].conf.metal  = 10.f;
       }
     }
   }

@@ -263,7 +263,7 @@ void finish(){
     blue  = (blue  - sen_mins[s].b) / sen_maxs[s].b;
     guessColor(&conf, red,blue,s);
     applyConfidence(poses.s[s].row,poses.s[s].col, &conf);
-    logColor(s, poses, red, blue, &conf);
+//    logColor(s, poses, red, blue, &conf);
   }
 }
 
