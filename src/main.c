@@ -12,14 +12,14 @@ typedef struct {
   int    delay;  
 } operation; 
 
-#define PAUSE 1000
+#define PAUSE 350
 operation Commands[] = { 
   { NOP,      0.f,   PAUSE },
   { FORWARD,  6.0f,  PAUSE },  // Right 
   { FORWARD, 10.0f,  PAUSE },  // Right 
   { FORWARD, 22.0f,  PAUSE },  // Right 
   { FORWARD, 26.0f,  PAUSE },  // Right 
-  { FORWARD, 29.25f,  PAUSE },  // Right
+  { FORWARD, 29.f,  PAUSE },  // Right
   { LEFT,     5.f,   PAUSE },
   { FORWARD, 10.0f,  PAUSE },  // Up
   { FORWARD, 22.0f,  PAUSE },  // Up
@@ -62,7 +62,6 @@ PID_Gains angleGains  = { 35.f, 0.00f, 0.0f },
 
 static void init(void);
 static void loop(void);
-
 void doUpdateState(void){
   __disable_irq();
   
