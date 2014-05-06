@@ -322,7 +322,6 @@ void parseParams(void){
   command = 'n'; 
   commandLen = 0; 
   received_index = 0; 
-  disableLEDs(ORANGE);
 }
 
 // this is the interrupt request handler (IRQ) for ALL USART1 interrupts
@@ -338,7 +337,6 @@ void USART1_IRQHandler(void){
     // First byte is the command
     if(received_index == 1){
       command = t; 
-      enableLEDs(ORANGE);
     }
     // Second byte is the length of remainder
     else if(received_index == 2){

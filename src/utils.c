@@ -76,7 +76,6 @@ void enableLEDs(Color c){
     mask |= ORANGE_PIN;
   if(c & BLUE)
     mask |= BLUE_PIN;
-  GPIO_SetBits(LED_PORT, mask); 
 }
 void disableLEDs(Color c){ 
   int mask = 0; 
@@ -88,7 +87,6 @@ void disableLEDs(Color c){
     mask |= ORANGE_PIN;
   if(c & BLUE)
     mask |= BLUE_PIN;
-  GPIO_ResetBits(LED_PORT, mask); 
 }
 
 /************ Timing ********************/

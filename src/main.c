@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "math.h"
 #include "state.h"
+#include "misc.h"
+#include "stm32f4xx_gpio.h"
 
 typedef enum { NOP, FORWARD, LEFT } opType;
 
@@ -12,7 +14,7 @@ typedef struct {
   int    delay;  
 } operation; 
 
-#define PAUSE 350
+#define PAUSE 35000
 operation Commands[] = { 
   { NOP,      0.f,   PAUSE },
   { FORWARD,  6.0f,  PAUSE },  // Right 
@@ -64,18 +66,18 @@ static void init(void);
 static void loop(void);
 void doUpdateState(void){
   __disable_irq();
-  
+
   localizer->cacheState(localizer);
 #ifdef DEBUG
   /*
-  USART_puts("[");
-  USART_putFloat(localizer->state->x);
-  USART_puts(", ");
-  USART_putFloat(localizer->state->y);
-  USART_puts(", ");
-  USART_putFloat(localizer->state->theta);
-  USART_puts("]\n");
-  */
+     USART_puts("[");
+     USART_putFloat(localizer->state->x);
+     USART_puts(", ");
+     USART_putFloat(localizer->state->y);
+     USART_puts(", ");
+     USART_putFloat(localizer->state->theta);
+     USART_puts("]\n");
+     */
 #endif
   __enable_irq();
 }
@@ -115,9 +117,9 @@ void startCommand(int index){
 void endCommand(int index){
   switch(Commands[index].command){
     case FORWARD:
-      colorSensors->startColor(NONE);
+//      colorSensors->startColor(NONE);
       delay(Commands[index].delay);
-      colorSensors->halt();
+//      colorSensors->halt();
 #ifndef DEBUG
       __disable_irq();
       sendGuesses();
@@ -135,10 +137,8 @@ int main(void) {
   delay_blocking(500); // Give the hardware time to warm up on cold start
   init();
   delay(1000); 
-  startCommand(currentCommandIndex);
-#ifdef DEBUG
+//  startCommand(currentCommandIndex);
   start();
-#endif 
   do {
     doUpdateState();
     if(calibrateColor){
@@ -146,10 +146,10 @@ int main(void) {
       calibrateColor = 0; 
     }
     if( (isMotionComplete() && !motionDone ) ){
-      endCommand(currentCommandIndex++);
+  //    endCommand(currentCommandIndex++);
       motionDone = 1; 
       if (currentCommandIndex < numCommands){ 
-        startCommand(currentCommandIndex);
+ //       startCommand(currentCommandIndex);
         motionDone = 0;
       }else{
         finishGrid();
@@ -181,6 +181,7 @@ static void init() {
   startState();
   ready = 1; 
   USART_puts("Init finished\n");
+  colorSensors->startColor(NONE);
 }
 
 void doLog(void){
@@ -194,7 +195,7 @@ void doLog(void){
   USART_puts("\t");
   USART_putFloat(localizer->state->y);
   USART_puts("\n");
-   
+
   USART_puts("Angle: ");
   USART_putFloat(localizer->state->theta);
   USART_puts("\n");
@@ -202,32 +203,48 @@ void doLog(void){
   USART_putFloat(localizer->state->vel);
   USART_puts("\n");
 }
-
-void loop(void) {
-  static int i = 1; 
-  //doLog();
-
-  if(i++ & 0x1)
-    enableLEDs(BLUE);
-  else 
-    disableLEDs(BLUE);
+void loop() {
+  int8_t x, y, z; 
+  GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |  GPIO_Pin_15); 
+  x = (int8_t)accel->getX(); 
+  y = (int8_t)accel->getY(); 
+  z = (int8_t)accel->getZ(); 
+  if (x > 30) 
+    GPIO_SetBits(GPIOD, GPIO_Pin_14); 
+  if (y > 30) 
+    GPIO_SetBits(GPIOD, GPIO_Pin_13); 
+  if (y < -30) 
+    GPIO_SetBits(GPIOD, GPIO_Pin_15); 
+  if (x < -30) 
+    GPIO_SetBits(GPIOD, GPIO_Pin_12); 
+  
 }
+/*
+   void loop(void) {
+   static int i = 1; 
+//doLog();
 
+if(i++ & 0x1)
+enableLEDs(BLUE);
+else 
+disableLEDs(BLUE);
+}
+*/
 void tick_loop(void){
   static int loopCount = 0;
   localizer->update(localizer);
   motors->updateOffset(motors, localizer->_state->theta);
   if(running){
     doMotion(); 
-  /*
-  if(loopCount == 0){
-    localizer->update(localizer);
-    pid->loop(pid, targState, localizer->_state);
-    loopCount = 10; 
-  }
-  motors->doMotorPID(motors); 
-  loopCount--;
-  */
+    /*
+       if(loopCount == 0){
+       localizer->update(localizer);
+       pid->loop(pid, targState, localizer->_state);
+       loopCount = 10; 
+       }
+       motors->doMotorPID(motors); 
+       loopCount--;
+       */
   }
   else{
     motors->setOffset(motors, PWM_MIN_L, PWM_MIN_R);

@@ -268,12 +268,11 @@ void finish(){
 }
 
 void nextColor(void){
-  disableLEDs(GREEN);
   if(!color_running)
     return;
   switch(colorState){
     case RED:
-      startColor(BLUE);
+      startColor(GREEN);
       break;
     case GREEN:
       startColor(BLUE);
@@ -294,7 +293,6 @@ void nextColor(void){
 void ADC_IRQHandler(void){
   int i ;
   ADC_TimerStop();
-  enableLEDs(GREEN);
   for(i = 0; i < NUM_SENSORS; i++){
     _colorSensors.sensors[i].measurements[currIdx] += ADC1ConvertedValue[i]; 
   }
