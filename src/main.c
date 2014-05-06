@@ -27,7 +27,7 @@ operation Commands[] = {
   { FORWARD, 31.0f,  PAUSE },  // Up
   { LEFT,     5.f,   PAUSE },  
   { FORWARD, 26.f,   PAUSE },  // Left
-  { FORWARD, 13.5f,   PAUSE },  // Left
+  { FORWARD, 14.f,   PAUSE },  // Left
   { FORWARD, 10.f,   PAUSE },  // Left
   { FORWARD,  6.5f,  PAUSE },  // Left
   { LEFT,     0.f, 2*PAUSE },
