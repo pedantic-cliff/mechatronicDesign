@@ -19,21 +19,21 @@ operation Commands[] = {
   { FORWARD, 10.0f,  PAUSE },  // Right 
   { FORWARD, 22.0f,  PAUSE },  // Right 
   { FORWARD, 26.0f,  PAUSE },  // Right 
-  { FORWARD, 29.f,  PAUSE },  // Right
+  { FORWARD, 29.1f,  PAUSE },  // Right
   { LEFT,     5.f,   PAUSE },
   { FORWARD, 10.0f,  PAUSE },  // Up
   { FORWARD, 22.0f,  PAUSE },  // Up
   { FORWARD, 26.0f,  PAUSE },  // Up
-  { FORWARD, 31.0f,  PAUSE },  // Up
+  { FORWARD, 31.f,  PAUSE },  // Up
   { LEFT,     5.f,   PAUSE },  
   { FORWARD, 26.f,   PAUSE },  // Left
-  { FORWARD, 14.f,   PAUSE },  // Left
+  { FORWARD, 14.5f,   PAUSE },  // Left
   { FORWARD, 10.f,   PAUSE },  // Left
   { FORWARD,  6.5f,  PAUSE },  // Left
   { LEFT,     0.f, 2*PAUSE },
   { FORWARD, 26.f,   PAUSE },  // Down
   { FORWARD, 22.f,   PAUSE },  // Down
-  { FORWARD, 18.f,   PAUSE },  // Down
+  { FORWARD, 18.5f,   PAUSE },  // Down
   { LEFT,     0.f,   PAUSE },
   { FORWARD, 18.f,   PAUSE },  // Right
   { FORWARD, 22.f,   PAUSE },  // Right
@@ -99,6 +99,7 @@ void doColorCalibrate(void){
 }
 
 void startCommand(int index){
+  colorSensors->halt();
   switch(Commands[index].command){
     case FORWARD:
       goForwardBy(Commands[index].argument);
