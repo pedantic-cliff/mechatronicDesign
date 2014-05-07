@@ -122,7 +122,7 @@ void main(int argc, char* argv[])
   
     char send_buf[100] = "";
     char rev_buf[100] = "";
-    char *buf = (char*)malloc(BUFFERSIZE*sizeof(char));
+    char *buf = (char*)calloc(BUFFERSIZE, sizeof(char));
     int running = 1;
     char start_cmd[10] = "start";
     char con_cmd[10] = "con";
@@ -152,6 +152,7 @@ void main(int argc, char* argv[])
             randID = rand();
             sprintf(buffer, "%c%c%c", 0xff, randID, 1);
             printf("From serial.c: %x, %x, %x\n", buffer[0] & 0xff,buffer[1] & 0xff,buffer[2] & 0xff);
+            tcflush(fd, TCIFLUSH);
             printf("Buffer length: %d, written size: %d\n", strlen(buffer), write(fd, buffer,  strlen(buffer)));
         }
 
@@ -160,7 +161,7 @@ void main(int argc, char* argv[])
             while((k += read(fd, rev_buf+k, BUFFERSIZE)) < 2);  // read up to 100 characters if ready to read
             // Authorize
             printf("read[%d]: \n", k);
-            printf("randon ID: %x, received: %x,%x\n", randID&0xff, rev_buf[0]&0xff, rev_buf[1]&0xff);
+            printf("random ID: %x, received: %x,%x\n", randID&0xff, rev_buf[0]&0xff, rev_buf[1]&0xff);
             if((randID != rev_buf[0]) || (rev_buf[1] != 1))
                 continue;
             else
@@ -191,7 +192,9 @@ void main(int argc, char* argv[])
             }
             else
             {
-                printf("\nDone with transmission!\n");
+                printf("Received packet[%d]\n", sum_n);
+                puts(buf);
+//                printf("\nDone with transmission!\n");
             }
         }
     }
@@ -219,7 +222,7 @@ void saveBuf(char *buf, int n)
     }
 
     fprintf(pf_b, "%d", (int)time(NULL));
-    printf("%d", (int)time(NULL));
+//    printf("%d", (int)time(NULL));
     /*
        if(buf[0] < 10)
        {
@@ -235,11 +238,23 @@ void saveBuf(char *buf, int n)
        }
      */
     int i;
-    for(i=0;i<n;i++){
+    
+    printf("%d", buf[0]);
+    fprintf(pf_b, ",%d", buf[0]);
+    printf(",%d", buf[1]);
+    fprintf(pf_b, ",%d", buf[1]);
+ 
+    for(i=2;i<n;i++){
+        if(!((i-2)%9))
+        {
+            printf("\n");
+        }
         printf(",%d", buf[i]);
+
         fprintf(pf_b, ",%d", buf[i]);
     }
     fprintf(pf_b, "\n");
+    printf("\n");
 
     do
     {
@@ -250,7 +265,6 @@ void saveBuf(char *buf, int n)
     fclose(pf);
     fclose(pf_b);
 
-    int result;
     char cmd[] = "cp output.bak result";
     system(cmd);
 }

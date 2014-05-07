@@ -21,7 +21,7 @@ MotorSpeeds speedSettings[] = 		{
   {8000*0.82,   7400*0.99},  //UP		+Y
   {6750*1.65f,   6800*1.35f},  //LEFT	-X
   {8000*1.0,    8500*1.0},	//DOWN	-Y
-  {-12000*0.94,  14500*0.95},   //LEFT 1
+  {-12000*0.95f,  14500*0.95},   //LEFT 1
   {-12300*1.23, 15500*1.5}, //LEFT 2
   {-14500*1.05, 12500*1.3},	//LEFT 3
   {-12000*0.85, 14500*0.9},	//LEFT 4
@@ -292,14 +292,17 @@ void doMotion(void){
     } else {
       errI = 0.f; 
       motors->setSpeeds(motors, sinf(theta)*speeds->l - errA*0.1*AGain, 
-                                sinf(theta)*speeds->r + errA*0.1*AGain);
+          sinf(theta)*speeds->r + errA*0.1*AGain);
     }
   } 
   else 
   {
     if(err>2.f){
       motors->setSpeeds(motors, speeds->l - AGain*errA, speeds->r + AGain*errA);
-      errI = 0.f; 
+      if(orientationFlag!=POSY){
+        errI = 0;
+      }
+
     } else {
       errI += err;
       switch(orientationFlag)

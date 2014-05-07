@@ -19,7 +19,7 @@ operation Commands[] = {
   { FORWARD, 10.0f,  PAUSE },  // Right 
   { FORWARD, 22.0f,  PAUSE },  // Right 
   { FORWARD, 26.0f,  PAUSE },  // Right 
-  { FORWARD, 29.f,  PAUSE },  // Right
+  { FORWARD, 30.f,  PAUSE },  // Right
   { LEFT,     5.f,   PAUSE },
   { FORWARD, 10.0f,  PAUSE },  // Up
   { FORWARD, 22.0f,  PAUSE },  // Up
@@ -27,7 +27,7 @@ operation Commands[] = {
   { FORWARD, 31.0f,  PAUSE },  // Up
   { LEFT,     5.f,   PAUSE },  
   { FORWARD, 26.f,   PAUSE },  // Left
-  { FORWARD, 14.f,   PAUSE },  // Left
+  { FORWARD, 14.5f,   PAUSE },  // Left
   { FORWARD, 10.f,   PAUSE },  // Left
   { FORWARD,  6.5f,  PAUSE },  // Left
   { LEFT,     0.f, 2*PAUSE },
